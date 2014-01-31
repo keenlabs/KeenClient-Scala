@@ -11,10 +11,10 @@ import java.nio.charset.StandardCharsets
 // XXX These should probably be Options with handling for missing ones below.
 class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", masterKey: String, writeKey: String, readKey: String) extends Logging {
 
-  // def version: Future[Response] = {
-  //   val freq = url(apiURL).secure
-  //   doRequest(freq.GET, masterKey)
-  // }
+  def addEvent(projectId: String, collection: String, event: String): Future[Response] = {
+    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure.setBody(event.getBytes(StandardCharsets.UTF_8))
+    doRequest(freq.POST, writeKey)
+  }
 
   def events(projectId: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "events").secure
@@ -55,7 +55,7 @@ object Client {
    * If your application uses the dispatch library for other purposes, those connections
    * will also terminate.
    */
-  def shutdown() {
+  def shutdown {
     Http.shutdown()
   }
 

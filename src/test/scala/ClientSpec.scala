@@ -16,7 +16,6 @@ class ClientSpec extends Specification {
       writeKey = sys.env("KEEN_WRITE_KEY"),
       readKey = sys.env("KEEN_READ_KEY")
     )
-    println(sys.env("USER").isEmpty)
 
     "fetch projects" in {
 
@@ -37,6 +36,22 @@ class ClientSpec extends Specification {
       val res = Await.result(client.events(projectId = sys.env("KEEN_PROJECT_ID")), Duration(5, "second"))
       // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(200)
+    }
+
+    "write an event" in {
+
+      val res = Await.result(client.addEvent(
+        projectId = sys.env("KEEN_PROJECT_ID"),
+        collection = "foo",
+        event = """{"foo": "bar"}"""
+      ), Duration(5, "second"))
+      println(res.getResponseBody)
+      res.getStatusCode must beEqualTo(201)
+    }
+
+    "shutdown" in {
+      Client.shutdown
+      1 must beEqualTo(1)
     }
   }
 }
