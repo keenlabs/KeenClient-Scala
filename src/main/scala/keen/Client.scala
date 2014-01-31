@@ -21,6 +21,11 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
     doRequest(freq.GET, masterKey)
   }
 
+  def getCollection(projectId: String, collection: String): Future[Response] = {
+    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure
+    doRequest(freq.GET, masterKey)
+  }
+
   def projects: Future[Response] = {
     val freq = (url(apiURL) / version / "projects").secure
     doRequest(freq.GET, masterKey)

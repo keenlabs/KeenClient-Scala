@@ -17,6 +17,15 @@ class ClientSpec extends Specification {
       readKey = sys.env("KEEN_READ_KEY")
     )
 
+    "fetch collection" in {
+      val res = Await.result(client.getCollection(
+        projectId = sys.env("KEEN_PROJECT_ID"),
+        collection = "foo"
+      ), Duration(5, "second"))
+      // println(res.getResponseBody)
+      res.getStatusCode must beEqualTo(200)
+    }
+
     "fetch projects" in {
 
       val res = Await.result(client.projects, Duration(5, "second"))
@@ -45,7 +54,7 @@ class ClientSpec extends Specification {
         collection = "foo",
         event = """{"foo": "bar"}"""
       ), Duration(5, "second"))
-      println(res.getResponseBody)
+      // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(201)
     }
 
