@@ -1,6 +1,6 @@
 # keen-scala
 
-*Note*: This library is currently in development and does not implement all of the features of the Keen API.
+**Note**: This library is currently in development and does not implement all of the features of the Keen API.
 It's safe to use for single-event publishing. Bulk publishing and other API features will be added over time.
 
 keen-scala is based on the [dispatch](http://dispatch.databinder.net/Dispatch.html)
