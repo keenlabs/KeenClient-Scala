@@ -12,6 +12,12 @@ from the async-http-client library. Normally you'll want to use `getResponseBody
 to get the response but you can also check `getStatusCode` to verify something
 didn't go awry.
 
+## JSON
+
+Note that at present this library does **not** do any JSON parsing. It works with strings only. It is
+assumed that you will parse the JSON returned and pass stringified JSON into any methods that
+require it.
+
 ## Dependencies
 
 Depends on [dispatch](http://dispatch.databinder.net/Dispatch.html) and
@@ -44,10 +50,15 @@ You'll want to set the following environment variables:
 ```
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import keen._
+import io.keen.client.scala.Client
 
 val client = new Client()
 
-// Verify the index exists
-client.projects.getStatusCode // Should be 200!
+// Publish an event!
+client.addEvent(
+  projectId = "YourProjectId",
+  collection = "collectionNameHere",
+  event = """{"foo": "bar"}"""
+)
+
 ```
