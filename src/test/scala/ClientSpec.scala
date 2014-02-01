@@ -3,7 +3,7 @@ package test
 import org.specs2.mutable._
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import keen._
+import io.keen.client.scala.Client
 
 class ClientSpec extends Specification {
 

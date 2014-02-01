@@ -24,10 +24,10 @@ scala 2.10.
 
 ```
 // Add the Dep
-libraryDependencies += "keen" %% "keen-scala" % "0.0.1"
+libraryDependencies += "keen" %% "keenclient-scala" % "0.0.1"
 
 // And a the resolver
-resolvers += "gphat" at "https://raw.github.com/gphat/mvn-repo/master/releases/",
+resolvers += "keenlabs" at "https://raw.github.com/keenlabs/mvn-repo/master/releases/",
 ```
 
 ## Environment Variables

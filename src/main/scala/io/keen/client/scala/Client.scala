@@ -1,4 +1,4 @@
-package keen
+package io.keen.client.scala
 
 import com.ning.http.client.Response
 import dispatch._

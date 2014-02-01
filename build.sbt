@@ -1,6 +1,6 @@
 organization := "keen"
 
-name := "keen-client"
+name := "keenclient-scala"
 
 version := "0.0.1"
 
