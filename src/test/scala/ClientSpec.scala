@@ -28,21 +28,21 @@ class ClientSpec extends Specification {
 
     "fetch projects" in {
 
-      val res = Await.result(client.projects, Duration(5, "second"))
+      val res = Await.result(client.getProjects, Duration(5, "second"))
       // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(200)
     }
 
     "fetch project" in {
 
-      val res = Await.result(client.project(projectId = sys.env("KEEN_PROJECT_ID")), Duration(5, "second"))
+      val res = Await.result(client.getProject(projectId = sys.env("KEEN_PROJECT_ID")), Duration(5, "second"))
       // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(200)
     }
 
     "fetch event collection" in {
 
-      val res = Await.result(client.events(projectId = sys.env("KEEN_PROJECT_ID")), Duration(5, "second"))
+      val res = Await.result(client.getEvents(projectId = sys.env("KEEN_PROJECT_ID")), Duration(5, "second"))
       // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(200)
     }

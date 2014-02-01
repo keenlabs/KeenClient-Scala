@@ -48,8 +48,6 @@ You'll want to set the following environment variables:
 ## Example
 
 ```
-import scala.concurrent.Await
-import scala.concurrent.duration._
 import io.keen.client.scala.Client
 
 val client = new Client()
@@ -60,5 +58,18 @@ client.addEvent(
   collection = "collectionNameHere",
   event = """{"foo": "bar"}"""
 )
+
+// Publish an event and care about the result!
+val resp = client.addEvent(
+  projectId = "YourProjectId",
+  collection = "collectionNameHere",
+  event = """{"foo": "bar"}"""
+)
+
+// Add an onComplete callback for failures!
+resp onComplete {
+  case Success(r) => println(resp.getResponseBody)
+  case Failure(t) => println(t.getMessage) // A Throwable
+}
 
 ```

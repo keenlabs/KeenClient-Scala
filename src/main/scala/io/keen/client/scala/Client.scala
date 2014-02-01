@@ -16,7 +16,7 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
     doRequest(freq.POST, writeKey)
   }
 
-  def events(projectId: String): Future[Response] = {
+  def getEvents(projectId: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "events").secure
     doRequest(freq.GET, masterKey)
   }
@@ -26,12 +26,12 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
     doRequest(freq.GET, masterKey)
   }
 
-  def projects: Future[Response] = {
+  def getProjects: Future[Response] = {
     val freq = (url(apiURL) / version / "projects").secure
     doRequest(freq.GET, masterKey)
   }
 
-  def project(projectId: String): Future[Response] = {
+  def getProject(projectId: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId).secure
     doRequest(freq.GET, masterKey)
   }
