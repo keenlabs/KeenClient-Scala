@@ -35,6 +35,25 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
   }
 
   /**
+   * Deletes the entire event collection. This is irreversible and will only work for collections under 10k events. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
+   *
+   * @param projectID The project to which the event will be added.
+   * @param collection The name of the collection.
+   */
+  def deleteCollection(projectId: String, collection: String): Future[Response] = {
+    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure
+    doRequest(freq.DELETE, masterKey)
+  }
+
+  /**
+   * Removes a property and deletes all values stored with that property name. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
+   */
+  def deleteProperty(projectId: String, collection: String, name: String): Future[Response] = {
+    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection / "properties" / name).secure
+    doRequest(freq.DELETE, masterKey)
+  }
+
+  /**
    * Returns schema information for all the event collections in this project. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
    *
    * @param projectID The project to which the event will be added.
@@ -44,7 +63,7 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
     doRequest(freq.GET, masterKey)
   }
 
-  /**
+  /** 
    * Returns available schema information for this event collection, including properties and their type. It also returns links to sub-resources. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
    *
    * @param projectID The project to which the event will be added.
@@ -75,7 +94,17 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
    * Returns the projects accessible to the API user, as well as links to project sub-resources for discovery. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
    */
   def getProperty(projectId: String, collection: String, name: String): Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "ervents" / collection / "properties" / name).secure
+    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection / "properties" / name).secure
+    doRequest(freq.GET, masterKey)
+  }
+
+  /** 
+   * Returns the list of available queries and links to them. See [[https://keen.io/docs/api/reference/#queries-resource Queries Resource]].
+   *
+   * @param projectID The project to which the event will be added.
+   */
+  def getQueries(projectId: String): Future[Response] = {
+    val freq = (url(apiURL) / version / "projects" / projectId / "queries").secure
     doRequest(freq.GET, masterKey)
   }
 

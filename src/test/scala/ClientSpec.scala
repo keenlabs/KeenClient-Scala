@@ -40,12 +40,12 @@ class ClientSpec extends Specification {
 
     "fetch property" in {
       val res = Await.result(client.getProperty(
-        projectId = sys.env("KEEN_PROJECT_ID")), Duration(5, "second"),
+        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
         name = "foo"
-      )
-      println(res.getResponseBody)
-      rs.getStatusCode must beEqualTo(200)
+      ), Duration(5, "second"))
+      // println(res.getResponseBody)
+      res.getStatusCode must beEqualTo(200)
     }
 
     "fetch event collection" in {
@@ -65,6 +65,25 @@ class ClientSpec extends Specification {
       // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(201)
     }
+
+    "fetch queries" in {
+      val res = Await.result(client.getQueries(
+        projectId = sys.env("KEEN_PROJECT_ID")
+      ), Duration(5, "second"))
+      // println(res.getResponseBody)
+      res.getStatusCode must beEqualTo(200)
+    }
+
+    // Is this working?
+    // "delete property" in {
+    //   val res = Await.result(client.deleteProperty(
+    //     projectId = sys.env("KEEN_PROJECT_ID"),
+    //     collection = "foo",
+    //     name = "foo"
+    //   ), Duration(5, "second"))
+    //   println(res.getResponseBody)
+    //   res.getStatusCode must beEqualTo(204)
+    // }
 
     // "write many events" in {
 
