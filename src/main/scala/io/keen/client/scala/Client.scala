@@ -72,6 +72,14 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
   }
 
   /**
+   * Returns the projects accessible to the API user, as well as links to project sub-resources for discovery. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
+   */
+  def getProperty(projectId: String, collection: String, name: String): Future[Response] = {
+    val freq = (url(apiURL) / version / "projects" / projectId / "ervents" / collection / "properties" / name).secure
+    doRequest(freq.GET, masterKey)
+  }
+
+  /**
    * Perform the request with some debugging for good measure.
    *
    * @param req The request

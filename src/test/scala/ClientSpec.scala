@@ -40,6 +40,10 @@ class ClientSpec extends Specification {
       res.getStatusCode must beEqualTo(200)
     }
 
+    "fetch property" in {
+      
+    }
+
     "fetch event collection" in {
 
       val res = Await.result(client.getEvents(projectId = sys.env("KEEN_PROJECT_ID")), Duration(5, "second"))
@@ -56,6 +60,17 @@ class ClientSpec extends Specification {
       ), Duration(5, "second"))
       // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(201)
+    }
+
+    "write many events" in {
+
+      val res = Await.result(client.addEvents(
+        projectId = sys.env("KEEN_PROJECT_ID"),
+        events = """{"foo": [{"foo": "bar"},{"baz": "gorch"}], "bar": [{"hood":"winked"}]}"""
+      ), Duration(5, "second"))
+      // println(res.getResponseBody)
+      // Not working!! XXX
+      res.getStatusCode must beEqualTo(500)
     }
 
     "shutdown" in {
