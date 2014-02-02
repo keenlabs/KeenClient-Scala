@@ -83,13 +83,14 @@ class ClientSpec extends Specification {
       res.getStatusCode must beEqualTo(200)
     }
 
-    "count with filters" in {
+    "count with filters and timeframe" in {
       val res = Await.result(client.count(
         projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
-        filters = Some("""[{"property_name": "baz","operator":"eq","property_value":"gorch"}]""")
+        filters = Some("""[{"property_name": "baz","operator":"eq","property_value":"gorch"}]"""),
+        timeframe = Some("this_week")
       ), Duration(5, "second"))
-      println(res.getResponseBody)
+      // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(200)
     }
 
