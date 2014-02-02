@@ -94,6 +94,16 @@ class ClientSpec extends Specification {
       res.getStatusCode must beEqualTo(200)
     }
 
+    "count unique" in {
+      val res = Await.result(client.countUnique(
+        projectId = sys.env("KEEN_PROJECT_ID"),
+        collection = "foo",
+        targetProperty = "gorch"
+      ), Duration(5, "second"))
+      // println(res.getResponseBody)
+      res.getStatusCode must beEqualTo(200)
+    }
+
     // Is this working?
     // "delete property" in {
     //   val res = Await.result(client.deleteProperty(

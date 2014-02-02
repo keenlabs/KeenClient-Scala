@@ -19,7 +19,8 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
    * @param event The event
    */
   def addEvent(projectId: String, collection: String, event: String): Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure.setBody(event.getBytes(StandardCharsets.UTF_8))
+    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure
+      .setBody(event.getBytes(StandardCharsets.UTF_8))
     doRequest(freq.POST, writeKey)
   }
 
@@ -30,7 +31,8 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
    * @param events The events to add to the project.
    */
   def addEvents(projectId: String, events: String): Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "events").secure.setBody(events.getBytes(StandardCharsets.UTF_8))
+    val freq = (url(apiURL) / version / "projects" / projectId / "events").secure
+      .setBody(events.getBytes(StandardCharsets.UTF_8))
     doRequest(freq.POST, writeKey)
   }
 
@@ -38,25 +40,55 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
    * Returns the number of resources in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
    *
    * @param projectID The project to which the event will be added.
-   * @param events The events to add to the project.
+   * @param collection The name of the event collection you are analyzing.
+   * @param filters Filters are used to narrow down the events used in an analysis request based on event property values. See [[https://keen.io/docs/data-analysis/filters/ Filters]].
+   * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
    */
-  def count(projectId: String, collection: String, filters: Option[String] = None, timeframe: Option[String] = None): Future[Response] = {
-    val req = (url(apiURL) / version / "projects" / projectId / "queries" / "count").secure.addQueryParameter("event_collection", collection)
+  def count(
+    projectId: String,
+    collection: String,
+    filters: Option[String] = None,
+    timeframe: Option[String] = None): Future[Response] = {
+
+    val req = (url(apiURL) / version / "projects" / projectId / "queries" / "count").secure
+      .addQueryParameter("event_collection", collection)
 
     val paramNames = List("filters", "timeframe")
     val params = List(filters, timeframe)
 
-    // Since modifying a dispatch request makes a copy, we use some convenient functional
-    // bits.  First, zip together the paramNames and their values.
-    val reqWithparams = paramNames.zip(params)
-      // Now, filter out any Tuples with a None (eliminating any unspecified params)
-      .filter(_._2.isDefined)
-      // Finally, foldLeft each remaining tuple, modifying the request. foldLeft will return
-      // each iteration's return value meaning that the final iteration returns the value
-      // we use in reqWithParams.
-      .foldLeft(req)((r, nameAndParam) => r.addQueryParameter(nameAndParam._1, nameAndParam._2.get))
+    val reqWithParams = parameterizeUrl(req, paramNames, params)
+    doRequest(reqWithParams.GET, readKey)
+  }
 
-    doRequest(reqWithparams.GET, readKey)
+  /**
+   * Returns the number of '''unique''' resources in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
+   *
+   * @param projectID The project to which the event will be added.
+   * @param collection The name of the event collection you are analyzing.
+   * @param targetProperty The name of the property you are analyzing.
+   * @param filters Filters are used to narrow down the events used in an analysis request based on event property values. See [[https://keen.io/docs/data-analysis/filters/ Filters]].
+   * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
+   * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
+   * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   */
+  def countUnique(
+    projectId: String,
+    collection: String,
+    targetProperty: String,
+    filters: Option[String] = None,
+    timeframe: Option[String] = None,
+    timezone: Option[String] = None,
+    groupBy: Option[String]= None): Future[Response] = {
+
+    val req = (url(apiURL) / version / "projects" / projectId / "queries" / "count_unique").secure
+      .addQueryParameter("event_collection", collection)
+      .addQueryParameter("target_property", targetProperty)
+
+    val paramNames = List("filters", "timeframe", "timezone", "group_by")
+    val params = List(filters, timeframe, timezone, groupBy)
+
+    val reqWithParams = parameterizeUrl(req, paramNames, params)
+    doRequest(reqWithParams.GET, readKey)
   }
 
   /**
@@ -100,7 +132,8 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
   }
 
   /**
-   * Returns the projects accessible to the API user, as well as links to project sub-resources for discovery. See [[https://keen.io/docs/api/reference/#projects-resource Projects Resource]].
+   * Returns the projects accessible to the API user, as well as links to project sub-resources for
+   * discovery. See [[https://keen.io/docs/api/reference/#projects-resource Projects Resource]].
    */
   def getProjects: Future[Response] = {
     val freq = (url(apiURL) / version / "projects").secure
@@ -108,7 +141,8 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
   }
 
   /**
-   * Returns the projects accessible to the API user, as well as links to project sub-resources for discovery. See [[https://keen.io/docs/api/reference/#project-row-resource Project Row Resource]].
+   * Returns detailed information about the specific project, as well as links to related resources.
+   * See [[https://keen.io/docs/api/reference/#project-row-resource Project Row Resource]].
    */
   def getProject(projectId: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId).secure
@@ -116,7 +150,7 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
   }
 
   /**
-   * Returns the projects accessible to the API user, as well as links to project sub-resources for discovery. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
+   * Returns the property name, type, and a link to sub-resources. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
    */
   def getProperty(projectId: String, collection: String, name: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection / "properties" / name).secure
@@ -131,6 +165,26 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
   def getQueries(projectId: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "queries").secure
     doRequest(freq.GET, masterKey)
+  }
+
+  /**
+   * Slap request params onto a URL, filtering out Nones.
+   * 
+   * @param req The request to use
+   * @param names List of parameter names.
+   * @param values List of parameter values.
+   */
+  private def parameterizeUrl(req: Req, names: List[String], values: List[Option[String]]): Req = {
+
+    // Since modifying a dispatch request makes a copy, we use some convenient functional
+    // bits.  First, zip together the paramNames and their values.
+    names.zip(values)
+      // Now, filter out any Tuples with a None (eliminating any unspecified params)
+      .filter(_._2.isDefined)
+      // Finally, foldLeft each remaining tuple, modifying the request. foldLeft will return
+      // each iteration's return value meaning that the final iteration returns the value
+      // we use in reqWithParams.
+      .foldLeft(req)((r, nameAndParam) => r.addQueryParameter(nameAndParam._1, nameAndParam._2.get))
   }
 
   /**
