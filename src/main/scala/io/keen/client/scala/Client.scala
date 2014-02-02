@@ -35,6 +35,31 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
   }
 
   /**
+   * Returns the number of resources in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
+   *
+   * @param projectID The project to which the event will be added.
+   * @param events The events to add to the project.
+   */
+  def count(projectId: String, collection: String, filters: Option[String] = None, timeframe: Option[String] = None): Future[Response] = {
+    val req = (url(apiURL) / version / "projects" / projectId / "queries" / "count").secure.addQueryParameter("event_collection", collection)
+
+    val paramNames = List("filters", "timeframe")
+    val params = List(filters, timeframe)
+
+    // Since modifying a dispatch request makes a copy, we use some convenient functional
+    // bits.  First, zip together the paramNames and their values.
+    val reqWithparams = paramNames.zip(params)
+      // Now, filter out any Tuples with a None (eliminating any unspecified params)
+      .filter(_._2.isDefined)
+      // Finally, foldLeft each remaining tuple, modifying the request. foldLeft will return
+      // each iteration's return value meaning that the final iteration returns the value
+      // we use in reqWithParams
+      .foldLeft(req)((r, nameAndParam) => r.addQueryParameter(nameAndParam._1, nameAndParam._2.toString))
+
+    doRequest(reqWithparams.GET, readKey)
+  }
+
+  /**
    * Deletes the entire event collection. This is irreversible and will only work for collections under 10k events. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
    *
    * @param projectID The project to which the event will be added.
