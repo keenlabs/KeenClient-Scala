@@ -53,8 +53,8 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
       .filter(_._2.isDefined)
       // Finally, foldLeft each remaining tuple, modifying the request. foldLeft will return
       // each iteration's return value meaning that the final iteration returns the value
-      // we use in reqWithParams
-      .foldLeft(req)((r, nameAndParam) => r.addQueryParameter(nameAndParam._1, nameAndParam._2.toString))
+      // we use in reqWithParams.
+      .foldLeft(req)((r, nameAndParam) => r.addQueryParameter(nameAndParam._1, nameAndParam._2.get))
 
     doRequest(reqWithparams.GET, readKey)
   }
