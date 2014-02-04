@@ -8,6 +8,8 @@ import java.net.URL
 import scala.concurrent.Promise
 import java.nio.charset.StandardCharsets
 
+// XXX Remaining: Extraction, Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
+
 // XXX These should probably be Options with handling for missing ones below.
 class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", masterKey: String, writeKey: String, readKey: String) extends Logging {
 
