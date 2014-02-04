@@ -50,14 +50,15 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
     filters: Option[String] = None,
     timeframe: Option[String] = None): Future[Response] = {
 
-    val req = (url(apiURL) / version / "projects" / projectId / "queries" / "count").secure
-      .addQueryParameter("event_collection", collection)
-
-    val paramNames = List("filters", "timeframe")
-    val params = List(filters, timeframe)
-
-    val reqWithParams = parameterizeUrl(req, paramNames, params)
-    doRequest(reqWithParams.GET, readKey)
+    doQuery(
+      query = "count",
+      projectId = projectId,
+      collection = collection,
+      targetProperty = None,
+      filters = filters,
+      timeframe = timeframe,
+      timezone = None,
+      groupBy = None)
   }
 
   /**
@@ -80,16 +81,136 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
     timezone: Option[String] = None,
     groupBy: Option[String]= None): Future[Response] = {
 
-    val req = (url(apiURL) / version / "projects" / projectId / "queries" / "count_unique").secure
-      .addQueryParameter("event_collection", collection)
-      .addQueryParameter("target_property", targetProperty)
-
-    val paramNames = List("filters", "timeframe", "timezone", "group_by")
-    val params = List(filters, timeframe, timezone, groupBy)
-
-    val reqWithParams = parameterizeUrl(req, paramNames, params)
-    doRequest(reqWithParams.GET, readKey)
+    doQuery(
+      query = "count",
+      projectId = projectId,
+      collection = collection,
+      targetProperty = Some(targetProperty),
+      filters = filters,
+      timeframe = timeframe,
+      timezone = timezone,
+      groupBy = groupBy)
   }
+
+  /**
+   * Returns the minimum numeric value for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#minimum-resource Minimum Resource]].
+   *
+   * @param projectID The project to which the event will be added.
+   * @param collection The name of the event collection you are analyzing.
+   * @param targetProperty The name of the property you are analyzing.
+   * @param filters Filters are used to narrow down the events used in an analysis request based on event property values. See [[https://keen.io/docs/data-analysis/filters/ Filters]].
+   * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
+   * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
+   * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   */
+  def minimum(
+    projectId: String,
+    collection: String,
+    targetProperty: String,
+    filters: Option[String] = None,
+    timeframe: Option[String] = None,
+    timezone: Option[String] = None,
+    groupBy: Option[String]= None): Future[Response] = 
+
+    doQuery(
+      query = "minimum",
+      projectId = projectId,
+      collection = collection,
+      targetProperty = Some(targetProperty),
+      filters = filters,
+      timeframe = timeframe,
+      timezone = timezone,
+      groupBy = groupBy)
+
+  /**
+   * Returns the maximum numeric value for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#maximum-resource Maximum Resource]].
+   *
+   * @param projectID The project to which the event will be added.
+   * @param collection The name of the event collection you are analyzing.
+   * @param targetProperty The name of the property you are analyzing.
+   * @param filters Filters are used to narrow down the events used in an analysis request based on event property values. See [[https://keen.io/docs/data-analysis/filters/ Filters]].
+   * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
+   * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
+   * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   */
+  def maximum(
+    projectId: String,
+    collection: String,
+    targetProperty: String,
+    filters: Option[String] = None,
+    timeframe: Option[String] = None,
+    timezone: Option[String] = None,
+    groupBy: Option[String]= None): Future[Response] = 
+
+    doQuery(
+      query = "maximum",
+      projectId = projectId,
+      collection = collection,
+      targetProperty = Some(targetProperty),
+      filters = filters,
+      timeframe = timeframe,
+      timezone = timezone,
+      groupBy = groupBy)
+
+  /**
+   * Returns the average across all numeric values for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#average-resource Average Resource]].
+   *
+   * @param projectID The project to which the event will be added.
+   * @param collection The name of the event collection you are analyzing.
+   * @param targetProperty The name of the property you are analyzing.
+   * @param filters Filters are used to narrow down the events used in an analysis request based on event property values. See [[https://keen.io/docs/data-analysis/filters/ Filters]].
+   * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
+   * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
+   * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   */
+  def average(
+    projectId: String,
+    collection: String,
+    targetProperty: String,
+    filters: Option[String] = None,
+    timeframe: Option[String] = None,
+    timezone: Option[String] = None,
+    groupBy: Option[String]= None): Future[Response] = 
+
+    doQuery(
+      query = "average",
+      projectId = projectId,
+      collection = collection,
+      targetProperty = Some(targetProperty),
+      filters = filters,
+      timeframe = timeframe,
+      timezone = timezone,
+      groupBy = groupBy)
+
+  /**
+   * Returns the sum across all numeric values for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#sum-resource Sum Resource]].
+   *
+   * @param projectID The project to which the event will be added.
+   * @param collection The name of the event collection you are analyzing.
+   * @param targetProperty The name of the property you are analyzing.
+   * @param filters Filters are used to narrow down the events used in an analysis request based on event property values. See [[https://keen.io/docs/data-analysis/filters/ Filters]].
+   * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
+   * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
+   * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   */
+  def sum(
+    projectId: String,
+    collection: String,
+    targetProperty: String,
+    filters: Option[String] = None,
+    timeframe: Option[String] = None,
+    timezone: Option[String] = None,
+    groupBy: Option[String]= None): Future[Response] = 
+
+    doQuery(
+      query = "sum",
+      projectId = projectId,
+      collection = collection,
+      targetProperty = Some(targetProperty),
+      filters = filters,
+      timeframe = timeframe,
+      timezone = timezone,
+      groupBy = groupBy)
 
   /**
    * Deletes the entire event collection. This is irreversible and will only work for collections under 10k events. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
@@ -165,6 +286,26 @@ class Client(apiURL: String = "https://api.keen.io", version: String = "3.0", ma
   def getQueries(projectId: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "queries").secure
     doRequest(freq.GET, masterKey)
+  }
+
+  private def doQuery(
+    query: String,
+    projectId: String,
+    collection: String,
+    targetProperty: Option[String],
+    filters: Option[String] = None,
+    timeframe: Option[String] = None,
+    timezone: Option[String] = None,
+    groupBy: Option[String]= None): Future[Response] = {
+
+    val req = (url(apiURL) / version / "projects" / projectId / "queries" / query).secure
+      .addQueryParameter("event_collection", collection)
+
+    val paramNames = List("target_property", "filters", "timeframe", "timezone", "group_by")
+    val params = List(targetProperty, filters, timeframe, timezone, groupBy)
+
+    val reqWithParams = parameterizeUrl(req, paramNames, params)
+    doRequest(reqWithParams.GET, readKey)
   }
 
   /**
