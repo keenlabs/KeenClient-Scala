@@ -50,7 +50,12 @@ You'll want to set the following environment variables:
 ```
 import io.keen.client.scala.Client
 
-val client = new Client()
+val client = new Client(
+  masterKey = sys.env("KEEN_MASTER_KEY"),
+  writeKey = sys.env("KEEN_WRITE_KEY"),
+  readKey = sys.env("KEEN_READ_KEY")
+)
+
 
 // Publish an event!
 client.addEvent(
