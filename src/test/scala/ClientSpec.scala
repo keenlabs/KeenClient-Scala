@@ -116,7 +116,7 @@ class ClientSpec extends Specification {
     }
 
     "average" in {
-      val res = Await.result(client.maximum(
+      val res = Await.result(client.average(
         collection = "foo",
         targetProperty = "gorch"
       ), Duration(5, "second"))
@@ -125,7 +125,7 @@ class ClientSpec extends Specification {
     }
 
     "sum" in {
-      val res = Await.result(client.maximum(
+      val res = Await.result(client.sum(
         collection = "foo",
         targetProperty = "gorch"
       ), Duration(5, "second"))
