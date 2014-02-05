@@ -3,7 +3,11 @@ package test
 import org.specs2.mutable._
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import io.keen.client.scala.Client
+import io.keen.client.scala.{Client,HttpAdapter}
+
+class TestHttpAdapter() extends HttpAdapter {
+
+}
 
 class ClientSpec extends Specification {
 
@@ -15,7 +19,8 @@ class ClientSpec extends Specification {
       projectId = sys.env("KEEN_PROJECT_ID"),
       masterKey = sys.env("KEEN_MASTER_KEY"),
       writeKey = sys.env("KEEN_WRITE_KEY"),
-      readKey = sys.env("KEEN_READ_KEY")
+      readKey = sys.env("KEEN_READ_KEY"),
+      httpAdapter = new TestHttpAdapter()
     )
 
     "fetch collection" in {
@@ -23,19 +28,19 @@ class ClientSpec extends Specification {
         collection = "foo"
       ), Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "fetch projects" in {
       val res = Await.result(client.getProjects, Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "fetch project" in {
       val res = Await.result(client.getProject, Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "fetch property" in {
@@ -44,14 +49,14 @@ class ClientSpec extends Specification {
         name = "foo"
       ), Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "fetch event collection" in {
 
       val res = Await.result(client.getEvents, Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "write an event" in {
@@ -61,13 +66,13 @@ class ClientSpec extends Specification {
         event = """{"foo": "bar"}"""
       ), Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(201)
+      res.statusCode must beEqualTo(201)
     }
 
     "fetch queries" in {
       val res = Await.result(client.getQueries, Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "count" in {
@@ -75,7 +80,7 @@ class ClientSpec extends Specification {
         collection = "foo"
       ), Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "count with filters and timeframe" in {
@@ -85,7 +90,7 @@ class ClientSpec extends Specification {
         timeframe = Some("this_week")
       ), Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "count unique" in {
@@ -94,7 +99,7 @@ class ClientSpec extends Specification {
         targetProperty = "gorch"
       ), Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "minimum" in {
@@ -103,7 +108,7 @@ class ClientSpec extends Specification {
         targetProperty = "gorch"
       ), Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "maximum" in {
@@ -112,7 +117,7 @@ class ClientSpec extends Specification {
         targetProperty = "gorch"
       ), Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "average" in {
@@ -121,7 +126,7 @@ class ClientSpec extends Specification {
         targetProperty = "gorch"
       ), Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "sum" in {
@@ -130,7 +135,7 @@ class ClientSpec extends Specification {
         targetProperty = "gorch"
       ), Duration(5, "second"))
       // println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      res.statusCode must beEqualTo(200)
     }
 
     "select unique" in {
@@ -138,18 +143,18 @@ class ClientSpec extends Specification {
         collection = "foo",
         targetProperty = "gorch"
       ), Duration(5, "second"))
-      println(res.getResponseBody)
-      res.getStatusCode must beEqualTo(200)
+      // println(res.getResponseBody)
+      res.statusCode must beEqualTo(200)
     }
 
-    // Is this working?
+    // // Is this working?
     // "delete property" in {
     //   val res = Await.result(client.deleteProperty(
     //     collection = "foo",
     //     name = "foo"
     //   ), Duration(5, "second"))
     //   println(res.getResponseBody)
-    //   res.getStatusCode must beEqualTo(204)
+    //   res.statusCode must beEqualTo(204)
     // }
 
     // "write many events" in {
@@ -159,7 +164,7 @@ class ClientSpec extends Specification {
     //   ), Duration(5, "second"))
     //   // println(res.getResponseBody)
     //   // Not working!! XXX
-    //   res.getStatusCode must beEqualTo(500)
+    //   res.statusCode must beEqualTo(500)
     // }
 
     "shutdown" in {

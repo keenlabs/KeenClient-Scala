@@ -1,11 +1,10 @@
 package io.keen.client.scala
 
-import com.ning.http.client.Response
-import dispatch._
-import Defaults._
+import dispatch.{Http,Req,url}
+
 import grizzled.slf4j.Logging
 import java.net.URL
-import scala.concurrent.Promise
+import scala.concurrent.Future
 import java.nio.charset.StandardCharsets
 
 // XXX Remaining: Extraction, Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
@@ -17,7 +16,8 @@ class Client(
   projectId: String,
   masterKey: String,
   writeKey: String,
-  readKey: String) extends Logging {
+  readKey: String,
+  httpAdapter: HttpAdapter = new HttpAdapter()) extends Logging {
 
   /**
    * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
@@ -28,7 +28,7 @@ class Client(
   def addEvent(collection: String, event: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure
       .setBody(event.getBytes(StandardCharsets.UTF_8))
-    doRequest(freq.POST, writeKey)
+    httpAdapter.doRequest(freq.POST, writeKey)
   }
 
   /**
@@ -39,7 +39,7 @@ class Client(
   def addEvents(events: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "events").secure
       .setBody(events.getBytes(StandardCharsets.UTF_8))
-    doRequest(freq.POST, writeKey)
+    httpAdapter.doRequest(freq.POST, writeKey)
   }
 
   /**
@@ -81,7 +81,7 @@ class Client(
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] = {
+    groupBy: Option[String]= None): Future[Response] =
 
     doQuery(
       analysisType = "count",
@@ -91,7 +91,6 @@ class Client(
       timeframe = timeframe,
       timezone = timezone,
       groupBy = groupBy)
-  }
 
   /**
    * Returns the number of '''unique''' resources in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
@@ -109,7 +108,7 @@ class Client(
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] = {
+    groupBy: Option[String]= None): Future[Response] =
 
     doQuery(
       analysisType = "count",
@@ -119,7 +118,6 @@ class Client(
       timeframe = timeframe,
       timezone = timezone,
       groupBy = groupBy)
-  }
 
   /**
    * Returns the maximum numeric value for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#maximum-resource Maximum Resource]].
@@ -191,7 +189,7 @@ class Client(
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] = {
+    groupBy: Option[String]= None): Future[Response] =
 
     doQuery(
       analysisType = "select_unique",
@@ -201,7 +199,6 @@ class Client(
       timeframe = timeframe,
       timezone = timezone,
       groupBy = groupBy)
-  }
 
   /**
    * Returns the sum across all numeric values for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#sum-resource Sum Resource]].
@@ -237,7 +234,7 @@ class Client(
    */
   def deleteCollection(collection: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure
-    doRequest(freq.DELETE, masterKey)
+    httpAdapter.doRequest(freq.DELETE, masterKey)
   }
 
   /**
@@ -245,7 +242,7 @@ class Client(
    */
   def deleteProperty(collection: String, name: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection / "properties" / name).secure
-    doRequest(freq.DELETE, masterKey)
+    httpAdapter.doRequest(freq.DELETE, masterKey)
   }
 
   /**
@@ -255,7 +252,7 @@ class Client(
    */
   def getEvents: Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "events").secure
-    doRequest(freq.GET, masterKey)
+    httpAdapter.doRequest(freq.GET, masterKey)
   }
 
   /** 
@@ -266,7 +263,7 @@ class Client(
    */
   def getCollection(collection: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure
-    doRequest(freq.GET, masterKey)
+    httpAdapter.doRequest(freq.GET, masterKey)
   }
 
   /**
@@ -275,7 +272,7 @@ class Client(
    */
   def getProjects: Future[Response] = {
     val freq = (url(apiURL) / version / "projects").secure
-    doRequest(freq.GET, masterKey)
+    httpAdapter.doRequest(freq.GET, masterKey)
   }
 
   /**
@@ -284,7 +281,7 @@ class Client(
    */
   def getProject: Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId).secure
-    doRequest(freq.GET, masterKey)
+    httpAdapter.doRequest(freq.GET, masterKey)
   }
 
   /**
@@ -292,7 +289,7 @@ class Client(
    */
   def getProperty(collection: String, name: String): Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection / "properties" / name).secure
-    doRequest(freq.GET, masterKey)
+    httpAdapter.doRequest(freq.GET, masterKey)
   }
 
   /** 
@@ -301,26 +298,7 @@ class Client(
    */
   def getQueries: Future[Response] = {
     val freq = (url(apiURL) / version / "projects" / projectId / "queries").secure
-    doRequest(freq.GET, masterKey)
-  }
-
-  private def doQuery(
-    analysisType: String,
-    collection: String,
-    targetProperty: Option[String],
-    filters: Option[String] = None,
-    timeframe: Option[String] = None,
-    timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] = {
-
-    val req = (url(apiURL) / version / "projects" / projectId / "queries" / analysisType).secure
-      .addQueryParameter("event_collection", collection)
-
-    val paramNames = List("target_property", "filters", "timeframe", "timezone", "group_by")
-    val params = List(targetProperty, filters, timeframe, timezone, groupBy)
-
-    val reqWithParams = parameterizeUrl(req, paramNames, params)
-    doRequest(reqWithParams.GET, readKey)
+    httpAdapter.doRequest(freq.GET, masterKey)
   }
 
   /**
@@ -343,23 +321,28 @@ class Client(
       .foldLeft(req)((r, nameAndParam) => r.addQueryParameter(nameAndParam._1, nameAndParam._2.get))
   }
 
-  /**
-   * Perform the request with some debugging for good measure.
-   *
-   * @param req The request
-   */
-  private def doRequest(req: Req, key: String) = {
-    val breq = req.toRequest
-    debug("%s: %s".format(breq.getMethod, breq.getUrl))
-    Http(
-      req.setHeader("Content-type", "application/json; charset=utf-8")
-        // Set the provided key, for authentication.
-        .setHeader("Authorization", key)
-    )
+  private def doQuery(
+    analysisType: String,
+    collection: String,
+    targetProperty: Option[String],
+    filters: Option[String] = None,
+    timeframe: Option[String] = None,
+    timezone: Option[String] = None,
+    groupBy: Option[String]= None): Future[Response] = {
+
+    val req = (url(apiURL) / version / "projects" / projectId / "queries" / analysisType).secure
+      .addQueryParameter("event_collection", collection)
+
+    val paramNames = List("target_property", "filters", "timeframe", "timezone", "group_by")
+    val params = List(targetProperty, filters, timeframe, timezone, groupBy)
+
+    val reqWithParams = parameterizeUrl(req, paramNames, params)
+    httpAdapter.doRequest(reqWithParams.GET, readKey)
   }
 }
 
 object Client {
+
   /**
    * Disconnects any remaining connections. Both idle and active. If you are accessing
    * Keen through a proxy that keeps connections alive this is useful.
