@@ -79,7 +79,9 @@ class Client(
   def count(
     collection: String,
     filters: Option[String] = None,
-    timeframe: Option[String] = None): Future[Response] = {
+    timeframe: Option[String] = None,
+    timezone: Option[String] = None,
+    groupBy: Option[String]= None): Future[Response] = {
 
     doQuery(
       query = "count",
@@ -87,8 +89,8 @@ class Client(
       targetProperty = None,
       filters = filters,
       timeframe = timeframe,
-      timezone = None,
-      groupBy = None)
+      timezone = timezone,
+      groupBy = groupBy)
   }
 
   /**
