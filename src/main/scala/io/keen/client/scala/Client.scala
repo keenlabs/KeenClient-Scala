@@ -61,7 +61,7 @@ class Client(
     groupBy: Option[String]= None): Future[Response] = 
 
     doQuery(
-      query = "average",
+      analysisType = "average",
       collection = collection,
       targetProperty = Some(targetProperty),
       filters = filters,
@@ -84,7 +84,7 @@ class Client(
     groupBy: Option[String]= None): Future[Response] = {
 
     doQuery(
-      query = "count",
+      analysisType = "count",
       collection = collection,
       targetProperty = None,
       filters = filters,
@@ -112,7 +112,7 @@ class Client(
     groupBy: Option[String]= None): Future[Response] = {
 
     doQuery(
-      query = "count",
+      analysisType = "count",
       collection = collection,
       targetProperty = Some(targetProperty),
       filters = filters,
@@ -140,7 +140,7 @@ class Client(
     groupBy: Option[String]= None): Future[Response] = 
 
     doQuery(
-      query = "maximum",
+      analysisType = "maximum",
       collection = collection,
       targetProperty = Some(targetProperty),
       filters = filters,
@@ -167,7 +167,7 @@ class Client(
     groupBy: Option[String]= None): Future[Response] = 
 
     doQuery(
-      query = "minimum",
+      analysisType = "minimum",
       collection = collection,
       targetProperty = Some(targetProperty),
       filters = filters,
@@ -194,7 +194,7 @@ class Client(
     groupBy: Option[String]= None): Future[Response] = {
 
     doQuery(
-      query = "select_unique",
+      analysisType = "select_unique",
       collection = collection,
       targetProperty = Some(targetProperty),
       filters = filters,
@@ -222,7 +222,7 @@ class Client(
     groupBy: Option[String]= None): Future[Response] = 
 
     doQuery(
-      query = "sum",
+      analysisType = "sum",
       collection = collection,
       targetProperty = Some(targetProperty),
       filters = filters,
@@ -305,7 +305,7 @@ class Client(
   }
 
   private def doQuery(
-    query: String,
+    analysisType: String,
     collection: String,
     targetProperty: Option[String],
     filters: Option[String] = None,
@@ -313,7 +313,7 @@ class Client(
     timezone: Option[String] = None,
     groupBy: Option[String]= None): Future[Response] = {
 
-    val req = (url(apiURL) / version / "projects" / projectId / "queries" / query).secure
+    val req = (url(apiURL) / version / "projects" / projectId / "queries" / analysisType).secure
       .addQueryParameter("event_collection", collection)
 
     val paramNames = List("target_property", "filters", "timeframe", "timezone", "group_by")
