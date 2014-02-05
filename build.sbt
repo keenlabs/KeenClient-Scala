@@ -6,6 +6,8 @@ version := "0.0.1"
 
 scalaVersion := "2.10.3"
 
+crossScalaVersions := Seq("2.10.0", "2.10.1", "2.10.2")
+
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
 libraryDependencies += "net.databinder.dispatch" %% "dispatch-core" % "0.11.0"
