@@ -12,6 +12,7 @@ class ClientSpec extends Specification {
   "Client" should {
 
     val client = new Client(
+      projectId = sys.env("KEEN_PROJECT_ID"),
       masterKey = sys.env("KEEN_MASTER_KEY"),
       writeKey = sys.env("KEEN_WRITE_KEY"),
       readKey = sys.env("KEEN_READ_KEY")
@@ -19,7 +20,6 @@ class ClientSpec extends Specification {
 
     "fetch collection" in {
       val res = Await.result(client.getCollection(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo"
       ), Duration(5, "second"))
       // println(res.getResponseBody)
@@ -33,14 +33,13 @@ class ClientSpec extends Specification {
     }
 
     "fetch project" in {
-      val res = Await.result(client.getProject(projectId = sys.env("KEEN_PROJECT_ID")), Duration(5, "second"))
+      val res = Await.result(client.getProject, Duration(5, "second"))
       // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(200)
     }
 
     "fetch property" in {
       val res = Await.result(client.getProperty(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
         name = "foo"
       ), Duration(5, "second"))
@@ -50,7 +49,7 @@ class ClientSpec extends Specification {
 
     "fetch event collection" in {
 
-      val res = Await.result(client.getEvents(projectId = sys.env("KEEN_PROJECT_ID")), Duration(5, "second"))
+      val res = Await.result(client.getEvents, Duration(5, "second"))
       // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(200)
     }
@@ -58,7 +57,6 @@ class ClientSpec extends Specification {
     "write an event" in {
 
       val res = Await.result(client.addEvent(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
         event = """{"foo": "bar"}"""
       ), Duration(5, "second"))
@@ -67,16 +65,13 @@ class ClientSpec extends Specification {
     }
 
     "fetch queries" in {
-      val res = Await.result(client.getQueries(
-        projectId = sys.env("KEEN_PROJECT_ID")
-      ), Duration(5, "second"))
+      val res = Await.result(client.getQueries, Duration(5, "second"))
       // println(res.getResponseBody)
       res.getStatusCode must beEqualTo(200)
     }
 
     "count" in {
       val res = Await.result(client.count(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo"
       ), Duration(5, "second"))
       // println(res.getResponseBody)
@@ -85,7 +80,6 @@ class ClientSpec extends Specification {
 
     "count with filters and timeframe" in {
       val res = Await.result(client.count(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
         filters = Some("""[{"property_name": "baz","operator":"eq","property_value":"gorch"}]"""),
         timeframe = Some("this_week")
@@ -96,7 +90,6 @@ class ClientSpec extends Specification {
 
     "count unique" in {
       val res = Await.result(client.countUnique(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
         targetProperty = "gorch"
       ), Duration(5, "second"))
@@ -106,7 +99,6 @@ class ClientSpec extends Specification {
 
     "minimum" in {
       val res = Await.result(client.minimum(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
         targetProperty = "gorch"
       ), Duration(5, "second"))
@@ -116,7 +108,6 @@ class ClientSpec extends Specification {
 
     "maximum" in {
       val res = Await.result(client.maximum(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
         targetProperty = "gorch"
       ), Duration(5, "second"))
@@ -126,7 +117,6 @@ class ClientSpec extends Specification {
 
     "average" in {
       val res = Await.result(client.maximum(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
         targetProperty = "gorch"
       ), Duration(5, "second"))
@@ -136,7 +126,6 @@ class ClientSpec extends Specification {
 
     "sum" in {
       val res = Await.result(client.maximum(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
         targetProperty = "gorch"
       ), Duration(5, "second"))
@@ -146,7 +135,6 @@ class ClientSpec extends Specification {
 
     "select unique" in {
       val res = Await.result(client.selectUnique(
-        projectId = sys.env("KEEN_PROJECT_ID"),
         collection = "foo",
         targetProperty = "gorch"
       ), Duration(5, "second"))
@@ -157,7 +145,6 @@ class ClientSpec extends Specification {
     // Is this working?
     // "delete property" in {
     //   val res = Await.result(client.deleteProperty(
-    //     projectId = sys.env("KEEN_PROJECT_ID"),
     //     collection = "foo",
     //     name = "foo"
     //   ), Duration(5, "second"))
@@ -168,7 +155,6 @@ class ClientSpec extends Specification {
     // "write many events" in {
 
     //   val res = Await.result(client.addEvents(
-    //     projectId = sys.env("KEEN_PROJECT_ID"),
     //     events = """{"foo": [{"foo": "bar"},{"baz": "gorch"}], "bar": [{"hood":"winked"}]}"""
     //   ), Duration(5, "second"))
     //   // println(res.getResponseBody)

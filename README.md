@@ -51,6 +51,7 @@ You'll want to set the following environment variables:
 import io.keen.client.scala.Client
 
 val client = new Client(
+  masterKey = sys.env("KEEN_PROJECT_ID"),
   masterKey = sys.env("KEEN_MASTER_KEY"),
   writeKey = sys.env("KEEN_WRITE_KEY"),
   readKey = sys.env("KEEN_READ_KEY")
@@ -59,14 +60,12 @@ val client = new Client(
 
 // Publish an event!
 client.addEvent(
-  projectId = "YourProjectId",
   collection = "collectionNameHere",
   event = """{"foo": "bar"}"""
 )
 
 // Publish an event and care about the result!
 val resp = client.addEvent(
-  projectId = "YourProjectId",
   collection = "collectionNameHere",
   event = """{"foo": "bar"}"""
 )
