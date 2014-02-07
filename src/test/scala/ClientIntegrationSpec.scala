@@ -5,11 +5,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import io.keen.client.scala.{Client,HttpAdapter}
 
-class TestHttpAdapter() extends HttpAdapter {
-
-}
-
-class ClientSpec extends Specification {
+class ClientIntegrationSpec extends Specification {
 
   sequential
 
