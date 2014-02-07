@@ -3,7 +3,7 @@ package test
 import org.specs2.mutable._
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import io.keen.client.scala.{Client,HttpAdapter}
+import io.keen.client.scala.Client
 
 class ClientIntegrationSpec extends Specification {
 
@@ -15,8 +15,7 @@ class ClientIntegrationSpec extends Specification {
       projectId = sys.env("KEEN_PROJECT_ID"),
       masterKey = sys.env("KEEN_MASTER_KEY"),
       writeKey = sys.env("KEEN_WRITE_KEY"),
-      readKey = sys.env("KEEN_READ_KEY"),
-      httpAdapter = new TestHttpAdapter()
+      readKey = sys.env("KEEN_READ_KEY")
     )
 
     "fetch collection" in {
