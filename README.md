@@ -35,6 +35,14 @@ libraryDependencies += "keen" %% "keenclient-scala" % "0.0.1"
 // And a the resolver
 resolvers += "keenlabs" at "https://raw.github.com/keenlabs/mvn-repo/master/releases/",
 ```
+# Testing It
+
+This test suite includes integration tests which require keys and access to Keen IO's
+API. You can skip them with
+
+```
+test-only * -- exclude integration
+```
 
 ## Environment Variables
 

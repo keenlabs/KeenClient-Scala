@@ -1,17 +1,19 @@
 package test
 
-import org.specs2.mutable._
+import org.specs2.mutable.Specification
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import io.keen.client.scala.Client
 
 class ClientIntegrationSpec extends Specification {
 
+  // args(exclude = "integration")
+
   sequential
 
   "Client" should {
 
-    val client = new Client(
+    lazy val client = new Client(
       projectId = sys.env("KEEN_PROJECT_ID"),
       masterKey = sys.env("KEEN_MASTER_KEY"),
       writeKey = sys.env("KEEN_WRITE_KEY"),
@@ -166,5 +168,5 @@ class ClientIntegrationSpec extends Specification {
       Client.shutdown
       1 must beEqualTo(1)
     }
-  }
+  } section("integration")
 }

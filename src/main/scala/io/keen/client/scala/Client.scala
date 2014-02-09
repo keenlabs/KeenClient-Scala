@@ -8,6 +8,7 @@ import scala.concurrent.Future
 import java.nio.charset.StandardCharsets
 
 // XXX Remaining: Extraction, Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
+// Event deletion
 
 // XXX These should probably be Options with handling for missing ones below.
 class Client(
