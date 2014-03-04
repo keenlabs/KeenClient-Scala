@@ -31,10 +31,19 @@ class HttpAdapter() extends Logging {
     body: Option[String] = None,
     params: Map[String,Option[String]] = Map.empty): Future[Response] = {
 
-    val filteredParams = params.filter(_._2.isDefined).map(param => (param._1 -> param._2.get))
+    // Turn a map of string,opt[string] into a map of string,string which is
+    // what Query wants
+    val filteredParams = params.filter(
+      // Filter out keys that are None
+      _._2.isDefined
+    ).map(
+      // Convert the remaining tuples to str,str
+      param => (param._1 -> param._2.get)
+    )
+    // Make a Uri
     val finalUrl = Uri(url).withQuery(Query(filteredParams))
 
-
+    // Use the provided
     val httpMethod: HttpRequest = method match {
       case "DELETE" => Delete(finalUrl, body)
       case "GET" => Get(finalUrl, body)
