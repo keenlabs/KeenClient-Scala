@@ -1,7 +1,5 @@
 package io.keen.client.scala
 
-import dispatch.{Http,Req,url}
-
 import grizzled.slf4j.Logging
 import java.net.URL
 import scala.concurrent.Future
@@ -27,9 +25,8 @@ class Client(
    * @param event The event
    */
   def addEvent(collection: String, event: String): Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure
-      .setBody(event.getBytes(StandardCharsets.UTF_8))
-    httpAdapter.doRequest(freq.POST, writeKey)
+    val url = Seq(apiURL, version, "projects", projectId, "events", collection).mkString("/")
+    httpAdapter.doRequest(url = url, method = "POST", key = writeKey, body = Some(event))
   }
 
   /**
@@ -38,9 +35,8 @@ class Client(
    * @param events The events to add to the project.
    */
   def addEvents(events: String): Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "events").secure
-      .setBody(events.getBytes(StandardCharsets.UTF_8))
-    httpAdapter.doRequest(freq.POST, writeKey)
+    val url = Seq(apiURL, version, "projects", projectId, "events").mkString("/")
+    httpAdapter.doRequest(url = url, method = "POST", key = writeKey, body = Some(events))
   }
 
   /**
@@ -59,7 +55,7 @@ class Client(
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] = 
+    groupBy: Option[String]= None): Future[Response] =
 
     doQuery(
       analysisType = "average",
@@ -136,7 +132,7 @@ class Client(
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] = 
+    groupBy: Option[String]= None): Future[Response] =
 
     doQuery(
       analysisType = "maximum",
@@ -163,7 +159,7 @@ class Client(
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] = 
+    groupBy: Option[String]= None): Future[Response] =
 
     doQuery(
       analysisType = "minimum",
@@ -217,7 +213,7 @@ class Client(
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] = 
+    groupBy: Option[String]= None): Future[Response] =
 
     doQuery(
       analysisType = "sum",
@@ -234,16 +230,16 @@ class Client(
    * @param collection The name of the collection.
    */
   def deleteCollection(collection: String): Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure
-    httpAdapter.doRequest(freq.DELETE, masterKey)
+    val url = Seq(apiURL, version, "projects", projectId, "events", collection).mkString("/")
+    httpAdapter.doRequest(url = url, method = "DELETE", key = masterKey)
   }
 
   /**
    * Removes a property and deletes all values stored with that property name. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
    */
   def deleteProperty(collection: String, name: String): Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection / "properties" / name).secure
-    httpAdapter.doRequest(freq.DELETE, masterKey)
+    val url = Seq(apiURL, version, "projects", projectId, "events", collection, "properties", name).mkString("/")
+    httpAdapter.doRequest(url = url, method = "DELETE", key = masterKey)
   }
 
   /**
@@ -252,19 +248,19 @@ class Client(
    * @param projectID The project to which the event will be added.
    */
   def getEvents: Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "events").secure
-    httpAdapter.doRequest(freq.GET, masterKey)
+    val url = Seq(apiURL, version, "projects", projectId, "events").mkString("/")
+    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
   }
 
-  /** 
+  /**
    * Returns available schema information for this event collection, including properties and their type. It also returns links to sub-resources. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
    *
    * @param projectID The project to which the event will be added.
    * @param collection The name of the collection.
    */
   def getCollection(collection: String): Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection).secure
-    httpAdapter.doRequest(freq.GET, masterKey)
+    val url = Seq(apiURL, version, "projects", projectId, "events", collection).mkString("/")
+    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
   }
 
   /**
@@ -272,8 +268,8 @@ class Client(
    * discovery. See [[https://keen.io/docs/api/reference/#projects-resource Projects Resource]].
    */
   def getProjects: Future[Response] = {
-    val freq = (url(apiURL) / version / "projects").secure
-    httpAdapter.doRequest(freq.GET, masterKey)
+    val url = Seq(apiURL, version, "projects").mkString("/")
+    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
   }
 
   /**
@@ -281,45 +277,25 @@ class Client(
    * See [[https://keen.io/docs/api/reference/#project-row-resource Project Row Resource]].
    */
   def getProject: Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId).secure
-    httpAdapter.doRequest(freq.GET, masterKey)
+    val url = Seq(apiURL, version, "projects", projectId).mkString("/")
+    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
   }
 
   /**
    * Returns the property name, type, and a link to sub-resources. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
    */
   def getProperty(collection: String, name: String): Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "events" / collection / "properties" / name).secure
-    httpAdapter.doRequest(freq.GET, masterKey)
+    val url = Seq(apiURL, version, "projects", projectId, "events", collection, "properties", name).mkString("/")
+    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
   }
 
-  /** 
+  /**
    * Returns the list of available queries and links to them. See [[https://keen.io/docs/api/reference/#queries-resource Queries Resource]].
    *
    */
   def getQueries: Future[Response] = {
-    val freq = (url(apiURL) / version / "projects" / projectId / "queries").secure
-    httpAdapter.doRequest(freq.GET, masterKey)
-  }
-
-  /**
-   * Slap request params onto a URL, filtering out Nones.
-   * 
-   * @param req The request to use
-   * @param names List of parameter names.
-   * @param values List of parameter values.
-   */
-  private def parameterizeUrl(req: Req, names: List[String], values: List[Option[String]]): Req = {
-
-    // Since modifying a dispatch request makes a copy, we use some convenient functional
-    // bits.  First, zip together the paramNames and their values.
-    names.zip(values)
-      // Now, filter out any Tuples with a None (eliminating any unspecified params)
-      .filter(_._2.isDefined)
-      // Finally, foldLeft each remaining tuple, modifying the request. foldLeft will return
-      // each iteration's return value meaning that the final iteration returns the value
-      // we use in reqWithParams.
-      .foldLeft(req)((r, nameAndParam) => r.addQueryParameter(nameAndParam._1, nameAndParam._2.get))
+    val url = Seq(apiURL, version, "projects", projectId, "queries").mkString("/")
+    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
   }
 
   private def doQuery(
@@ -331,27 +307,17 @@ class Client(
     timezone: Option[String] = None,
     groupBy: Option[String]= None): Future[Response] = {
 
-    val req = (url(apiURL) / version / "projects" / projectId / "queries" / analysisType).secure
-      .addQueryParameter("event_collection", collection)
+    val url = Seq(apiURL, version, "projects", projectId, "queries", analysisType).mkString("/")
 
-    val paramNames = List("target_property", "filters", "timeframe", "timezone", "group_by")
-    val params = List(targetProperty, filters, timeframe, timezone, groupBy)
+    val params = Map(
+      "event_collection" -> Some(collection),
+      "target_property" -> targetProperty,
+      "filters" -> filters,
+      "timeframe" -> timeframe,
+      "timezone" -> timezone,
+      "group_by" -> groupBy
+    )
 
-    val reqWithParams = parameterizeUrl(req, paramNames, params)
-    httpAdapter.doRequest(reqWithParams.GET, readKey)
-  }
-}
-
-object Client {
-
-  /**
-   * Disconnects any remaining connections. Both idle and active. If you are accessing
-   * Keen through a proxy that keeps connections alive this is useful.
-   *
-   * If your application uses the dispatch library for other purposes, those connections
-   * will also terminate.
-   */
-  def shutdown {
-    Http.shutdown()
+    httpAdapter.doRequest(url = url, method = "GET", key = readKey, params = params)
   }
 }
