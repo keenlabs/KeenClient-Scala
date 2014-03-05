@@ -320,4 +320,12 @@ class Client(
 
     httpAdapter.doRequest(url = url, method = "GET", key = readKey, params = params)
   }
+
+  /**
+   * Disconnects any remaining connections. Both idle and active. If you are accessing
+   * Keen through a proxy that keeps connections alive this is useful.
+   */
+  def shutdown {
+    httpAdapter.shutdown
+  }
 }

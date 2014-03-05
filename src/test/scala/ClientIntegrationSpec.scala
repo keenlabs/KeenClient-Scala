@@ -165,7 +165,7 @@ class ClientIntegrationSpec extends Specification {
     // }
 
     "shutdown" in {
-      Client.shutdown
+      client.shutdown
       1 must beEqualTo(1)
     }
   } section("integration")

@@ -60,4 +60,8 @@ class HttpAdapter() extends Logging {
         Response(statusCode = res.status.intValue, res.entity.asString)
       })
   }
+
+  def shutdown {
+    Http.CloseAll
+  }
 }
