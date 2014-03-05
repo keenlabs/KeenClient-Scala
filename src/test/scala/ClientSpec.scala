@@ -17,12 +17,15 @@ class ClientSpec extends Specification {
     var lastKey: Option[String] = None
 
     override def doRequest(
-      url: String,
+      scheme: String,
+      authority: String,
+      path: String,
       method: String,
       key: String,
       body: Option[String] = None,
       params: Map[String,Option[String]] = Map.empty): Future[Response] = {
 
+      // We have a map of str,opt[str] and we need to convert it to
       val filteredParams = params.filter(
         // Filter out keys that are None
         _._2.isDefined
@@ -31,7 +34,12 @@ class ClientSpec extends Specification {
         param => (param._1 -> param._2.get)
       )
       // Make a Uri
-      val finalUrl = Uri(input = url, StandardCharsets.UTF_8, Uri.ParsingMode.Relaxed).withQuery(Query(filteredParams))
+      val finalUrl = Uri(
+        scheme = scheme,
+        authority = Authority(host = Host(authority)),
+        path = Path("/" + path),
+        query = Query(filteredParams)
+      )
 
       lastUrl = Some(finalUrl.toString)
       lastKey = Some(key)
@@ -111,7 +119,7 @@ class ClientSpec extends Specification {
       val res = Await.result(client.getCollection("foo foo"), Duration(5, "second"))
 
       res.statusCode must beEqualTo(200)
-      adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/events/foo+foo")
+      adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/events/foo%20foo")
       adapter.getKey.get must beEqualTo("masterKey")
     }
 
@@ -144,9 +152,9 @@ class ClientSpec extends Specification {
       url must contain("https://api.keen.io/3.0/projects/abc/queries/average?")
       url must contain("event_collection=foo+foo%E2%9D%96")
       url must contain("target_property=bar")
-      url must contain("filters=%5B%7B%22property_name%22%3A%20%22baz%22%2C%22operator%22%3A%22eq%22%2C%22property_value%22%3A%22gorch%22%7D%5D")
+      url must contain("filters=%5B%7B%22property_name%22:+%22baz%22,%22operator%22:%22eq%22,%22property_value%22:%22gorch%22%7D%5D")
       url must contain("timeframe=this_week")
-      url must contain("timezone=America%2FChicago")
+      url must contain("timezone=America/Chicago")
       url must contain("group_by=foo.name")
 
       adapter.getKey.get must beEqualTo("readKey")

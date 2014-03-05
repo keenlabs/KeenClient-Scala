@@ -1,7 +1,6 @@
 package io.keen.client.scala
 
 import grizzled.slf4j.Logging
-import java.net.URL
 import scala.concurrent.Future
 import java.nio.charset.StandardCharsets
 
@@ -10,7 +9,8 @@ import java.nio.charset.StandardCharsets
 
 // XXX These should probably be Options with handling for missing ones below.
 class Client(
-  apiURL: String = "https://api.keen.io",
+  scheme: String = "https",
+  authority: String = "api.keen.io",
   version: String = "3.0",
   projectId: String,
   masterKey: String,
@@ -25,8 +25,8 @@ class Client(
    * @param event The event
    */
   def addEvent(collection: String, event: String): Future[Response] = {
-    val url = Seq(apiURL, version, "projects", projectId, "events", collection).mkString("/")
-    httpAdapter.doRequest(url = url, method = "POST", key = writeKey, body = Some(event))
+    val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
+    doRequest(path = path, method = "POST", key = writeKey, body = Some(event))
   }
 
   /**
@@ -35,8 +35,8 @@ class Client(
    * @param events The events to add to the project.
    */
   def addEvents(events: String): Future[Response] = {
-    val url = Seq(apiURL, version, "projects", projectId, "events").mkString("/")
-    httpAdapter.doRequest(url = url, method = "POST", key = writeKey, body = Some(events))
+    val path = Seq(version, "projects", projectId, "events").mkString("/")
+    doRequest(path = path, method = "POST", key = writeKey, body = Some(events))
   }
 
   /**
@@ -230,16 +230,16 @@ class Client(
    * @param collection The name of the collection.
    */
   def deleteCollection(collection: String): Future[Response] = {
-    val url = Seq(apiURL, version, "projects", projectId, "events", collection).mkString("/")
-    httpAdapter.doRequest(url = url, method = "DELETE", key = masterKey)
+    val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
+    doRequest(path = path, method = "DELETE", key = masterKey)
   }
 
   /**
    * Removes a property and deletes all values stored with that property name. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
    */
   def deleteProperty(collection: String, name: String): Future[Response] = {
-    val url = Seq(apiURL, version, "projects", projectId, "events", collection, "properties", name).mkString("/")
-    httpAdapter.doRequest(url = url, method = "DELETE", key = masterKey)
+    val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
+    doRequest(path = path, method = "DELETE", key = masterKey)
   }
 
   /**
@@ -248,8 +248,8 @@ class Client(
    * @param projectID The project to which the event will be added.
    */
   def getEvents: Future[Response] = {
-    val url = Seq(apiURL, version, "projects", projectId, "events").mkString("/")
-    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
+    val path = Seq(version, "projects", projectId, "events").mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
   }
 
   /**
@@ -259,8 +259,8 @@ class Client(
    * @param collection The name of the collection.
    */
   def getCollection(collection: String): Future[Response] = {
-    val url = Seq(apiURL, version, "projects", projectId, "events", collection).mkString("/")
-    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
+    val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
   }
 
   /**
@@ -268,8 +268,8 @@ class Client(
    * discovery. See [[https://keen.io/docs/api/reference/#projects-resource Projects Resource]].
    */
   def getProjects: Future[Response] = {
-    val url = Seq(apiURL, version, "projects").mkString("/")
-    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
+    val path = Seq(version, "projects").mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
   }
 
   /**
@@ -277,16 +277,16 @@ class Client(
    * See [[https://keen.io/docs/api/reference/#project-row-resource Project Row Resource]].
    */
   def getProject: Future[Response] = {
-    val url = Seq(apiURL, version, "projects", projectId).mkString("/")
-    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
+    val path = Seq(version, "projects", projectId).mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
   }
 
   /**
    * Returns the property name, type, and a link to sub-resources. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
    */
   def getProperty(collection: String, name: String): Future[Response] = {
-    val url = Seq(apiURL, version, "projects", projectId, "events", collection, "properties", name).mkString("/")
-    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
+    val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
   }
 
   /**
@@ -294,8 +294,8 @@ class Client(
    *
    */
   def getQueries: Future[Response] = {
-    val url = Seq(apiURL, version, "projects", projectId, "queries").mkString("/")
-    httpAdapter.doRequest(url = url, method = "GET", key = masterKey)
+    val path = Seq(version, "projects", projectId, "queries").mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
   }
 
   private def doQuery(
@@ -307,7 +307,7 @@ class Client(
     timezone: Option[String] = None,
     groupBy: Option[String]= None): Future[Response] = {
 
-    val url = Seq(apiURL, version, "projects", projectId, "queries", analysisType).mkString("/")
+    val path = Seq(version, "projects", projectId, "queries", analysisType).mkString("/")
 
     val params = Map(
       "event_collection" -> Some(collection),
@@ -318,8 +318,19 @@ class Client(
       "group_by" -> groupBy
     )
 
-    httpAdapter.doRequest(url = url, method = "GET", key = readKey, params = params)
+    doRequest(path = path, method = "GET", key = readKey, params = params)
   }
+
+  private def doRequest(
+    path: String,
+    method: String,
+    key: String,
+    body: Option[String] = None,
+    params: Map[String,Option[String]] = Map.empty) = {
+
+    httpAdapter.doRequest(method = method, scheme = scheme, authority = authority, path = path, key = key, body = body, params = params)
+  }
+
 
   /**
    * Disconnects any remaining connections. Both idle and active. If you are accessing

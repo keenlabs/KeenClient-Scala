@@ -25,7 +25,9 @@ class HttpAdapter() extends Logging {
    * @param req The request
    */
   def doRequest(
-    url: String,
+    scheme: String,
+    authority: String,
+    path: String,
     method: String,
     key: String,
     body: Option[String] = None,
@@ -41,7 +43,12 @@ class HttpAdapter() extends Logging {
       param => (param._1 -> param._2.get)
     )
     // Make a Uri
-    val finalUrl = Uri(url).withQuery(Query(filteredParams))
+    val finalUrl = Uri(
+      scheme = scheme,
+      authority = Authority(host = Host(authority)),
+      path = Path(path),
+      query = Query(filteredParams)
+    )
 
     // Use the provided
     val httpMethod: HttpRequest = method match {
