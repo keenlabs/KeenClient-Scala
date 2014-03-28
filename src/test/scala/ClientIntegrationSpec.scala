@@ -18,19 +18,13 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
 
   sequential
 
+  // This set of expectations currently assumes master access. Should
+  // eventually break out some to test access control granularly.
   "Client" should {
 
-    val projectId = sys.env("KEEN_PROJECT_ID")
+    lazy val client = new Client with Master
 
-    // This set of expectations currently assumes master access. Should
-    // eventually break out some to test access control granularly.
-    trait Keys {
-      val masterKey = sys.env("KEEN_MASTER_KEY")
-    }
-
-    lazy val client = new Client(projectId = projectId) with Master with Keys
-
-    lazy val dispatchClient = new Client(projectId = projectId) with Master with Keys {
+    lazy val dispatchClient = new Client with Master {
       override val httpAdapter = new HttpAdapterDispatch
     }
 

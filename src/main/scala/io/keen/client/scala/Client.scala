@@ -1,13 +1,15 @@
 package io.keen.client.scala
 
-import grizzled.slf4j.Logging
 import scala.concurrent.Future
+
+import com.typesafe.config.{ Config, ConfigFactory }
+import grizzled.slf4j.Logging
 
 // XXX Remaining: Extraction, Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
 // Event deletion
 
 class Client(
-  val projectId: String,
+  config: Config = ConfigFactory.load(),
   // These will move to a config file:
   val scheme: String = "https",
   val authority: String = "api.keen.io",
@@ -15,6 +17,7 @@ class Client(
   ) extends HttpAdapterComponent with Logging {
 
   val httpAdapter: HttpAdapter = new HttpAdapterSpray
+  val settings: Settings = new Settings(config)
 
   /**
    * Disconnects any remaining connections. Both idle and active. If you are accessing
@@ -51,7 +54,7 @@ sealed protected trait AccessLevel {
   // Access levels need the basic facilities of a Client; require that.
   self: Client =>
 
-  val projectId: String
+  val projectId: String = settings.projectId
 
   // TODO: These don't belong here abstraction-wise. They will move to a config
   // file and will be properties of HttpAdapter so that doRequest does not need
@@ -77,8 +80,8 @@ sealed protected trait AccessLevel {
  * A [[Client]] mixing in `Reader` can make Keen IO API calls requiring a read
  * key.
  *
- * A read key must be configured e.g. by setting the `readKey` field in an
- * anonymous class override.
+ * A read key must be configured in the `Client`'s [[Settings]] or the `readKey`
+ * field must otherwise be set e.g. with an anonymous class override.
  *
  * @example Initializing a Client with read access
  * {{{
@@ -86,6 +89,8 @@ sealed protected trait AccessLevel {
  *   override val readKey = "myReadKey"
  * }
  * }}}
+ *
+ * @throws MissingCredential if a read key is not configured.
  *
  * @see [[https://keen.io/docs/security/]]
  */
@@ -95,7 +100,7 @@ trait Reader extends AccessLevel {
   /**
    * A read key required to make API calls for querying and extracting data.
    */
-  val readKey: String
+  val readKey: String = settings.readKey.getOrElse(throw MissingCredential("Read key required for Reader"))
 
   /**
    * Returns the average across all numeric values for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#average-resource Average Resource]].
@@ -310,8 +315,8 @@ trait Reader extends AccessLevel {
  * A [[Client]] mixing in `Writer` can make Keen IO API calls requiring a write
  * key.
  *
- * A write key must be configured e.g. by setting the `writeKey` field in an
- * anonymous class override.
+ * A write key must be configured in the `Client`'s [[Settings]] or the
+ * `writeKey` field must otherwise be set e.g. with an anonymous class override.
  *
  * @example Initializing a Client with write access
  * {{{
@@ -319,6 +324,8 @@ trait Reader extends AccessLevel {
  *   override val writeKey = "myWriteKey"
  * }
  * }}}
+ *
+ * @throws MissingCredential if a write key is not configured.
  *
  * @see [[https://keen.io/docs/security/]]
  */
@@ -328,7 +335,7 @@ trait Writer extends AccessLevel {
   /**
    * A write key required to make API calls that write data.
    */
-  val writeKey: String
+  val writeKey: String = settings.writeKey.getOrElse(throw MissingCredential("Write key required for Writer"))
 
   /**
    * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
@@ -362,8 +369,8 @@ trait Writer extends AccessLevel {
  * should '''not''' be considered a shortcut! Please keep your master key as
  * secure as possible by not deploying it where it isn't strictly needed.
  *
- * A master key must be configured e.g. by setting the `masterKey` field in an
- * anonymous class override.
+ * A master key must be configured in the `Client`'s [[Settings]] or the
+ * `masterKey` field must otherwise be set e.g. with an anonymous class override.
  *
  * @example Initializing a Client with master access
  * {{{
@@ -371,6 +378,8 @@ trait Writer extends AccessLevel {
  *   override val masterKey = "myMasterKey"
  * }
  * }}}
+ *
+ * @throws MissingCredential if a master key is not configured.
  *
  * @see [[https://keen.io/docs/security/]]
  */
@@ -380,12 +389,12 @@ trait Master extends Reader with Writer {
   /**
    * A master key required to make API calls of administrative nature.
    */
-  val masterKey: String
+  val masterKey: String = settings.masterKey.getOrElse(throw MissingCredential("Master key required for Master"))
 
   // Since a master key can perform any API call, override read and write keys
   // so that a client can extend only the Master trait when needed.
-  override lazy val readKey: String = masterKey
-  override lazy val writeKey: String = masterKey
+  override val readKey: String = masterKey
+  override val writeKey: String = masterKey
 
   /**
    * Deletes the entire event collection. This is irreversible and will only work for collections under 10k events. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
