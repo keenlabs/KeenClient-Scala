@@ -13,7 +13,7 @@ class ClientSpec extends Specification {
 
     var lastReq: Option[Req] = None
     var lastKey: Option[String] = None
-    
+
     override def doRequest(req: Req, key: String): Future[Response] = {
       lastReq = Some(req)
       lastKey = Some(key)
@@ -25,8 +25,19 @@ class ClientSpec extends Specification {
     }
 
     def getKey = lastKey
-    
+
     def getReq = lastReq
+  }
+
+  class NokHttpAdapter extends HttpAdapter {
+
+    override def doRequest(req: Req, key: String): Future[Response] = {
+      val p = Promise[Response]()
+      Future {
+        p.success(Response(500, "Internal Server Error"))
+      }
+      p.future
+    }
   }
 
   // Sequential because it's less work to share the client instance
@@ -45,13 +56,13 @@ class ClientSpec extends Specification {
 
     "handle 200" in {
       val res = Await.result(client.getProjects, Duration(5, "second"))
-      
+
       res.statusCode must beEqualTo(200)
     }
 
     "handle get projects" in {
       val res = Await.result(client.getProjects, Duration(5, "second"))
-      
+
       res.statusCode must beEqualTo(200)
       adapter.getReq.get.url must beEqualTo("https://api.keen.io/3.0/projects")
       adapter.getKey.get must beEqualTo("masterKey")
@@ -59,7 +70,7 @@ class ClientSpec extends Specification {
 
     "handle get project" in {
       val res = Await.result(client.getProject, Duration(5, "second"))
-      
+
       res.statusCode must beEqualTo(200)
       adapter.getReq.get.url must beEqualTo("https://api.keen.io/3.0/projects/abc")
       adapter.getKey.get must beEqualTo("masterKey")
@@ -67,7 +78,7 @@ class ClientSpec extends Specification {
 
     "handle get event" in {
       val res = Await.result(client.getEvents, Duration(5, "second"))
-      
+
       res.statusCode must beEqualTo(200)
       adapter.getReq.get.url must beEqualTo("https://api.keen.io/3.0/projects/abc/events")
       adapter.getKey.get must beEqualTo("masterKey")
@@ -75,7 +86,7 @@ class ClientSpec extends Specification {
 
     "handle get property" in {
       val res = Await.result(client.getProperty("foo", "bar"), Duration(5, "second"))
-      
+
       res.statusCode must beEqualTo(200)
       adapter.getReq.get.url must beEqualTo("https://api.keen.io/3.0/projects/abc/events/foo/properties/bar")
       adapter.getKey.get must beEqualTo("masterKey")
@@ -83,7 +94,7 @@ class ClientSpec extends Specification {
 
     "handle get collection" in {
       val res = Await.result(client.getCollection("foo"), Duration(5, "second"))
-      
+
       res.statusCode must beEqualTo(200)
       adapter.getReq.get.url must beEqualTo("https://api.keen.io/3.0/projects/abc/events/foo")
       adapter.getKey.get must beEqualTo("masterKey")
@@ -99,7 +110,7 @@ class ClientSpec extends Specification {
 
     "handle count query" in {
       val res = Await.result(client.count("foo"), Duration(5, "second"))
-      
+
       res.statusCode must beEqualTo(200)
       adapter.getReq.get.url must beEqualTo("https://api.keen.io/3.0/projects/abc/queries/count?event_collection=foo")
 
@@ -118,7 +129,7 @@ class ClientSpec extends Specification {
         timezone = Some("America/Chicago"),
         groupBy = Some("foo.name")
       ), Duration(5, "second"))
-      
+
       res.statusCode must beEqualTo(200)
       var url = adapter.getReq.get.url
 
@@ -137,6 +148,24 @@ class ClientSpec extends Specification {
     "shutdown" in {
       Client.shutdown
       1 must beEqualTo(1)
+    }
+  }
+
+  "Client failures" should {
+
+    val adapter = new NokHttpAdapter()
+    val client = new Client(
+      projectId = "abc",
+      masterKey = "masterKey",
+      writeKey = "writeKey",
+      readKey = "readKey",
+      httpAdapter = adapter
+    )
+
+    "handle 500" in {
+      val res = Await.result(client.getProjects, Duration(5, "second"))
+
+      res.statusCode must beEqualTo(500)
     }
   }
 }
