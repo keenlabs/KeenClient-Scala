@@ -29,7 +29,7 @@ class ClientSpec extends Specification {
     def getReq = lastReq
   }
 
-  class NokHttpAdapter extends HttpAdapter {
+  class FiveHundredHttpAdapter extends HttpAdapter {
 
     override def doRequest(req: Req, key: String): Future[Response] = {
       val p = Promise[Response]()
@@ -39,6 +39,18 @@ class ClientSpec extends Specification {
       p.future
     }
   }
+
+  class FailingHttpAdapter extends HttpAdapter {
+
+    override def doRequest(req: Req, key: String): Future[Response] = {
+      val p = Promise[Response]()
+      Future {
+        p.failure(throw new RuntimeException("timeout?"))
+      }
+      p.future
+    }
+  }
+
 
   // Sequential because it's less work to share the client instance
   sequential
@@ -151,9 +163,27 @@ class ClientSpec extends Specification {
     }
   }
 
-  "Client failures" should {
+  "Client 500 failures" should {
 
-    val adapter = new NokHttpAdapter()
+    val adapter = new FiveHundredHttpAdapter()
+    val client = new Client(
+      projectId = "abc",
+      masterKey = "masterKey",
+      writeKey = "writeKey",
+      readKey = "readKey",
+      httpAdapter = adapter
+    )
+
+    "handle 500" in {
+      val res = Await.result(client.getProjects, Duration(5, "second"))
+
+      res.statusCode must beEqualTo(500)
+    }
+  }
+
+  "Client future failures" should {
+
+    val adapter = new FailingHttpAdapter()
     val client = new Client(
       projectId = "abc",
       masterKey = "masterKey",

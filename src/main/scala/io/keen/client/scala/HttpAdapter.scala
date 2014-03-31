@@ -4,7 +4,7 @@ import dispatch._
 import grizzled.slf4j.Logging
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class HttpAdapter() extends Logging {  
+class HttpAdapter() extends Logging {
 
   /**
    * Perform the request with some debugging for good measure.
@@ -14,7 +14,7 @@ class HttpAdapter() extends Logging {
   def doRequest(req: Req, key: String): Future[Response] = {
     val breq = req.toRequest
     debug("%s: %s".format(breq.getMethod, breq.getUrl))
-    Http(
+    Http.configure(_.setConnectionTimeoutInMs(5000))(
       req.setHeader("Content-type", "application/json; charset=utf-8")
         // Set the provided key, for authentication.
         .setHeader("Authorization", key)
