@@ -52,7 +52,7 @@ You'll want to set the following environment variables:
 
 ## Example
 
-```Scala
+```scala
 import io.keen.client.scala.Client
 
 val client = new Client(
