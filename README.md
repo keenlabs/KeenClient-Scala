@@ -1,4 +1,4 @@
-# keen-scala
+# KeenClient-Scala
 
 **Note**: This library is currently in development and does not implement all of the features of the Keen API.
 Single event publishing works. Bulk publishing and other API features will be added over time. **The interface will almost
