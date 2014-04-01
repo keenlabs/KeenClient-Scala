@@ -17,6 +17,8 @@ class HttpAdapter() extends Logging {
 
   implicit val system = ActorSystem()
   import system.dispatcher // execution context for futures
+  // Akka's Ask pattern requires an implicit timeout to know
+  // how long to wait for a response.
   implicit val timeout = Timeout(10, TimeUnit.SECONDS)
 
   def doRequest(
@@ -45,15 +47,21 @@ class HttpAdapter() extends Logging {
       query = Query(filteredParams)
     )
 
-    // Use the provided
+    // Use the provided case classes from spray-client
+    // to construct an HTTP request of the type needed.
     val httpMethod: HttpRequest = method match {
-      case "DELETE" => HttpRequest(method = HttpMethods.DELETE, uri = finalUrl, entity = body)
+      case "DELETE" => Delete(finalUrl, body)
       case "GET" => Get(finalUrl, body)
       case "POST" => Post(finalUrl, body)
       case _ => throw new IllegalArgumentException("Unknown HTTP method: " + method)
     }
 
     debug("%s: %s".format(method, finalUrl))
+    // For spelunkers, the ? is a function of the Akka "ask pattern". Unlike !
+    // it waits for a response in the form of a future. In this case we're
+    // sending along a case class representing the type of HTTP request we want
+    // to do and something down in the guts of the actors handles it and gets
+    // us a response.
     (IO(Http) ? httpMethod.withHeaders(
       RawHeader("Content-type", "application/json"),
       RawHeader("Authorization", key)

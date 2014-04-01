@@ -1,5 +1,6 @@
 package test
 
+import akka.pattern.AskTimeoutException
 import io.keen.client.scala._
 import java.nio.charset.StandardCharsets
 import org.specs2.mutable.Specification
@@ -43,11 +44,7 @@ class ClientSpec extends Specification {
 
       lastUrl = Some(finalUrl.toString)
       lastKey = Some(key)
-      val p = Promise[Response]()
-      Future {
-        p.success(Response(200, "Ok"))
-      }
-      p.future
+      Future { Response(200, "Ok") }
     }
 
     def getKey = lastKey
@@ -57,23 +54,33 @@ class ClientSpec extends Specification {
 
   class FiveHundredHttpAdapter extends HttpAdapter {
 
-    override def doRequest(req: Req, key: String): Future[Response] = {
-      val p = Promise[Response]()
+    override def doRequest(
+      scheme: String,
+      authority: String,
+      path: String,
+      method: String,
+      key: String,
+      body: Option[String] = None,
+      params: Map[String,Option[String]] = Map.empty
+    ): Future[Response] = {
       Future {
-        p.success(Response(500, "Internal Server Error"))
+        Response(500, "Internal Server Error")
       }
-      p.future
     }
   }
 
-  class FailingHttpAdapter extends HttpAdapter {
+  class SlowHttpAdapter extends HttpAdapter {
 
-    override def doRequest(req: Req, key: String): Future[Response] = {
-      val p = Promise[Response]()
-      Future {
-        p.failure(throw new RuntimeException("timeout?"))
-      }
-      p.future
+    override def doRequest(
+      scheme: String,
+      authority: String,
+      path: String,
+      method: String,
+      key: String,
+      body: Option[String] = None,
+      params: Map[String,Option[String]] = Map.empty
+    ): Future[Response] = {
+      Future.failed(new AskTimeoutException("I timed out!"))
     }
   }
 
@@ -209,7 +216,7 @@ class ClientSpec extends Specification {
 
   "Client future failures" should {
 
-    val adapter = new FailingHttpAdapter()
+    val adapter = new SlowHttpAdapter()
     val client = new Client(
       projectId = "abc",
       masterKey = "masterKey",
@@ -218,10 +225,8 @@ class ClientSpec extends Specification {
       httpAdapter = adapter
     )
 
-    "handle 500" in {
-      val res = Await.result(client.getProjects, Duration(5, "second"))
-
-      res.statusCode must beEqualTo(500)
+    "handle timeout" in {
+      Await.result(client.getProjects, Duration(10, "second")) must throwA[AskTimeoutException]
     }
   }
 }

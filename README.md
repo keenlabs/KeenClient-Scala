@@ -20,7 +20,7 @@ require it. Feedback is welcome!
 
 ## Dependencies
 
-Depends on [dispatch](http://dispatch.databinder.net/Dispatch.html) and
+Depends on [spray](http://spray.io/) and
 [grizzled-slf4j](http://software.clapper.org/grizzled-slf4j/). It's compiled for
 scala 2.10.
 
