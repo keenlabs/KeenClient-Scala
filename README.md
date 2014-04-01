@@ -14,9 +14,9 @@ didn't go awry.
 
 ## JSON
 
-Note that at present this library does **not** do any JSON parsing. It works with strings only. It is
+Presently this library does **not** do any JSON parsing. It works with strings only. It is
 assumed that you will parse the JSON returned and pass stringified JSON into any methods that
-require it.
+require it. Feedback is welcome!
 
 ## Dependencies
 
@@ -28,13 +28,12 @@ scala 2.10.
 
 # Using It
 
-```
-// Add the Dep
-libraryDependencies += "keen" %% "keenclient-scala" % "0.0.1"
+You'll have to compile from source for now.
 
-// And a the resolver
-resolvers += "keenlabs" at "https://raw.github.com/keenlabs/mvn-repo/master/releases/",
 ```
+sbt package
+```
+
 # Testing It
 
 This test suite includes integration tests which require keys and access to Keen IO's
@@ -82,6 +81,13 @@ val resp = client.addEvent(
 resp onComplete {
   case Success(r) => println(resp.getResponseBody)
   case Failure(t) => println(t.getMessage) // A Throwable
+}
+
+// Or use a map
+resp map {
+  println("I succeeded!")
+} getOrElse {
+  println("I failed :(")
 }
 
 ```

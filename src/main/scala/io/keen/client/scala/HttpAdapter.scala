@@ -19,11 +19,6 @@ class HttpAdapter() extends Logging {
   import system.dispatcher // execution context for futures
   implicit val timeout = Timeout(10, TimeUnit.SECONDS)
 
-  /**
-   * Perform the request with some debugging for good measure.
-   *
-   * @param req The request
-   */
   def doRequest(
     scheme: String,
     authority: String,
