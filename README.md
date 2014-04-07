@@ -8,7 +8,7 @@ keen-scala uses the [spray-can](http://spray.io/) HTTP library.
 It's all async so all of the returned values are
 `Future[Response]`.
 
-The returned object is an `io.keen.client.scala.Response`. You can look at it's
+The returned object is an [`io.keen.client.scala.Response`](src/scala/io/keen/client/scala/package.scala). You can look at it's
 `statusCode` or `body` attributes to verify something didn't go awry.
 
 ## JSON
@@ -77,7 +77,7 @@ val resp = client.addEvent(
 
 // Add an onComplete callback for failures!
 resp onComplete {
-  case Success(r) => println(resp.getResponseBody)
+  case Success(r) => println(resp.statusCode)
   case Failure(t) => println(t.getMessage) // A Throwable
 }
 
