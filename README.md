@@ -8,7 +8,7 @@ keen-scala uses the [spray-can](http://spray.io/) HTTP library.
 It's all async so all of the returned values are
 `Future[Response]`.
 
-The returned object is an [`io.keen.client.scala.Response`](src/scala/io/keen/client/scala/package.scala). You can look at it's
+The returned object is an [`io.keen.client.scala.Response`](src/main/scala/io/keen/client/scala/package.scala). You can look at it's
 `statusCode` or `body` attributes to verify something didn't go awry.
 
 ## JSON
