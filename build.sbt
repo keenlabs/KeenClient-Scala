@@ -2,7 +2,7 @@ organization := "keen"
 
 name := "keenclient-scala"
 
-version := "0.0.1"
+version := "1.0.0-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
