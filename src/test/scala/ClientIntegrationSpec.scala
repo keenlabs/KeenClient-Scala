@@ -24,7 +24,6 @@ class ClientIntegrationSpec extends Specification {
       val res = Await.result(client.getCollection(
         collection = "foo"
       ), Duration(5, "second"))
-      println(res.body)
       res.statusCode must beEqualTo(200)
     }
 
@@ -58,7 +57,6 @@ class ClientIntegrationSpec extends Specification {
         collection = "foo",
         event = """{"foo": "bar"}"""
       ), Duration(5, "second"))
-      println(res.body)
       res.statusCode must beEqualTo(201)
     }
 
