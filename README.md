@@ -1,7 +1,7 @@
 # KeenClient-Scala
 
 **Note**: This library is currently in development and does not implement all of the features of the Keen API.
-Single event publishing works. Bulk publishing and other API features will be added over time. **The interface will almost
+Single event publishing works.Other API features will be added over time. **The interface will almost
 certainly change!**
 
 keen-scala uses the [spray-can](http://spray.io/) HTTP library.
@@ -74,6 +74,9 @@ val resp = client.addEvent(
   collection = "collectionNameHere",
   event = """{"foo": "bar"}"""
 )
+
+// Publish lots of events
+client.addEvents(someEvents)
 
 // Add an onComplete callback for failures!
 resp onComplete {

@@ -52,7 +52,7 @@ class HttpAdapter() extends Logging {
     val httpMethod: HttpRequest = method match {
       case "DELETE" => Delete(finalUrl, body)
       case "GET" => Get(finalUrl, body)
-      case "POST" => Post(finalUrl, body)
+      case "POST" => Post(finalUrl, HttpEntity(ContentTypes.`application/json`, body.get))
       case _ => throw new IllegalArgumentException("Unknown HTTP method: " + method)
     }
 
@@ -63,7 +63,6 @@ class HttpAdapter() extends Logging {
     // to do and something down in the guts of the actors handles it and gets
     // us a response.
     (IO(Http) ? httpMethod.withHeaders(
-      RawHeader("Content-type", "application/json"),
       RawHeader("Authorization", key)
     ))
       .mapTo[HttpResponse].map({ res =>
