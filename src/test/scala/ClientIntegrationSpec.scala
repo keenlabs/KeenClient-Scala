@@ -139,15 +139,13 @@ class ClientIntegrationSpec extends Specification {
     //   res.statusCode must beEqualTo(204)
     // }
 
-    // "write many events" in {
+    "write many events" in {
 
-    //   val res = Await.result(client.addEvents(
-    //     events = """{"foo": [{"foo": "bar"},{"baz": "gorch"}], "bar": [{"hood":"winked"}]}"""
-    //   ), Duration(5, "second"))
-    //   // println(res.getResponseBody)
-    //   // Not working!! XXX
-    //   res.statusCode must beEqualTo(500)
-    // }
+      val res = Await.result(client.addEvents(
+        events = """{"foo": [{"foo": "bar"},{"baz": "gorch"}], "bar": [{"hood":"winked"}]}"""
+      ), Duration(5, "second"))
+      res.statusCode must beEqualTo(200)
+    }
 
     "shutdown" in {
       client.shutdown
