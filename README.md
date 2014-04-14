@@ -56,7 +56,7 @@ You'll want to set the following environment variables:
 import io.keen.client.scala.Client
 
 val client = new Client(
-  masterKey = sys.env("KEEN_PROJECT_ID"),
+  projectId = sys.env("KEEN_PROJECT_ID"),
   masterKey = sys.env("KEEN_MASTER_KEY"),
   writeKey = sys.env("KEEN_WRITE_KEY"),
   readKey = sys.env("KEEN_READ_KEY")
