@@ -13,9 +13,9 @@ class Client(
   authority: String = "api.keen.io",
   version: String = "3.0",
   projectId: String,
-  masterKey: String,
-  writeKey: String,
-  readKey: String,
+  masterKey: Option[String] = None,
+  writeKey: Option[String] = None,
+  readKey: Option[String] = None,
   httpAdapter: HttpAdapter = new HttpAdapter()) extends Logging {
 
   /**
@@ -26,6 +26,7 @@ class Client(
    */
   def addEvent(collection: String, event: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
+    ensureKey(readKey, "Write")
     doRequest(path = path, method = "POST", key = writeKey, body = Some(event))
   }
 
@@ -36,6 +37,7 @@ class Client(
    */
   def addEvents(events: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events").mkString("/")
+    ensureKey(readKey, "Write")
     doRequest(path = path, method = "POST", key = writeKey, body = Some(events))
   }
 
@@ -231,6 +233,7 @@ class Client(
    */
   def deleteCollection(collection: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
+    ensureKey(readKey, "Master")
     doRequest(path = path, method = "DELETE", key = masterKey)
   }
 
@@ -239,6 +242,7 @@ class Client(
    */
   def deleteProperty(collection: String, name: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
+    ensureKey(readKey, "Master")
     doRequest(path = path, method = "DELETE", key = masterKey)
   }
 
@@ -249,6 +253,7 @@ class Client(
    */
   def getEvents: Future[Response] = {
     val path = Seq(version, "projects", projectId, "events").mkString("/")
+    ensureKey(readKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -260,6 +265,7 @@ class Client(
    */
   def getCollection(collection: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
+    ensureKey(readKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -269,6 +275,7 @@ class Client(
    */
   def getProjects: Future[Response] = {
     val path = Seq(version, "projects").mkString("/")
+    ensureKey(readKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -278,6 +285,7 @@ class Client(
    */
   def getProject: Future[Response] = {
     val path = Seq(version, "projects", projectId).mkString("/")
+    ensureKey(readKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -286,6 +294,7 @@ class Client(
    */
   def getProperty(collection: String, name: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
+    ensureKey(readKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -295,6 +304,7 @@ class Client(
    */
   def getQueries: Future[Response] = {
     val path = Seq(version, "projects", projectId, "queries").mkString("/")
+    ensureKey(readKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -318,19 +328,24 @@ class Client(
       "group_by" -> groupBy
     )
 
+    ensureKey(readKey, "Read")
     doRequest(path = path, method = "GET", key = readKey, params = params)
   }
 
   private def doRequest(
     path: String,
     method: String,
-    key: String,
+    key: Option[String],
     body: Option[String] = None,
     params: Map[String,Option[String]] = Map.empty) = {
 
-    httpAdapter.doRequest(method = method, scheme = scheme, authority = authority, path = path, key = key, body = body, params = params)
+    // Gonna call key.get in here because ensureKey protects us!
+    httpAdapter.doRequest(method = method, scheme = scheme, authority = authority, path = path, key = key.get, body = body, params = params)
   }
 
+  private def ensureKey(key: Option[String], name: String) = {
+    key.getOrElse(throw new Exception(s"$name key must be set for this operation!"))
+  }
 
   /**
    * Disconnects any remaining connections. Both idle and active. If you are accessing

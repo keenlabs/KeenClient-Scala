@@ -15,9 +15,9 @@ class ClientIntegrationSpec extends Specification {
 
     lazy val client = new Client(
       projectId = sys.env("KEEN_PROJECT_ID"),
-      masterKey = sys.env("KEEN_MASTER_KEY"),
-      writeKey = sys.env("KEEN_WRITE_KEY"),
-      readKey = sys.env("KEEN_READ_KEY")
+      masterKey = sys.env.get("KEEN_MASTER_KEY"),
+      writeKey = sys.env.get("KEEN_WRITE_KEY"),
+      readKey = sys.env.get("KEEN_READ_KEY")
     )
 
     "fetch collection" in {

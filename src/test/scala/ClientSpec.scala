@@ -93,9 +93,9 @@ class ClientSpec extends Specification {
     val adapter = new OkHttpAdapter()
     val client = new Client(
       projectId = "abc",
-      masterKey = "masterKey",
-      writeKey = "writeKey",
-      readKey = "readKey",
+      masterKey = Some("masterKey"),
+      writeKey = Some("writeKey"),
+      readKey = Some("readKey"),
       httpAdapter = adapter
     )
 
@@ -201,9 +201,9 @@ class ClientSpec extends Specification {
     val adapter = new FiveHundredHttpAdapter()
     val client = new Client(
       projectId = "abc",
-      masterKey = "masterKey",
-      writeKey = "writeKey",
-      readKey = "readKey",
+      masterKey = Some("masterKey"),
+      writeKey = Some("writeKey"),
+      readKey = Some("readKey"),
       httpAdapter = adapter
     )
 
@@ -219,14 +219,33 @@ class ClientSpec extends Specification {
     val adapter = new SlowHttpAdapter()
     val client = new Client(
       projectId = "abc",
-      masterKey = "masterKey",
-      writeKey = "writeKey",
-      readKey = "readKey",
+      masterKey = Some("masterKey"),
+      writeKey = Some("writeKey"),
+      readKey = Some("readKey"),
       httpAdapter = adapter
     )
 
     "handle timeout" in {
       Await.result(client.getProjects, Duration(10, "second")) must throwA[AskTimeoutException]
+    }
+  }
+
+  "Client key failures" should {
+
+    val adapter = new SlowHttpAdapter()
+    val client = new Client(
+      projectId = "abc",
+      // No keys lololol
+      httpAdapter = adapter
+    )
+
+    "handle missing master" in {
+      Await.result(client.getProjects, Duration(10, "second")) must throwA[Exception].like {
+        case e => e.getMessage must contain("Master key must be set")
+      }
+      Await.result(client.addEvent("coll", """{}"""), Duration(10, "second")) must throwA[Exception].like {
+        case e => e.getMessage must contain("Write key must be set")
+      }
     }
   }
 }
