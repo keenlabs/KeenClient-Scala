@@ -7,6 +7,7 @@ import akka.util.Timeout
 import grizzled.slf4j.Logging
 import java.util.concurrent.TimeUnit
 import scala.concurrent.Future
+import scala.util.{Failure,Success}
 import spray.can.Http
 import spray.http._
 import spray.http.Uri._
@@ -15,10 +16,12 @@ import spray.httpx.RequestBuilding._
 
 class HttpAdapter(
   httpTimeoutSeconds: Int = 10,
-  implicit val actorSystem: ActorSystem = ActorSystem()
+  actorSystem: Option[ActorSystem] = None
   ) extends Logging {
 
-  import actorSystem.dispatcher // execution context for futures
+  // If we didn't get an actor system passed in
+  implicit val finalAS = actorSystem.getOrElse(ActorSystem())
+  import finalAS.dispatcher // execution context for futures
   // Akka's Ask pattern requires an implicit timeout to know
   // how long to wait for a response.
   implicit val timeout = Timeout(httpTimeoutSeconds, TimeUnit.SECONDS)
@@ -72,7 +75,13 @@ class HttpAdapter(
       })
   }
 
-  def shutdown {
-    IO(Http)? Http.CloseAll
+  def shutdown = {
+    (IO(Http) ? Http.CloseAll) onComplete {
+      // When this completes we will shutdown the actor system if it wasn't
+      // supplies by the user.
+      case Success(x) => actorSystem.foreach { x => finalAS.shutdown() }
+      // If we fail to close not sure what we can except rethrow
+      case Failure(t) => throw t
+    }
   }
 }

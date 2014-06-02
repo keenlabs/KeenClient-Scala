@@ -201,7 +201,7 @@ class ClientSpec extends Specification {
   "Client with custom HttpAdapter" should {
 
     "handle user-supplied actor system" in {
-      val adapter = new HttpAdapter(actorSystem = ActorSystem("keen-test"))
+      val adapter = new HttpAdapter(actorSystem = Some(ActorSystem("keen-test")))
       val attempt = Try({
         val client = new Client(
           projectId = "abc",
