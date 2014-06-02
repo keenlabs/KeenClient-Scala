@@ -71,6 +71,6 @@ class HttpAdapter() extends Logging {
   }
 
   def shutdown {
-    Http.CloseAll
+    IO(Http)? Http.CloseAll
   }
 }
