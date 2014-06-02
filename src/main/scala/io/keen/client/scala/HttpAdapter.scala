@@ -15,10 +15,10 @@ import spray.httpx.RequestBuilding._
 
 class HttpAdapter(
   httpTimeoutSeconds: Int = 10,
-  implicit val system: ActorSystem = ActorSystem()
+  implicit val actorSystem: ActorSystem = ActorSystem()
   ) extends Logging {
 
-  import system.dispatcher // execution context for futures
+  import actorSystem.dispatcher // execution context for futures
   // Akka's Ask pattern requires an implicit timeout to know
   // how long to wait for a response.
   implicit val timeout = Timeout(httpTimeoutSeconds, TimeUnit.SECONDS)
