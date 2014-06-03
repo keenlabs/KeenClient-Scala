@@ -1,5 +1,6 @@
 package test
 
+import akka.actor.ActorSystem
 import akka.pattern.AskTimeoutException
 import io.keen.client.scala._
 import java.nio.charset.StandardCharsets
@@ -7,6 +8,7 @@ import org.specs2.mutable.Specification
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await,Future,Promise}
+import scala.util.Try
 import spray.http.Uri
 import spray.http.Uri._
 
@@ -193,6 +195,23 @@ class ClientSpec extends Specification {
     "shutdown" in {
       client.shutdown
       1 must beEqualTo(1)
+    }
+  }
+
+  "Client with custom HttpAdapter" should {
+
+    "handle user-supplied actor system" in {
+      val adapter = new HttpAdapter(actorSystem = Some(ActorSystem("keen-test")))
+      val attempt = Try({
+        val client = new Client(
+          projectId = "abc",
+          masterKey = Some("masterKey"),
+          writeKey = Some("writeKey"),
+          readKey = Some("readKey"),
+          httpAdapter = adapter
+        )
+      })
+      attempt must beSuccessfulTry
     }
   }
 
