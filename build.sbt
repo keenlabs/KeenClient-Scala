@@ -2,7 +2,7 @@ organization := "keen"
 
 name := "keenclient-scala"
 
-version := "1.0.0"
+version := "1.0.1"
 
 scalaVersion := "2.10.4"
 
@@ -25,6 +25,8 @@ libraryDependencies += "io.spray" % "spray-util" % "1.3.1"
 libraryDependencies += "io.spray" % "spray-can" % "1.3.1"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.1"
+
+libraryDependencies += "net.databinder.dispatch" %% "dispatch-core" % "0.11.2"
 
 libraryDependencies += "org.clapper" %% "grizzled-slf4j" % "1.0.1"
 
