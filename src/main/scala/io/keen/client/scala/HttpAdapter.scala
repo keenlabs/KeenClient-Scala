@@ -2,6 +2,8 @@ package io.keen.client.scala
 
 import scala.concurrent.Future
 
+case class Response(statusCode: Int, body: String)
+
 trait HttpAdapter {
   def doRequest(
     scheme: String,
