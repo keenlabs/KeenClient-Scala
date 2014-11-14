@@ -26,6 +26,8 @@ libraryDependencies += "io.spray" % "spray-can" % "1.3.1"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.1"
 
+libraryDependencies += "net.databinder.dispatch" %% "dispatch-core" % "0.11.2"
+
 libraryDependencies += "org.clapper" %% "grizzled-slf4j" % "1.0.1"
 
 libraryDependencies += "org.specs2" %% "specs2" % "2.3.10" % "test"
