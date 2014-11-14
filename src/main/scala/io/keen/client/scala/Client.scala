@@ -16,7 +16,7 @@ class Client(
   masterKey: Option[String] = None,
   writeKey: Option[String] = None,
   readKey: Option[String] = None,
-  httpAdapter: HttpAdapter = new HttpAdapter()) extends Logging {
+  httpAdapter: HttpAdapter = new HttpAdapterSpray()) extends Logging {
 
   /**
    * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].

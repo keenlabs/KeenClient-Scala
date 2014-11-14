@@ -3,7 +3,7 @@ package test
 import org.specs2.mutable.Specification
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import io.keen.client.scala.Client
+import io.keen.client.scala.{HttpAdapterDispatch, Client}
 
 class ClientIntegrationSpec extends Specification {
 
@@ -20,8 +20,23 @@ class ClientIntegrationSpec extends Specification {
       readKey = sys.env.get("KEEN_READ_KEY")
     )
 
+    lazy val dispatchClient = new Client(
+      projectId = sys.env("KEEN_PROJECT_ID"),
+      masterKey = sys.env.get("KEEN_MASTER_KEY"),
+      writeKey = sys.env.get("KEEN_WRITE_KEY"),
+      readKey = sys.env.get("KEEN_READ_KEY"),
+      httpAdapter = new HttpAdapterDispatch
+    )
+
     "fetch collection" in {
       val res = Await.result(client.getCollection(
+        collection = "foo"
+      ), Duration(5, "second"))
+      res.statusCode must beEqualTo(200)
+    }
+
+    "fetch collection dispatchClient" in {
+      val res = Await.result(dispatchClient.getCollection(
         collection = "foo"
       ), Duration(5, "second"))
       res.statusCode must beEqualTo(200)
@@ -54,6 +69,15 @@ class ClientIntegrationSpec extends Specification {
     "write an event" in {
 
       val res = Await.result(client.addEvent(
+        collection = "foo",
+        event = """{"foo": "bar"}"""
+      ), Duration(5, "second"))
+      res.statusCode must beEqualTo(201)
+    }
+
+    "write an event dispatchClient" in {
+
+      val res = Await.result(dispatchClient.addEvent(
         collection = "foo",
         event = """{"foo": "bar"}"""
       ), Duration(5, "second"))

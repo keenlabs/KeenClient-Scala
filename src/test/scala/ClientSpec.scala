@@ -14,7 +14,7 @@ import spray.http.Uri._
 
 class ClientSpec extends Specification {
 
-  class OkHttpAdapter extends HttpAdapter {
+  class OkHttpAdapter extends HttpAdapterSpray {
 
     var lastUrl: Option[String] = None
     var lastKey: Option[String] = None
@@ -54,7 +54,7 @@ class ClientSpec extends Specification {
     def getUrl = lastUrl
   }
 
-  class FiveHundredHttpAdapter extends HttpAdapter {
+  class FiveHundredHttpAdapter extends HttpAdapterSpray {
 
     override def doRequest(
       scheme: String,
@@ -71,7 +71,7 @@ class ClientSpec extends Specification {
     }
   }
 
-  class SlowHttpAdapter extends HttpAdapter {
+  class SlowHttpAdapter extends HttpAdapterSpray {
 
     override def doRequest(
       scheme: String,
@@ -201,7 +201,7 @@ class ClientSpec extends Specification {
   "Client with custom HttpAdapter" should {
 
     "handle user-supplied actor system" in {
-      val adapter = new HttpAdapter(actorSystem = Some(ActorSystem("keen-test")))
+      val adapter = new HttpAdapterSpray(actorSystem = Some(ActorSystem("keen-test")))
       val attempt = Try({
         val client = new Client(
           projectId = "abc",
@@ -265,6 +265,23 @@ class ClientSpec extends Specification {
       Await.result(client.addEvent("coll", """{}"""), Duration(10, "second")) must throwA[Exception].like {
         case e => e.getMessage must contain("Write key must be set")
       }
+    }
+  }
+
+  "Client with Dispatch HttpAdapter" should {
+
+    "handle dispatch without an actor system" in {
+      val adapter = new HttpAdapterDispatch
+      val attempt = Try({
+        val client = new Client(
+          projectId = "abc",
+          masterKey = Some("masterKey"),
+          writeKey = Some("writeKey"),
+          readKey = Some("readKey"),
+          httpAdapter = adapter
+        )
+      })
+      attempt must beSuccessfulTry
     }
   }
 }
