@@ -10,6 +10,8 @@ import scala.concurrent.Future
  * Helps avoid dependency conflicts in use cases such as Spark
  */
 class HttpAdapterDispatch(httpTimeoutSeconds: Int = 10) extends HttpAdapter {
+  val http = new Http
+
   def doRequest(
     scheme: String,
     authority: String,
@@ -45,10 +47,12 @@ class HttpAdapterDispatch(httpTimeoutSeconds: Int = 10) extends HttpAdapter {
     val httpRequestWithHeader = httpRequest.addHeader("Authorization", key)
 
     // Fire request
-    val result = Http(httpRequestWithHeader)
+    val result = http(httpRequestWithHeader)
 
     result map (r => Response(r.getStatusCode, r.getResponseBody))
   }
 
-  def shutdown = {}
+  def shutdown = http.shutdown
+
+  override protected def finalize = shutdown
 }
