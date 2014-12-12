@@ -6,7 +6,7 @@ version := "1.0.4-SNAPSHOT"
 
 scalaVersion := "2.11.2"
 
-crossScalaVersions := Seq("2.10.4")
+crossScalaVersions := Seq("2.10.4", "2.11.2")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
@@ -29,4 +29,10 @@ libraryDependencies ++= {
     "org.slf4j"                %  "slf4j-simple"    % "1.7.6"        % "test"
   )
 }
+
+// sbt console convenience
+initialCommands in console := "import io.keen.client.scala._"
+
+// ...but skip it in case we've broken the build and want the REPL to find out why!
+initialCommands in consoleQuick := ""
 
