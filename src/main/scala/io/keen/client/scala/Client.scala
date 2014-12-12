@@ -26,7 +26,7 @@ class Client(
    */
   def addEvent(collection: String, event: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
-    ensureKey(readKey, "Write")
+    ensureKey(writeKey, "Write")
     doRequest(path = path, method = "POST", key = writeKey, body = Some(event))
   }
 
@@ -37,7 +37,7 @@ class Client(
    */
   def addEvents(events: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events").mkString("/")
-    ensureKey(readKey, "Write")
+    ensureKey(writeKey, "Write")
     doRequest(path = path, method = "POST", key = writeKey, body = Some(events))
   }
 
@@ -233,7 +233,7 @@ class Client(
    */
   def deleteCollection(collection: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
-    ensureKey(readKey, "Master")
+    ensureKey(masterKey, "Master")
     doRequest(path = path, method = "DELETE", key = masterKey)
   }
 
@@ -242,7 +242,7 @@ class Client(
    */
   def deleteProperty(collection: String, name: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
-    ensureKey(readKey, "Master")
+    ensureKey(masterKey, "Master")
     doRequest(path = path, method = "DELETE", key = masterKey)
   }
 
@@ -253,7 +253,7 @@ class Client(
    */
   def getEvents: Future[Response] = {
     val path = Seq(version, "projects", projectId, "events").mkString("/")
-    ensureKey(readKey, "Master")
+    ensureKey(masterKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -265,7 +265,7 @@ class Client(
    */
   def getCollection(collection: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
-    ensureKey(readKey, "Master")
+    ensureKey(masterKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -275,7 +275,7 @@ class Client(
    */
   def getProjects: Future[Response] = {
     val path = Seq(version, "projects").mkString("/")
-    ensureKey(readKey, "Master")
+    ensureKey(masterKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -285,7 +285,7 @@ class Client(
    */
   def getProject: Future[Response] = {
     val path = Seq(version, "projects", projectId).mkString("/")
-    ensureKey(readKey, "Master")
+    ensureKey(masterKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -294,7 +294,7 @@ class Client(
    */
   def getProperty(collection: String, name: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
-    ensureKey(readKey, "Master")
+    ensureKey(masterKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
@@ -304,7 +304,7 @@ class Client(
    */
   def getQueries: Future[Response] = {
     val path = Seq(version, "projects", projectId, "queries").mkString("/")
-    ensureKey(readKey, "Master")
+    ensureKey(masterKey, "Master")
     doRequest(path = path, method = "GET", key = masterKey)
   }
 
