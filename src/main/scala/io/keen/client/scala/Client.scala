@@ -7,40 +7,55 @@ import java.nio.charset.StandardCharsets
 // XXX Remaining: Extraction, Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
 // Event deletion
 
-// XXX These should probably be Options with handling for missing ones below.
 class Client(
-  scheme: String = "https",
-  authority: String = "api.keen.io",
-  version: String = "3.0",
-  projectId: String,
-  masterKey: Option[String] = None,
-  writeKey: Option[String] = None,
-  readKey: Option[String] = None) extends HttpAdapterComponent with Logging {
+  val projectId: String,
+  // These will move to a config file:
+  val scheme: String = "https",
+  val authority: String = "api.keen.io",
+  val version: String = "3.0"
+  ) extends HttpAdapterComponent with Logging {
 
   val httpAdapter: HttpAdapter = new HttpAdapterSpray
 
   /**
-   * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
-   *
-   * @param collection The collection to which the event will be added.
-   * @param event The event
+   * Disconnects any remaining connections. Both idle and active. If you are accessing
+   * Keen through a proxy that keeps connections alive this is useful.
    */
-  def addEvent(collection: String, event: String): Future[Response] = {
-    val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
-    ensureKey(writeKey, "Write")
-    doRequest(path = path, method = "POST", key = writeKey, body = Some(event))
+  def shutdown {
+    httpAdapter.shutdown
   }
+}
 
-  /**
-   * Publish multiple events. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
-   *
-   * @param events The events to add to the project.
-   */
-  def addEvents(events: String): Future[Response] = {
-    val path = Seq(version, "projects", projectId, "events").mkString("/")
-    ensureKey(writeKey, "Write")
-    doRequest(path = path, method = "POST", key = writeKey, body = Some(events))
+sealed trait AccessLevel {
+  // Require that we're mixed into something that provides an HttpAdapterComponent
+  self: HttpAdapterComponent =>
+
+  val projectId: String
+
+  // TODO: These don't belong here abstraction-wise. They will move to a config
+  // file and will be properties of HttpAdapter so that doRequest does not need
+  // to be defined in this trait just to pass these through. The other traits
+  // will then be able to use httpAdapter.doRequest instead of this inherited
+  // version.
+  val scheme: String
+  val authority: String
+  val version: String
+
+  protected def doRequest(
+    path: String,
+    method: String,
+    key: String,
+    body: Option[String] = None,
+    params: Map[String, Option[String]] = Map.empty) = {
+
+    httpAdapter.doRequest(method = method, scheme = scheme, authority = authority, path = path, key = key, body = body, params = params)
   }
+}
+
+trait Reader extends AccessLevel {
+  self: HttpAdapterComponent =>
+
+  val readKey: String
 
   /**
    * Returns the average across all numeric values for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#average-resource Average Resource]].
@@ -227,88 +242,6 @@ class Client(
       timezone = timezone,
       groupBy = groupBy)
 
-  /**
-   * Deletes the entire event collection. This is irreversible and will only work for collections under 10k events. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
-   *
-   * @param collection The name of the collection.
-   */
-  def deleteCollection(collection: String): Future[Response] = {
-    val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
-    ensureKey(masterKey, "Master")
-    doRequest(path = path, method = "DELETE", key = masterKey)
-  }
-
-  /**
-   * Removes a property and deletes all values stored with that property name. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
-   */
-  def deleteProperty(collection: String, name: String): Future[Response] = {
-    val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
-    ensureKey(masterKey, "Master")
-    doRequest(path = path, method = "DELETE", key = masterKey)
-  }
-
-  /**
-   * Returns schema information for all the event collections in this project. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
-   *
-   * @param projectID The project to which the event will be added.
-   */
-  def getEvents: Future[Response] = {
-    val path = Seq(version, "projects", projectId, "events").mkString("/")
-    ensureKey(masterKey, "Master")
-    doRequest(path = path, method = "GET", key = masterKey)
-  }
-
-  /**
-   * Returns available schema information for this event collection, including properties and their type. It also returns links to sub-resources. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
-   *
-   * @param projectID The project to which the event will be added.
-   * @param collection The name of the collection.
-   */
-  def getCollection(collection: String): Future[Response] = {
-    val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
-    ensureKey(masterKey, "Master")
-    doRequest(path = path, method = "GET", key = masterKey)
-  }
-
-  /**
-   * Returns the projects accessible to the API user, as well as links to project sub-resources for
-   * discovery. See [[https://keen.io/docs/api/reference/#projects-resource Projects Resource]].
-   */
-  def getProjects: Future[Response] = {
-    val path = Seq(version, "projects").mkString("/")
-    ensureKey(masterKey, "Master")
-    doRequest(path = path, method = "GET", key = masterKey)
-  }
-
-  /**
-   * Returns detailed information about the specific project, as well as links to related resources.
-   * See [[https://keen.io/docs/api/reference/#project-row-resource Project Row Resource]].
-   */
-  def getProject: Future[Response] = {
-    val path = Seq(version, "projects", projectId).mkString("/")
-    ensureKey(masterKey, "Master")
-    doRequest(path = path, method = "GET", key = masterKey)
-  }
-
-  /**
-   * Returns the property name, type, and a link to sub-resources. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
-   */
-  def getProperty(collection: String, name: String): Future[Response] = {
-    val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
-    ensureKey(masterKey, "Master")
-    doRequest(path = path, method = "GET", key = masterKey)
-  }
-
-  /**
-   * Returns the list of available queries and links to them. See [[https://keen.io/docs/api/reference/#queries-resource Queries Resource]].
-   *
-   */
-  def getQueries: Future[Response] = {
-    val path = Seq(version, "projects", projectId, "queries").mkString("/")
-    ensureKey(masterKey, "Master")
-    doRequest(path = path, method = "GET", key = masterKey)
-  }
-
   private def doQuery(
     analysisType: String,
     collection: String,
@@ -329,30 +262,118 @@ class Client(
       "group_by" -> groupBy
     )
 
-    ensureKey(readKey, "Read")
     doRequest(path = path, method = "GET", key = readKey, params = params)
   }
+}
 
-  private def doRequest(
-    path: String,
-    method: String,
-    key: Option[String],
-    body: Option[String] = None,
-    params: Map[String,Option[String]] = Map.empty) = {
+trait Writer extends AccessLevel {
+  self: HttpAdapterComponent =>
 
-    // Gonna call key.get in here because ensureKey protects us!
-    httpAdapter.doRequest(method = method, scheme = scheme, authority = authority, path = path, key = key.get, body = body, params = params)
-  }
+  val writeKey: String
 
-  private def ensureKey(key: Option[String], name: String) = {
-    key.getOrElse(throw new Exception(s"$name key must be set for this operation!"))
+  /**
+   * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
+   *
+   * @param collection The collection to which the event will be added.
+   * @param event The event
+   */
+  def addEvent(collection: String, event: String): Future[Response] = {
+    val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
+    doRequest(path = path, method = "POST", key = writeKey, body = Some(event))
   }
 
   /**
-   * Disconnects any remaining connections. Both idle and active. If you are accessing
-   * Keen through a proxy that keeps connections alive this is useful.
+   * Publish multiple events. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
+   *
+   * @param events The events to add to the project.
    */
-  def shutdown {
-    httpAdapter.shutdown
+  def addEvents(events: String): Future[Response] = {
+    val path = Seq(version, "projects", projectId, "events").mkString("/")
+    doRequest(path = path, method = "POST", key = writeKey, body = Some(events))
+  }
+}
+
+trait Master extends Reader with Writer {
+  self: HttpAdapterComponent =>
+
+  val masterKey: String
+
+  // Since a master key can perform any API call, override read and write keys
+  // so that a client can extend only the Master trait when needed.
+  override lazy val readKey: String = masterKey
+  override lazy val writeKey: String = masterKey
+
+  /**
+   * Deletes the entire event collection. This is irreversible and will only work for collections under 10k events. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
+   *
+   * @param collection The name of the collection.
+   */
+  def deleteCollection(collection: String): Future[Response] = {
+    val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
+    doRequest(path = path, method = "DELETE", key = masterKey)
+  }
+
+  /**
+   * Removes a property and deletes all values stored with that property name. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
+   */
+  def deleteProperty(collection: String, name: String): Future[Response] = {
+    val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
+    doRequest(path = path, method = "DELETE", key = masterKey)
+  }
+
+  /**
+   * Returns schema information for all the event collections in this project. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
+   *
+   * @param projectID The project to which the event will be added.
+   */
+  def getEvents: Future[Response] = {
+    val path = Seq(version, "projects", projectId, "events").mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
+  }
+
+  /**
+   * Returns available schema information for this event collection, including properties and their type. It also returns links to sub-resources. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
+   *
+   * @param projectID The project to which the event will be added.
+   * @param collection The name of the collection.
+   */
+  def getCollection(collection: String): Future[Response] = {
+    val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
+  }
+
+  /**
+   * Returns the projects accessible to the API user, as well as links to project sub-resources for
+   * discovery. See [[https://keen.io/docs/api/reference/#projects-resource Projects Resource]].
+   */
+  def getProjects: Future[Response] = {
+    val path = Seq(version, "projects").mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
+  }
+
+  /**
+   * Returns detailed information about the specific project, as well as links to related resources.
+   * See [[https://keen.io/docs/api/reference/#project-row-resource Project Row Resource]].
+   */
+  def getProject: Future[Response] = {
+    val path = Seq(version, "projects", projectId).mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
+  }
+
+  /**
+   * Returns the property name, type, and a link to sub-resources. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
+   */
+  def getProperty(collection: String, name: String): Future[Response] = {
+    val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
+  }
+
+  /**
+   * Returns the list of available queries and links to them. See [[https://keen.io/docs/api/reference/#queries-resource Queries Resource]].
+   *
+   */
+  def getQueries: Future[Response] = {
+    val path = Seq(version, "projects", projectId, "queries").mkString("/")
+    doRequest(path = path, method = "GET", key = masterKey)
   }
 }

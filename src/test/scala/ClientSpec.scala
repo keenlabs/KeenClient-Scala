@@ -88,18 +88,15 @@ class ClientSpec extends Specification {
     }
   }
 
-
   // Sequential because it's less work to share the client instance
+  // TODO: set up separate read-only client, writer client, etc. instead of
+  // doing everything in this suite with a master key.
   sequential
 
   "Client" should {
 
-    val client = new Client(
-      projectId = "abc",
-      masterKey = Some("masterKey"),
-      writeKey = Some("writeKey"),
-      readKey = Some("readKey")
-    ) {
+    val client = new Client(projectId = "abc") with Master {
+      override val masterKey = "masterKey"
       override val httpAdapter = new OkHttpAdapter
     }
 
@@ -165,7 +162,7 @@ class ClientSpec extends Specification {
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/queries/count?event_collection=foo")
 
-      adapter.getKey.get must beEqualTo("readKey")
+      adapter.getKey.get must beEqualTo("masterKey")
     }
 
     // We'll test average thoroughly but since all the query method use the same underlying
@@ -193,7 +190,7 @@ class ClientSpec extends Specification {
       url must contain("timezone=America/Chicago")
       url must contain("group_by=foo.name")
 
-      adapter.getKey.get must beEqualTo("readKey")
+      adapter.getKey.get must beEqualTo("masterKey")
     }
 
     "shutdown" in {
@@ -206,12 +203,7 @@ class ClientSpec extends Specification {
 
     "handle user-supplied actor system" in {
       val attempt = Try({
-        val client = new Client(
-          projectId = "abc",
-          masterKey = Some("masterKey"),
-          writeKey = Some("writeKey"),
-          readKey = Some("readKey")
-        ) {
+        val client = new Client(projectId = "abc") {
           override val httpAdapter = new HttpAdapterSpray(actorSystem = Some(ActorSystem("keen-test")))
         }
       })
@@ -221,12 +213,8 @@ class ClientSpec extends Specification {
 
   "Client 500 failures" should {
 
-    val client = new Client(
-      projectId = "abc",
-      masterKey = Some("masterKey"),
-      writeKey = Some("writeKey"),
-      readKey = Some("readKey")
-    ) {
+    val client = new Client(projectId = "abc") with Master {
+      override val masterKey = "masterKey"
       override val httpAdapter = new FiveHundredHttpAdapter()
     }
 
@@ -239,12 +227,8 @@ class ClientSpec extends Specification {
 
   "Client future failures" should {
 
-    val client = new Client(
-      projectId = "abc",
-      masterKey = Some("masterKey"),
-      writeKey = Some("writeKey"),
-      readKey = Some("readKey")
-    ) {
+    val client = new Client(projectId = "abc") with Master {
+      override val masterKey = "masterKey"
       override val httpAdapter = new SlowHttpAdapter
     }
 
@@ -253,33 +237,11 @@ class ClientSpec extends Specification {
     }
   }
 
-  "Client key failures" should {
-
-    // No keys lololol
-    val client = new Client(projectId = "abc") {
-      override val httpAdapter = new SlowHttpAdapter
-    }
-
-    "handle missing master" in {
-      Await.result(client.getProjects, Duration(10, "second")) must throwA[Exception].like {
-        case e => e.getMessage must contain("Master key must be set")
-      }
-      Await.result(client.addEvent("coll", """{}"""), Duration(10, "second")) must throwA[Exception].like {
-        case e => e.getMessage must contain("Write key must be set")
-      }
-    }
-  }
-
   "Client with Dispatch HttpAdapter" should {
 
     "handle dispatch without an actor system" in {
       val attempt = Try({
-        val client = new Client(
-          projectId = "abc",
-          masterKey = Some("masterKey"),
-          writeKey = Some("writeKey"),
-          readKey = Some("readKey")
-        ) {
+        val client = new Client(projectId = "abc") {
           override val httpAdapter = new HttpAdapterDispatch
         }
       })

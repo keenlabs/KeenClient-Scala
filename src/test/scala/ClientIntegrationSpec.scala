@@ -3,7 +3,7 @@ package test
 import org.specs2.mutable.Specification
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import io.keen.client.scala.{HttpAdapterDispatch, Client}
+import io.keen.client.scala._
 
 class ClientIntegrationSpec extends Specification {
 
@@ -13,19 +13,17 @@ class ClientIntegrationSpec extends Specification {
 
   "Client" should {
 
-    lazy val client = new Client(
-      projectId = sys.env("KEEN_PROJECT_ID"),
-      masterKey = sys.env.get("KEEN_MASTER_KEY"),
-      writeKey = sys.env.get("KEEN_WRITE_KEY"),
-      readKey = sys.env.get("KEEN_READ_KEY")
-    )
+    val projectId = sys.env("KEEN_PROJECT_ID")
 
-    lazy val dispatchClient = new Client(
-      projectId = sys.env("KEEN_PROJECT_ID"),
-      masterKey = sys.env.get("KEEN_MASTER_KEY"),
-      writeKey = sys.env.get("KEEN_WRITE_KEY"),
-      readKey = sys.env.get("KEEN_READ_KEY")
-    ) {
+    // This set of expectations currently assumes master access. Should
+    // eventually break out some to test access control granularly.
+    trait Keys {
+      val masterKey = sys.env("KEEN_MASTER_KEY")
+    }
+
+    lazy val client = new Client(projectId = projectId) with Master with Keys
+
+    lazy val dispatchClient = new Client(projectId = projectId) with Master with Keys {
       override val httpAdapter = new HttpAdapterDispatch
     }
 
