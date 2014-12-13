@@ -24,9 +24,10 @@ class ClientIntegrationSpec extends Specification {
       projectId = sys.env("KEEN_PROJECT_ID"),
       masterKey = sys.env.get("KEEN_MASTER_KEY"),
       writeKey = sys.env.get("KEEN_WRITE_KEY"),
-      readKey = sys.env.get("KEEN_READ_KEY"),
-      httpAdapter = new HttpAdapterDispatch
-    )
+      readKey = sys.env.get("KEEN_READ_KEY")
+    ) {
+      override val httpAdapter = new HttpAdapterDispatch
+    }
 
     "fetch collection" in {
       val res = Await.result(client.getCollection(

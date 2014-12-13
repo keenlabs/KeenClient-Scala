@@ -14,7 +14,7 @@ import spray.http.Uri._
 
 class ClientSpec extends Specification {
 
-  class OkHttpAdapter extends HttpAdapterSpray {
+  class OkHttpAdapter extends HttpAdapter {
 
     var lastUrl: Option[String] = None
     var lastKey: Option[String] = None
@@ -52,6 +52,8 @@ class ClientSpec extends Specification {
     def getKey = lastKey
 
     def getUrl = lastUrl
+
+    def shutdown = {}
   }
 
   class FiveHundredHttpAdapter extends HttpAdapterSpray {
@@ -92,14 +94,16 @@ class ClientSpec extends Specification {
 
   "Client" should {
 
-    val adapter = new OkHttpAdapter()
     val client = new Client(
       projectId = "abc",
       masterKey = Some("masterKey"),
       writeKey = Some("writeKey"),
-      readKey = Some("readKey"),
-      httpAdapter = adapter
-    )
+      readKey = Some("readKey")
+    ) {
+      override val httpAdapter = new OkHttpAdapter
+    }
+
+    val adapter = client.httpAdapter
 
     "handle 200" in {
       val res = Await.result(client.getProjects, Duration(5, "second"))
@@ -201,15 +205,15 @@ class ClientSpec extends Specification {
   "Client with custom HttpAdapter" should {
 
     "handle user-supplied actor system" in {
-      val adapter = new HttpAdapterSpray(actorSystem = Some(ActorSystem("keen-test")))
       val attempt = Try({
         val client = new Client(
           projectId = "abc",
           masterKey = Some("masterKey"),
           writeKey = Some("writeKey"),
-          readKey = Some("readKey"),
-          httpAdapter = adapter
-        )
+          readKey = Some("readKey")
+        ) {
+          override val httpAdapter = new HttpAdapterSpray(actorSystem = Some(ActorSystem("keen-test")))
+        }
       })
       attempt must beSuccessfulTry
     }
@@ -217,14 +221,14 @@ class ClientSpec extends Specification {
 
   "Client 500 failures" should {
 
-    val adapter = new FiveHundredHttpAdapter()
     val client = new Client(
       projectId = "abc",
       masterKey = Some("masterKey"),
       writeKey = Some("writeKey"),
-      readKey = Some("readKey"),
-      httpAdapter = adapter
-    )
+      readKey = Some("readKey")
+    ) {
+      override val httpAdapter = new FiveHundredHttpAdapter()
+    }
 
     "handle 500" in {
       val res = Await.result(client.getProjects, Duration(5, "second"))
@@ -235,14 +239,14 @@ class ClientSpec extends Specification {
 
   "Client future failures" should {
 
-    val adapter = new SlowHttpAdapter()
     val client = new Client(
       projectId = "abc",
       masterKey = Some("masterKey"),
       writeKey = Some("writeKey"),
-      readKey = Some("readKey"),
-      httpAdapter = adapter
-    )
+      readKey = Some("readKey")
+    ) {
+      override val httpAdapter = new SlowHttpAdapter
+    }
 
     "handle timeout" in {
       Await.result(client.getProjects, Duration(10, "second")) must throwA[AskTimeoutException]
@@ -251,12 +255,10 @@ class ClientSpec extends Specification {
 
   "Client key failures" should {
 
-    val adapter = new SlowHttpAdapter()
-    val client = new Client(
-      projectId = "abc",
-      // No keys lololol
-      httpAdapter = adapter
-    )
+    // No keys lololol
+    val client = new Client(projectId = "abc") {
+      override val httpAdapter = new SlowHttpAdapter
+    }
 
     "handle missing master" in {
       Await.result(client.getProjects, Duration(10, "second")) must throwA[Exception].like {
@@ -271,15 +273,15 @@ class ClientSpec extends Specification {
   "Client with Dispatch HttpAdapter" should {
 
     "handle dispatch without an actor system" in {
-      val adapter = new HttpAdapterDispatch
       val attempt = Try({
         val client = new Client(
           projectId = "abc",
           masterKey = Some("masterKey"),
           writeKey = Some("writeKey"),
-          readKey = Some("readKey"),
-          httpAdapter = adapter
-        )
+          readKey = Some("readKey")
+        ) {
+          override val httpAdapter = new HttpAdapterDispatch
+        }
       })
       attempt must beSuccessfulTry
     }
