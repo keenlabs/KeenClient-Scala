@@ -26,9 +26,9 @@ class Client(
   }
 }
 
-sealed trait AccessLevel {
-  // Require that we're mixed into something that provides an HttpAdapterComponent
-  self: HttpAdapterComponent =>
+sealed protected trait AccessLevel {
+  // Access levels need the basic facilities of a Client; require that.
+  self: Client =>
 
   val projectId: String
 
@@ -53,7 +53,7 @@ sealed trait AccessLevel {
 }
 
 trait Reader extends AccessLevel {
-  self: HttpAdapterComponent =>
+  self: Client =>
 
   val readKey: String
 
@@ -267,7 +267,7 @@ trait Reader extends AccessLevel {
 }
 
 trait Writer extends AccessLevel {
-  self: HttpAdapterComponent =>
+  self: Client =>
 
   val writeKey: String
 
@@ -294,7 +294,7 @@ trait Writer extends AccessLevel {
 }
 
 trait Master extends Reader with Writer {
-  self: HttpAdapterComponent =>
+  self: Client =>
 
   val masterKey: String
 
