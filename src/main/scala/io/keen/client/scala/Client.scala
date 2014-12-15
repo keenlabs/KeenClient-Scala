@@ -26,6 +26,28 @@ class Client(
   }
 }
 
+/**
+ * A [[Client]] can mix in one or more `AccessLevel`s to enable API calls for
+ * read, write, and master operations.
+ *
+ * The intention of this approach is to make it a compile-time error to call an
+ * API method requiring a write key if you haven't statically declared that the
+ * client should be a writer, for example.
+ *
+ * This also means that runtime checks for presence of optional settings (keys
+ * for access levels you don't need) are pushed up to the time of client
+ * instantiation: if you've forgotten to provide a write key in your deployment
+ * environment, we won't wait to throw a runtime exception at the point that you
+ * make a write call, perhaps long after your app has started and you've gone
+ * home for the weekend.
+ *
+ * @example Client with read and write access:
+ * {{{
+ * val keen = new Client with Reader with Writer
+ * }}}
+ *
+ * @see [[https://keen.io/docs/security/]]
+ */
 sealed protected trait AccessLevel {
   // Access levels need the basic facilities of a Client; require that.
   self: Client =>
@@ -52,9 +74,28 @@ sealed protected trait AccessLevel {
   }
 }
 
+/**
+ * A [[Client]] mixing in `Reader` can make Keen IO API calls requiring a read
+ * key.
+ *
+ * A read key must be configured e.g. by setting the `readKey` field in an
+ * anonymous class override.
+ *
+ * @example Initializing a Client with read access
+ * {{{
+ * val keen = new Client with Reader {
+ *   override val readKey = "myReadKey"
+ * }
+ * }}}
+ *
+ * @see [[https://keen.io/docs/security/]]
+ */
 trait Reader extends AccessLevel {
   self: Client =>
 
+  /**
+   * A read key required to make API calls for querying and extracting data.
+   */
   val readKey: String
 
   /**
@@ -266,9 +307,28 @@ trait Reader extends AccessLevel {
   }
 }
 
+/**
+ * A [[Client]] mixing in `Writer` can make Keen IO API calls requiring a write
+ * key.
+ *
+ * A write key must be configured e.g. by setting the `writeKey` field in an
+ * anonymous class override.
+ *
+ * @example Initializing a Client with write access
+ * {{{
+ * val keen = new Client with Writer {
+ *   override val writeKey = "myWriteKey"
+ * }
+ * }}}
+ *
+ * @see [[https://keen.io/docs/security/]]
+ */
 trait Writer extends AccessLevel {
   self: Client =>
 
+  /**
+   * A write key required to make API calls that write data.
+   */
   val writeKey: String
 
   /**
@@ -293,9 +353,34 @@ trait Writer extends AccessLevel {
   }
 }
 
+/**
+ * A [[Client]] mixing in `Master` can make Keen IO API calls requiring a master
+ * key, such as deleting data, creating saved queries, and performing
+ * administrative functions.
+ *
+ * A `Master` client can also perform all [[Reader]] and [[Writer]] API calls
+ * and does not require additional keys configured for these. However, this
+ * should '''not''' be considered a shortcut! Please keep your master key as
+ * secure as possible by not deploying it where it isn't strictly needed.
+ *
+ * A master key must be configured e.g. by setting the `masterKey` field in an
+ * anonymous class override.
+ *
+ * @example Initializing a Client with master access
+ * {{{
+ * val keen = new Client with Master {
+ *   override val masterKey = "myMasterKey"
+ * }
+ * }}}
+ *
+ * @see [[https://keen.io/docs/security/]]
+ */
 trait Master extends Reader with Writer {
   self: Client =>
 
+  /**
+   * A master key required to make API calls of administrative nature.
+   */
   val masterKey: String
 
   // Since a master key can perform any API call, override read and write keys
@@ -323,8 +408,6 @@ trait Master extends Reader with Writer {
 
   /**
    * Returns schema information for all the event collections in this project. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
-   *
-   * @param projectID The project to which the event will be added.
    */
   def getEvents: Future[Response] = {
     val path = Seq(version, "projects", projectId, "events").mkString("/")
@@ -334,7 +417,6 @@ trait Master extends Reader with Writer {
   /**
    * Returns available schema information for this event collection, including properties and their type. It also returns links to sub-resources. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
    *
-   * @param projectID The project to which the event will be added.
    * @param collection The name of the collection.
    */
   def getCollection(collection: String): Future[Response] = {

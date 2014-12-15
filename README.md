@@ -41,26 +41,37 @@ API. You can skip them with
 test-only * -- exclude integration
 ```
 
-## Environment Variables
+# Configuration
 
-You'll want to set the following environment variables:
+The client has a notion of access levels that reflect [the Keen IO API key
+security model][security]. These are represented by Scala traits called
+`Reader`, `Writer`, and `Master`. According to the level of access that your
+application requires, you must mix the appropriate trait(s) into your client
+instance when creating it, and configure your corresponding API keys. This is
+demonstrated in the example below.
 
-* KEEN_PROJECT_ID
-* KEEN_MASTER_KEY
-* KEEN_WRITE_KEY
-* KEEN_READ_KEY
+Our recommended means of providing settings is through environment variables, to
+avoid storing credentials in source control. We intend to support a config file
+soon, but would still discourage you from using that for credentials.
 
 ## Example
 
 ```scala
-import io.keen.client.scala.Client
+import io.keen.client.scala.{ Client, Reader, Writer }
 
-val client = new Client(
-  projectId = sys.env("KEEN_PROJECT_ID"),
-  masterKey = sys.env.get("KEEN_MASTER_KEY"),
-  writeKey = sys.env.get("KEEN_WRITE_KEY"),
-  readKey = sys.env.get("KEEN_READ_KEY")
-)
+// You probably have some form of configuration object in your app already,
+// this is just an example.
+object KeenSettings {
+  val projectId = sys.env("KEEN_PROJECT_ID")
+  val readKey = sys.env("KEEN_READ_KEY")
+  val writeKey = sys.env("KEEN_WRITE_KEY")
+}
+
+// Construct a client with read and write access, providing the required keys.
+val client = new Client(KeenSettings.projectId) with Reader with Writer {
+  override val readKey = KeenSettings.readKey
+  override val writeKey = KeenSettings.writeKey
+}
 
 
 // Publish an event!
@@ -90,5 +101,7 @@ resp map {
 } getOrElse {
   println("I failed :(")
 }
-
 ```
+
+[security]: https://keen.io/docs/security/
+
