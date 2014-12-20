@@ -1,8 +1,12 @@
-organization := "keen"
-
 name := "keenclient-scala"
 
-version := "1.0.4-SNAPSHOT"
+organization := "io.keen"
+
+description := "Keen IO SDK/client library for Scala"
+
+homepage := Some(url("https://github.com/keenlabs/KeenClient-Scala"))
+
+version := "0.4.0-SNAPSHOT"
 
 scalaVersion := "2.11.2"
 
