@@ -1,0 +1,3 @@
+v1.0.4-SNAPSHOT
+* Began CHANGELOG
+* Switched to trait-based key setup when creating client (ches)
