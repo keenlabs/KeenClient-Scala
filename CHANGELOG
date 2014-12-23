@@ -1,0 +1,4 @@
+v0.0.4-SNAPSHOT
+* Began CHANGELOG
+* Switched to trait-based key setup when creating client (ches)
+* Added bits for artifact publishing to maven central (ches)
