@@ -4,6 +4,10 @@ import scala.concurrent.Future
 
 case class Response(statusCode: Int, body: String)
 
+trait HttpAdapterComponent {
+  val httpAdapter: HttpAdapter
+}
+
 trait HttpAdapter {
   def doRequest(
     scheme: String,
@@ -15,5 +19,5 @@ trait HttpAdapter {
     params: Map[String, Option[String]] = Map.empty
   ): Future[Response]
 
-  def shutdown
+  def shutdown: Unit
 }

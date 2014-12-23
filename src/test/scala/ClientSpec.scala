@@ -14,7 +14,7 @@ import spray.http.Uri._
 
 class ClientSpec extends Specification {
 
-  class OkHttpAdapter extends HttpAdapterSpray {
+  class OkHttpAdapter extends HttpAdapter {
 
     var lastUrl: Option[String] = None
     var lastKey: Option[String] = None
@@ -52,6 +52,8 @@ class ClientSpec extends Specification {
     def getKey = lastKey
 
     def getUrl = lastUrl
+
+    def shutdown = {}
   }
 
   class FiveHundredHttpAdapter extends HttpAdapterSpray {
@@ -86,20 +88,19 @@ class ClientSpec extends Specification {
     }
   }
 
-
   // Sequential because it's less work to share the client instance
+  // TODO: set up separate read-only client, writer client, etc. instead of
+  // doing everything in this suite with a master key.
   sequential
 
   "Client" should {
 
-    val adapter = new OkHttpAdapter()
-    val client = new Client(
-      projectId = "abc",
-      masterKey = Some("masterKey"),
-      writeKey = Some("writeKey"),
-      readKey = Some("readKey"),
-      httpAdapter = adapter
-    )
+    val client = new Client(projectId = "abc") with Master {
+      override val masterKey = "masterKey"
+      override val httpAdapter = new OkHttpAdapter
+    }
+
+    val adapter = client.httpAdapter
 
     "handle 200" in {
       val res = Await.result(client.getProjects, Duration(5, "second"))
@@ -161,7 +162,7 @@ class ClientSpec extends Specification {
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/queries/count?event_collection=foo")
 
-      adapter.getKey.get must beEqualTo("readKey")
+      adapter.getKey.get must beEqualTo("masterKey")
     }
 
     // We'll test average thoroughly but since all the query method use the same underlying
@@ -189,7 +190,7 @@ class ClientSpec extends Specification {
       url must contain("timezone=America/Chicago")
       url must contain("group_by=foo.name")
 
-      adapter.getKey.get must beEqualTo("readKey")
+      adapter.getKey.get must beEqualTo("masterKey")
     }
 
     "shutdown" in {
@@ -201,15 +202,10 @@ class ClientSpec extends Specification {
   "Client with custom HttpAdapter" should {
 
     "handle user-supplied actor system" in {
-      val adapter = new HttpAdapterSpray(actorSystem = Some(ActorSystem("keen-test")))
       val attempt = Try({
-        val client = new Client(
-          projectId = "abc",
-          masterKey = Some("masterKey"),
-          writeKey = Some("writeKey"),
-          readKey = Some("readKey"),
-          httpAdapter = adapter
-        )
+        val client = new Client(projectId = "abc") {
+          override val httpAdapter = new HttpAdapterSpray(actorSystem = Some(ActorSystem("keen-test")))
+        }
       })
       attempt must beSuccessfulTry
     }
@@ -217,14 +213,10 @@ class ClientSpec extends Specification {
 
   "Client 500 failures" should {
 
-    val adapter = new FiveHundredHttpAdapter()
-    val client = new Client(
-      projectId = "abc",
-      masterKey = Some("masterKey"),
-      writeKey = Some("writeKey"),
-      readKey = Some("readKey"),
-      httpAdapter = adapter
-    )
+    val client = new Client(projectId = "abc") with Master {
+      override val masterKey = "masterKey"
+      override val httpAdapter = new FiveHundredHttpAdapter()
+    }
 
     "handle 500" in {
       val res = Await.result(client.getProjects, Duration(5, "second"))
@@ -235,51 +227,23 @@ class ClientSpec extends Specification {
 
   "Client future failures" should {
 
-    val adapter = new SlowHttpAdapter()
-    val client = new Client(
-      projectId = "abc",
-      masterKey = Some("masterKey"),
-      writeKey = Some("writeKey"),
-      readKey = Some("readKey"),
-      httpAdapter = adapter
-    )
+    val client = new Client(projectId = "abc") with Master {
+      override val masterKey = "masterKey"
+      override val httpAdapter = new SlowHttpAdapter
+    }
 
     "handle timeout" in {
       Await.result(client.getProjects, Duration(10, "second")) must throwA[AskTimeoutException]
     }
   }
 
-  "Client key failures" should {
-
-    val adapter = new SlowHttpAdapter()
-    val client = new Client(
-      projectId = "abc",
-      // No keys lololol
-      httpAdapter = adapter
-    )
-
-    "handle missing master" in {
-      Await.result(client.getProjects, Duration(10, "second")) must throwA[Exception].like {
-        case e => e.getMessage must contain("Master key must be set")
-      }
-      Await.result(client.addEvent("coll", """{}"""), Duration(10, "second")) must throwA[Exception].like {
-        case e => e.getMessage must contain("Write key must be set")
-      }
-    }
-  }
-
   "Client with Dispatch HttpAdapter" should {
 
     "handle dispatch without an actor system" in {
-      val adapter = new HttpAdapterDispatch
       val attempt = Try({
-        val client = new Client(
-          projectId = "abc",
-          masterKey = Some("masterKey"),
-          writeKey = Some("writeKey"),
-          readKey = Some("readKey"),
-          httpAdapter = adapter
-        )
+        val client = new Client(projectId = "abc") {
+          override val httpAdapter = new HttpAdapterDispatch
+        }
       })
       attempt must beSuccessfulTry
     }
