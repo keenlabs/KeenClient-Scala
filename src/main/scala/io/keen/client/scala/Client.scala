@@ -2,7 +2,6 @@ package io.keen.client.scala
 
 import grizzled.slf4j.Logging
 import scala.concurrent.Future
-import java.nio.charset.StandardCharsets
 
 // XXX Remaining: Extraction, Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
 // Event deletion
