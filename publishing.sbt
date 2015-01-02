@@ -38,8 +38,10 @@ scmInfo := Some(
 pomIncludeRepository := { _ => false }
 pomExtra :=
   <developers>
-    <id>keenlabs</id>
-    <name>Keen IO</name>
-    <email></email>
+    <developer>
+      <id>keenlabs</id>
+      <name>Keen IO</name>
+      <email></email>
+    </developer>
   </developers>
 
