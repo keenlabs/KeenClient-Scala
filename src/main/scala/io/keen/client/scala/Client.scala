@@ -23,8 +23,8 @@ class Client(
    * Disconnects any remaining connections. Both idle and active. If you are accessing
    * Keen through a proxy that keeps connections alive this is useful.
    */
-  def shutdown {
-    httpAdapter.shutdown
+  def shutdown() = {
+    httpAdapter.shutdown()
   }
 }
 

@@ -72,7 +72,7 @@ class HttpAdapterSpray(httpTimeoutSeconds: Int = 10)(implicit val actorSystem: A
       })
   }
 
-  def shutdown = {
+  def shutdown() = {
     (IO(Http) ? Http.CloseAll) onComplete {
       // When this completes we will shutdown the actor system if it wasn't
       // supplied by the user.

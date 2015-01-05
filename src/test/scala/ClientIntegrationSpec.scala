@@ -172,7 +172,7 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
     }
 
     "shutdown" in {
-      client.shutdown
+      client.shutdown()
       1 must beEqualTo(1)
     }
   } section("integration")

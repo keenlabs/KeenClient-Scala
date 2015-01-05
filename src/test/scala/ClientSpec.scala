@@ -60,7 +60,7 @@ class ClientSpec extends Specification with NoTimeConversions {
 
     def getUrl = lastUrl
 
-    def shutdown = {}
+    def shutdown() = {}
   }
 
   class FiveHundredHttpAdapter extends HttpAdapterSpray {
@@ -210,7 +210,7 @@ class ClientSpec extends Specification with NoTimeConversions {
     }
 
     "shutdown" in {
-      client.shutdown
+      client.shutdown()
       1 must beEqualTo(1)
     }
   }
@@ -262,7 +262,7 @@ class ClientSpec extends Specification with NoTimeConversions {
       adapter.actorSystem must be(externalSystem)
 
       // We don't terminate a user-supplied actor system
-      client.shutdown
+      client.shutdown()
       externalSystem.awaitTermination(timeout) must throwA[TimeoutException]
       externalSystem.isTerminated must beFalse
     }
@@ -275,7 +275,7 @@ class ClientSpec extends Specification with NoTimeConversions {
       // TODO: httpAdapter field should be private
       client.httpAdapter.actorSystem must be(externalSystem)
 
-      client.shutdown
+      client.shutdown()
       externalSystem.awaitTermination(timeout) must throwA[TimeoutException]
       externalSystem.isTerminated must beFalse
     }
