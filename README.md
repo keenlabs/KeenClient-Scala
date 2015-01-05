@@ -1,8 +1,7 @@
 # KeenClient-Scala
 
 **Note**: This library is currently in development and does not implement all of the features of the Keen API.
-Single event publishing works. Other API features will be added over time. **The interface will almost
-certainly change!**
+Single event publishing works. Other API features will be added over time.
 
 keen-scala uses the [spray-can](http://spray.io/) HTTP library.
 It's all async so all of the returned values are
