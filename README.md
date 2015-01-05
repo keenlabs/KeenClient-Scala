@@ -24,13 +24,19 @@ Depends on [spray](http://spray.io/) and
 
 # Using It
 
-You'll have to compile from source for now.
+Artifacts for keen-client-scala are [hosted on Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ckeenclient-scala).
+You can use them in your project with SBT thusly:
 
-```
-sbt package
+```scala
+libraryDependencies += "io.keen" %% "keenclient-scala" % "0.4.0"
 ```
 
-You'll find a jar in `target/scala-2.10`. Something like `keenclient-scala_2.10-VERSION.jar`
+Note that we publish artifacts for Scala 2.10 and 2.11, so you can either use `%%` to automatically pick the correct
+version or specify them explicitly with something like:
+
+```scala
+libraryDependencies += "io.keen" % "keenclient-scala_2.10" % "0.4.0"
+```
 
 # Testing It
 
