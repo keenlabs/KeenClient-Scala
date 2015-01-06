@@ -6,7 +6,7 @@ description := "Keen IO SDK/client library for Scala"
 
 homepage := Some(url("https://github.com/keenlabs/KeenClient-Scala"))
 
-version := "0.4.0"
+version := "0.5.0-SNAPSHOT"
 
 scalaVersion := "2.11.2"
 
