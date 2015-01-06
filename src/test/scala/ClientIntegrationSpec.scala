@@ -1,11 +1,18 @@
 package test
 
-import org.specs2.mutable.Specification
 import scala.concurrent.Await
 import scala.concurrent.duration._
+
+import org.specs2.mutable.Specification
+import org.specs2.time.NoTimeConversions
+
 import io.keen.client.scala._
 
-class ClientIntegrationSpec extends Specification {
+class ClientIntegrationSpec extends Specification with NoTimeConversions {
+  // Timeout used for most future awaits, etc. ScalaTest and Akka TestKit both
+  // feature scalable time dilation for testing on CI servers that might be
+  // slow--see IntegrationPatience in ScalaTest, not sure if specs2 has similar...
+  val timeout = 4.seconds
 
   // args(exclude = "integration")
 
@@ -30,24 +37,24 @@ class ClientIntegrationSpec extends Specification {
     "fetch collection" in {
       val res = Await.result(client.getCollection(
         collection = "foo"
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
     "fetch collection dispatchClient" in {
       val res = Await.result(dispatchClient.getCollection(
         collection = "foo"
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
     "fetch projects" in {
-      val res = Await.result(client.getProjects, Duration(5, "second"))
+      val res = Await.result(client.getProjects, timeout)
       res.statusCode must beEqualTo(200)
     }
 
     "fetch project" in {
-      val res = Await.result(client.getProject, Duration(5, "second"))
+      val res = Await.result(client.getProject, timeout)
       res.statusCode must beEqualTo(200)
     }
 
@@ -55,13 +62,13 @@ class ClientIntegrationSpec extends Specification {
       val res = Await.result(client.getProperty(
         collection = "foo",
         name = "foo"
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
     "fetch event collection" in {
 
-      val res = Await.result(client.getEvents, Duration(5, "second"))
+      val res = Await.result(client.getEvents, timeout)
       res.statusCode must beEqualTo(200)
     }
 
@@ -70,7 +77,7 @@ class ClientIntegrationSpec extends Specification {
       val res = Await.result(client.addEvent(
         collection = "foo",
         event = """{"foo": "bar"}"""
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(201)
     }
 
@@ -79,19 +86,19 @@ class ClientIntegrationSpec extends Specification {
       val res = Await.result(dispatchClient.addEvent(
         collection = "foo",
         event = """{"foo": "bar"}"""
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(201)
     }
 
     "fetch queries" in {
-      val res = Await.result(client.getQueries, Duration(5, "second"))
+      val res = Await.result(client.getQueries, timeout)
       res.statusCode must beEqualTo(200)
     }
 
     "count" in {
       val res = Await.result(client.count(
         collection = "foo"
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
@@ -100,7 +107,7 @@ class ClientIntegrationSpec extends Specification {
         collection = "foo",
         filters = Some("""[{"property_name": "baz","operator":"eq","property_value":"gorch"}]"""),
         timeframe = Some("this_week")
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
@@ -108,7 +115,7 @@ class ClientIntegrationSpec extends Specification {
       val res = Await.result(client.countUnique(
         collection = "foo",
         targetProperty = "gorch"
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
@@ -116,7 +123,7 @@ class ClientIntegrationSpec extends Specification {
       val res = Await.result(client.minimum(
         collection = "foo",
         targetProperty = "gorch"
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
@@ -124,7 +131,7 @@ class ClientIntegrationSpec extends Specification {
       val res = Await.result(client.maximum(
         collection = "foo",
         targetProperty = "gorch"
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
@@ -132,7 +139,7 @@ class ClientIntegrationSpec extends Specification {
       val res = Await.result(client.average(
         collection = "foo",
         targetProperty = "gorch"
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
@@ -140,7 +147,7 @@ class ClientIntegrationSpec extends Specification {
       val res = Await.result(client.sum(
         collection = "foo",
         targetProperty = "gorch"
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
@@ -148,7 +155,7 @@ class ClientIntegrationSpec extends Specification {
       val res = Await.result(client.selectUnique(
         collection = "foo",
         targetProperty = "gorch"
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
@@ -157,7 +164,7 @@ class ClientIntegrationSpec extends Specification {
     //   val res = Await.result(client.deleteProperty(
     //     collection = "foo",
     //     name = "foo"
-    //   ), Duration(5, "second"))
+    //   ), timeout)
     //   println(res.getResponseBody)
     //   res.statusCode must beEqualTo(204)
     // }
@@ -166,7 +173,7 @@ class ClientIntegrationSpec extends Specification {
 
       val res = Await.result(client.addEvents(
         events = """{"foo": [{"foo": "bar"},{"baz": "gorch"}], "bar": [{"hood":"winked"}]}"""
-      ), Duration(5, "second"))
+      ), timeout)
       res.statusCode must beEqualTo(200)
     }
 
