@@ -1,27 +1,59 @@
 # KeenClient-Scala
 
-**Note**: This library is currently in development and does not implement all of the features of the Keen API.
-Single event publishing works. Other API features will be added over time.
+The official asynchronous Scala client for the [Keen IO] API.
 
-keen-scala uses the [spray-can](http://spray.io/) HTTP library.
-It's all async so all of the returned values are
-`Future[Response]`.
+**Note**: This library is in early development and does not implement all of the
+features of the Keen API. It is pre-1.0 in the [Semantic Versioning] sense:
+public interfaces may change without backwards compatibility. We will try to
+minimize breaking changes, but please consult [the changelog] when updating to a
+new release version.
 
-The returned object is an [`io.keen.client.scala.Response`](src/main/scala/io/keen/client/scala/package.scala). You can look at it's
-`statusCode` or `body` attributes to verify something didn't go awry.
+Additional API features will be added over time. Contributions are welcome!
 
-## JSON
+## Use It - A Quick Taste
 
-Presently this library does **not** do any JSON parsing. It works with strings only. It is
-assumed that you will parse the JSON returned and pass stringified JSON into any methods that
-require it. Feedback is welcome!
+```scala
+import io.keen.client.scala.{ Client, Reader, Writer }
 
-## Dependencies
+// You probably have some form of configuration object in your app already,
+// this is just an example.
+object KeenSettings {
+  val projectId = sys.env("KEEN_PROJECT_ID")
+  val readKey = sys.env("KEEN_READ_KEY")
+  val writeKey = sys.env("KEEN_WRITE_KEY")
+}
 
-Depends on [spray](http://spray.io/) and
-[grizzled-slf4j](http://software.clapper.org/grizzled-slf4j/). It cross-compiles for versions of scala 2.10.
+// Construct a client with read and write access, providing the required keys.
+val keen = new Client(KeenSettings.projectId) with Reader with Writer {
+  override val readKey = KeenSettings.readKey
+  override val writeKey = KeenSettings.writeKey
+}
 
-# Using It
+// Publish an event!
+keen.addEvent(
+  collection = "collectionNameHere",
+  event = """{"foo": "bar"}"""
+)
+
+// Publish lots of events!
+keen.addEvents(someEvents)
+
+// Responses are Futures - handle errors!
+val resp = keen.addEvent(
+  collection = "collectionNameHere",
+  event = """{"foo": "bar"}"""
+)
+
+resp onComplete {
+  case Success(r) => println(resp.statusCode)
+  case Failure(t) => println(t.getMessage) // A Throwable
+}
+
+// Or using map
+resp map { println("I succeeded!") } getOrElse { println("I failed :(") }
+```
+
+## Get It
 
 Artifacts for keen-client-scala are [hosted on Maven Central](http://search.maven.org/#search%7Cga%7C1%7Ckeenclient-scala).
 You can use them in your project with SBT thusly:
@@ -37,16 +69,7 @@ version or specify them explicitly with something like:
 libraryDependencies += "io.keen" % "keenclient-scala_2.10" % "0.4.0"
 ```
 
-# Testing It
-
-This test suite includes integration tests which require keys and access to Keen IO's
-API. You can skip them with
-
-```
-test-only * -- exclude integration
-```
-
-# Configuration
+## Configuration
 
 The client has a notion of access levels that reflect [the Keen IO API key
 security model][security]. These are represented by Scala traits called
@@ -59,54 +82,69 @@ Our recommended means of providing settings is through environment variables, to
 avoid storing credentials in source control. We intend to support a config file
 soon, but would still discourage you from using that for credentials.
 
-## Example
+## Dependencies
+
+The client's default HTTP adapter is built on the [spray HTTP toolkit][spray],
+which is [Akka]-based and asynchronous. A [Dispatch]-based adapter is also
+available. At this time spray (and thus Akka) is a hard dependency, but if there
+is demand we may consider designating it as "provided" so that you may opt for
+the Dispatch adapter (or a custom one for your preferred HTTP client) and avoid
+pulling in Akka dependencies if you wish, or to avoid version conflicts. Please
+share your feedback if you find the spray deps burdensome.
+
+With either adapter, API calls will return a uniform `Future[Response]` type,
+where `Response` is an `io.keen.client.scala.Response`. Instances have
+`statusCode` and `body` attributes that you may inspect to act on errors. An
+example of choosing the Dispatch adapter is shown below.
+
+The client also depends on [grizzled-slf4j] for logging.
+
+It is cross-compiled for 2.10 and 2.11 Scala versions. If you are interested in
+support for other versions or discover any binary compatibility problems, please
+share your feedback.
+
+### Using the Dispatch adapter
+
+To use the Dispatch HTTP adapter instead of the Spray default, specify the
+following override when instantiating a `Client` instance:
 
 ```scala
-import io.keen.client.scala.{ Client, Reader, Writer }
+import io.keen.client.scala.{ Client, HttpAdapterDispatch }
 
-// You probably have some form of configuration object in your app already,
-// this is just an example.
-object KeenSettings {
-  val projectId = sys.env("KEEN_PROJECT_ID")
-  val readKey = sys.env("KEEN_READ_KEY")
-  val writeKey = sys.env("KEEN_WRITE_KEY")
-}
-
-// Construct a client with read and write access, providing the required keys.
-val client = new Client(KeenSettings.projectId) with Reader with Writer {
-  override val readKey = KeenSettings.readKey
-  override val writeKey = KeenSettings.writeKey
-}
-
-
-// Publish an event!
-client.addEvent(
-  collection = "collectionNameHere",
-  event = """{"foo": "bar"}"""
-)
-
-// Publish an event and care about the result!
-val resp = client.addEvent(
-  collection = "collectionNameHere",
-  event = """{"foo": "bar"}"""
-)
-
-// Publish lots of events
-client.addEvents(someEvents)
-
-// Add an onComplete callback for failures!
-resp onComplete {
-  case Success(r) => println(resp.statusCode)
-  case Failure(t) => println(t.getMessage) // A Throwable
-}
-
-// Or use a map
-resp map {
-  println("I succeeded!")
-} getOrElse {
-  println("I failed :(")
+val keen = new Client {
+  override val httpAdapter = new HttpAdapterDispatch
 }
 ```
 
+### JSON
+
+Presently this library does **not** do any JSON parsing. It works with strings only. It is
+assumed that you will parse the JSON returned and pass stringified JSON into any methods that
+require it. Feedback is welcome!
+
+We understand that Scala users value the language's strong type system. Again,
+we wish to avoid unwanted dependencies given that there are so many JSON parsing
+libraries out there. We'd eventually like to offer rich types through JSON
+adapters with optional deps.
+
+## Hack On It
+
+The test suite includes integration tests which require keys and access to Keen
+IO's API. You can skip them in the SBT console with:
+
+```
+> testOnly * -- exclude integration
+```
+
+Unit tests can be run with the standard SBT `test`, `testQuick`, etc.
+
+
+[Keen IO]: http://keen.io/
+[Semantic Versioning]: http://semver.org/
+[the changelog]: https://github.com/keenlabs/KeenClient-Scala/blob/master/CHANGELOG
+[spray]: http://spray.io
+[Akka]: http://akka.io
+[Dispatch]: http://dispatch.databinder.net/
+[grizzled-slf4j]: http://software.clapper.org/grizzled-slf4j/
 [security]: https://keen.io/docs/security/
 

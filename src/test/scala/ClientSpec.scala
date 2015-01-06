@@ -1,18 +1,24 @@
 package test
 
-import akka.actor.ActorSystem
-import akka.pattern.AskTimeoutException
-import io.keen.client.scala._
-import java.nio.charset.StandardCharsets
-import org.specs2.mutable.Specification
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await,Future,Promise}
+import scala.concurrent.{ Await, Future, TimeoutException }
 import scala.util.Try
+
+import akka.actor.ActorSystem
+import akka.pattern.AskTimeoutException
+import com.typesafe.config.{ Config, ConfigFactory }
+import org.specs2.mutable.Specification
+import org.specs2.time.NoTimeConversions
 import spray.http.Uri
 import spray.http.Uri._
 
-class ClientSpec extends Specification {
+import io.keen.client.scala._
+
+class ClientSpec extends Specification with NoTimeConversions {
+  // Timeout used for most future awaits, etc. With unit tests/mocking this
+  // shouldn't normally need to be long.
+  val timeout = 1.second
 
   class OkHttpAdapter extends HttpAdapter {
 
@@ -103,13 +109,13 @@ class ClientSpec extends Specification {
     val adapter = client.httpAdapter
 
     "handle 200" in {
-      val res = Await.result(client.getProjects, Duration(5, "second"))
+      val res = Await.result(client.getProjects, timeout)
 
       res.statusCode must beEqualTo(200)
     }
 
     "handle get projects" in {
-      val res = Await.result(client.getProjects, Duration(5, "second"))
+      val res = Await.result(client.getProjects, timeout)
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects")
@@ -117,7 +123,7 @@ class ClientSpec extends Specification {
     }
 
     "handle get project" in {
-      val res = Await.result(client.getProject, Duration(5, "second"))
+      val res = Await.result(client.getProject, timeout)
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc")
@@ -125,7 +131,7 @@ class ClientSpec extends Specification {
     }
 
     "handle get event" in {
-      val res = Await.result(client.getEvents, Duration(5, "second"))
+      val res = Await.result(client.getEvents, timeout)
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/events")
@@ -133,7 +139,7 @@ class ClientSpec extends Specification {
     }
 
     "handle get property" in {
-      val res = Await.result(client.getProperty("foo", "bar"), Duration(5, "second"))
+      val res = Await.result(client.getProperty("foo", "bar"), timeout)
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/events/foo/properties/bar")
@@ -141,7 +147,7 @@ class ClientSpec extends Specification {
     }
 
     "handle get collection" in {
-      val res = Await.result(client.getCollection("foo"), Duration(5, "second"))
+      val res = Await.result(client.getCollection("foo"), timeout)
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/events/foo")
@@ -149,7 +155,7 @@ class ClientSpec extends Specification {
     }
 
     "handle get collection (encoding)" in {
-      val res = Await.result(client.getCollection("foo foo"), Duration(5, "second"))
+      val res = Await.result(client.getCollection("foo foo"), timeout)
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/events/foo%20foo")
@@ -157,7 +163,7 @@ class ClientSpec extends Specification {
     }
 
     "handle count query" in {
-      val res = Await.result(client.count("foo"), Duration(5, "second"))
+      val res = Await.result(client.count("foo"), timeout)
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/queries/count?event_collection=foo")
@@ -176,7 +182,7 @@ class ClientSpec extends Specification {
         timeframe = Some("this_week "),
         timezone = Some("America/Chicago"),
         groupBy = Some("foo.name")
-      ), Duration(5, "second"))
+      ), timeout)
 
       res.statusCode must beEqualTo(200)
       var url = adapter.getUrl.get
@@ -199,15 +205,37 @@ class ClientSpec extends Specification {
     }
   }
 
-  "Client with custom HttpAdapter" should {
+  "Client with Spray HttpAdapter" should {
+    lazy val externalSystem = ActorSystem("keen-test-user-supplied")
 
-    "handle user-supplied actor system" in {
-      val attempt = Try({
-        val client = new Client(projectId = "abc") {
-          override val httpAdapter = new HttpAdapterSpray(actorSystem = Some(ActorSystem("keen-test")))
-        }
-      })
-      attempt must beSuccessfulTry
+    "use explicit user-supplied actor system" in {
+      val adapter = new HttpAdapterSpray()(externalSystem)
+      val client = new Client(projectId = "abc") {
+        override val httpAdapter = adapter
+      }
+      adapter.actorSystem must be(externalSystem)
+
+      // We don't terminate a user-supplied actor system
+      client.shutdown
+      externalSystem.awaitTermination(timeout) must throwA[TimeoutException]
+      externalSystem.isTerminated must beFalse
+    }
+
+    "use implicit user-supplied actor system" in {
+      implicit val system = externalSystem
+      val client = new Client(projectId = "abc") {
+        override val httpAdapter = new HttpAdapterSpray
+      }
+      // TODO: httpAdapter field should be private
+      client.httpAdapter.actorSystem must be(externalSystem)
+
+      client.shutdown
+      externalSystem.awaitTermination(timeout) must throwA[TimeoutException]
+      externalSystem.isTerminated must beFalse
+    }
+
+    step {
+      externalSystem.shutdown()
     }
   }
 
@@ -219,7 +247,7 @@ class ClientSpec extends Specification {
     }
 
     "handle 500" in {
-      val res = Await.result(client.getProjects, Duration(5, "second"))
+      val res = Await.result(client.getProjects, timeout)
 
       res.statusCode must beEqualTo(500)
     }
@@ -233,7 +261,7 @@ class ClientSpec extends Specification {
     }
 
     "handle timeout" in {
-      Await.result(client.getProjects, Duration(10, "second")) must throwA[AskTimeoutException]
+      Await.result(client.getProjects, timeout) must throwA[AskTimeoutException]
     }
   }
 
