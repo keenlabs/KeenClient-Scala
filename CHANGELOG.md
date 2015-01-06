@@ -1,3 +1,7 @@
+## v0.5.0-SNAPSHOT
+
+* Configuration with Typesafe Config - #25 (ches)
+
 ## v0.4.0 - Jan 3rd, 2015
 
 * Began CHANGELOG

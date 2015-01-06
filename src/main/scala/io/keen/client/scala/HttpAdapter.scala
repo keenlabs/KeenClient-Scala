@@ -19,5 +19,5 @@ trait HttpAdapter {
     params: Map[String, Option[String]] = Map.empty
   ): Future[Response]
 
-  def shutdown: Unit
+  def shutdown(): Unit
 }

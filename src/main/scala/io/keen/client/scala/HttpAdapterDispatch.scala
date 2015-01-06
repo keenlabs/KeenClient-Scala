@@ -52,7 +52,7 @@ class HttpAdapterDispatch(httpTimeoutSeconds: Int = 10) extends HttpAdapter {
     result map (r => Response(r.getStatusCode, r.getResponseBody))
   }
 
-  def shutdown = http.shutdown
+  def shutdown() = http.shutdown()
 
-  override protected def finalize = shutdown
+  override protected def finalize() = shutdown()
 }

@@ -23,6 +23,7 @@ libraryDependencies ++= {
   val sprayVersion = "1.3.2"
   Seq(
     "com.typesafe.akka"        %% "akka-actor"      % "2.3.6",
+    "com.typesafe"             %  "config"          % "1.2.1",
     "io.spray"                 %% "spray-can"       % sprayVersion,
     "io.spray"                 %% "spray-http"      % sprayVersion,
     "io.spray"                 %% "spray-httpx"     % sprayVersion,

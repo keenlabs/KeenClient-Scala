@@ -13,21 +13,10 @@ Additional API features will be added over time. Contributions are welcome!
 ## Use It - A Quick Taste
 
 ```scala
-import io.keen.client.scala.{ Client, Reader, Writer }
+import io.keen.client.scala.{ Client, Writer }
 
-// You probably have some form of configuration object in your app already,
-// this is just an example.
-object KeenSettings {
-  val projectId = sys.env("KEEN_PROJECT_ID")
-  val readKey = sys.env("KEEN_READ_KEY")
-  val writeKey = sys.env("KEEN_WRITE_KEY")
-}
-
-// Construct a client with read and write access, providing the required keys.
-val keen = new Client(KeenSettings.projectId) with Reader with Writer {
-  override val readKey = KeenSettings.readKey
-  override val writeKey = KeenSettings.writeKey
-}
+// Assumes you've configured a write key as explained in Configuration below
+val keen = new Client with Writer
 
 // Publish an event!
 keen.addEvent(
@@ -76,11 +65,38 @@ security model][security]. These are represented by Scala traits called
 `Reader`, `Writer`, and `Master`. According to the level of access that your
 application requires, you must mix the appropriate trait(s) into your client
 instance when creating it, and configure your corresponding API keys. This is
-demonstrated in the example below.
+demonstrated in the examples.
 
-Our recommended means of providing settings is through environment variables, to
-avoid storing credentials in source control. We intend to support a config file
-soon, but would still discourage you from using that for credentials.
+Configuration is supported by the [Typesafe config] library, offering all the
+flexibility you could wish to provide settings through a file, environment
+variables, or programmatically. We recommend environment variables for your API
+keys at very least, to avoid storing credentials in source control. To that end,
+the following will be honored by default if set:
+
+* `KEEN_PROJECT_ID`
+* `KEEN_READ_KEY`
+* `KEEN_WRITE_KEY`
+* `KEEN_MASTER_KEY`
+
+To configure with a file, it must be on the classpath, customarily called
+`application.conf` though you may use others--see the Typesafe config
+documentation for all the options and details of the file format. [Our
+`reference.conf`] reflects all of the settings you can configure and their
+default values.
+
+For advanced needs, you may provide your own custom [`Config`] object by simply
+passing it to the client constructor:
+
+```scala
+import io.keen.client.scala.Client
+
+val keen = new Client(config = myCustomConfigObject)
+```
+
+When using environment variables, you might like [sbt-dotenv] in your
+development setup (install it as a [global plugin], and `chmod 600` your `.env`
+files that contain credentials!). In production, a [good service manager][runit]
+can set env vars for app processes with ease. On Heroku you'll be right at home.
 
 ## Dependencies
 
@@ -147,4 +163,10 @@ Unit tests can be run with the standard SBT `test`, `testQuick`, etc.
 [Dispatch]: http://dispatch.databinder.net/
 [grizzled-slf4j]: http://software.clapper.org/grizzled-slf4j/
 [security]: https://keen.io/docs/security/
+[Typesafe config]: https://github.com/typesafehub/config
+[Our `reference.conf`]: https://github.com/keenlabs/KeenClient-Scala/tree/master/src/main/resources/reference.conf
+[`Config`]: http://typesafehub.github.io/config/latest/api/com/typesafe/config/Config.html
+[sbt-dotenv]: https://github.com/mefellows/sbt-dotenv
+[global plugin]: http://www.scala-sbt.org/0.13/docs/Global-Settings.html
+[runit]: http://smarden.org/runit/
 

@@ -4,3 +4,7 @@ target
 tmp
 .idea/
 .idea_modules/
+
+# You can change settings here for working on the library in development
+src/main/resources/application.conf
+
