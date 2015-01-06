@@ -2,7 +2,7 @@ package test
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await,Future,Promise}
+import scala.concurrent.{ Await, Future, TimeoutException }
 import scala.util.Try
 
 import akka.actor.ActorSystem
@@ -205,15 +205,37 @@ class ClientSpec extends Specification with NoTimeConversions {
     }
   }
 
-  "Client with custom HttpAdapter" should {
+  "Client with Spray HttpAdapter" should {
+    lazy val externalSystem = ActorSystem("keen-test-user-supplied")
 
-    "handle user-supplied actor system" in {
-      val attempt = Try({
-        val client = new Client(projectId = "abc") {
-          override val httpAdapter = new HttpAdapterSpray(actorSystem = Some(ActorSystem("keen-test")))
-        }
-      })
-      attempt must beSuccessfulTry
+    "use explicit user-supplied actor system" in {
+      val adapter = new HttpAdapterSpray()(externalSystem)
+      val client = new Client(projectId = "abc") {
+        override val httpAdapter = adapter
+      }
+      adapter.actorSystem must be(externalSystem)
+
+      // We don't terminate a user-supplied actor system
+      client.shutdown
+      externalSystem.awaitTermination(timeout) must throwA[TimeoutException]
+      externalSystem.isTerminated must beFalse
+    }
+
+    "use implicit user-supplied actor system" in {
+      implicit val system = externalSystem
+      val client = new Client(projectId = "abc") {
+        override val httpAdapter = new HttpAdapterSpray
+      }
+      // TODO: httpAdapter field should be private
+      client.httpAdapter.actorSystem must be(externalSystem)
+
+      client.shutdown
+      externalSystem.awaitTermination(timeout) must throwA[TimeoutException]
+      externalSystem.isTerminated must beFalse
+    }
+
+    step {
+      externalSystem.shutdown()
     }
   }
 

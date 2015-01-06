@@ -14,14 +14,11 @@ import spray.http.Uri._
 import spray.http.HttpHeaders.RawHeader
 import spray.httpx.RequestBuilding._
 
-class HttpAdapterSpray(
-  httpTimeoutSeconds: Int = 10,
-  actorSystem: Option[ActorSystem] = None
-  ) extends Logging with HttpAdapter {
+class HttpAdapterSpray(httpTimeoutSeconds: Int = 10)(implicit val actorSystem: ActorSystem = ActorSystem("keen-client"))
+  extends HttpAdapter with Logging {
 
-  // If we didn't get an actor system passed in
-  implicit val finalAS = actorSystem.getOrElse(ActorSystem())
-  import finalAS.dispatcher // execution context for futures
+  import actorSystem.dispatcher // execution context for futures
+
   // Akka's Ask pattern requires an implicit timeout to know
   // how long to wait for a response.
   implicit val timeout = Timeout(httpTimeoutSeconds, TimeUnit.SECONDS)
@@ -78,8 +75,9 @@ class HttpAdapterSpray(
   def shutdown = {
     (IO(Http) ? Http.CloseAll) onComplete {
       // When this completes we will shutdown the actor system if it wasn't
-      // supplies by the user.
-      case Success(x) => actorSystem.foreach { x => finalAS.shutdown() }
+      // supplied by the user.
+      case Success(_) => if (actorSystem.name == "keen-client") actorSystem.shutdown()
+
       // If we fail to close not sure what we can except rethrow
       case Failure(t) => throw t
     }
