@@ -189,7 +189,7 @@ class ClientSpec extends Specification with NoTimeConversions {
         collection = "foo foo❖",
         targetProperty = "bar",
         filters = Some("""[{"property_name": "baz","operator":"eq","property_value":"gorch"}]"""),
-        timeframe = Some("this_week "),
+        timeframe = Some("this_week"),
         timezone = Some("America/Chicago"),
         groupBy = Some("foo.name")
       ), timeout)
@@ -207,6 +207,28 @@ class ClientSpec extends Specification with NoTimeConversions {
       url must contain("group_by=foo.name")
 
       adapter.getKey.get must beEqualTo("masterKey")
+    }
+
+    "handle extraction query" in {
+      val res = Await.result(client.extraction(
+        collection = "foo",
+        filters = Some("""[{"property_name": "baz","operator":"eq","property_value":"gorch"}]"""),
+        timeframe = Some("this_week"),
+        email = Some("test@example.com"),
+        latest = Some("1"),
+        propertyNames = Some("""["abc","def"]""")
+      ), timeout)
+
+      res.statusCode must beEqualTo(200)
+      var url = adapter.getUrl.get
+
+      url must contain("https://api.keen.io/3.0/projects/abc/queries/extraction?")
+      url must contain("event_collection=foo")
+      url must contain("filters=%5B%7B%22property_name%22:+%22baz%22,%22operator%22:%22eq%22,%22property_value%22:%22gorch%22%7D%5D")
+      url must contain("timeframe=this_week")
+      url must contain("email=test@example.com")
+      url must contain("latest=1")
+      url must contain("%5B%22abc%22,%22def%22%5D")
     }
 
     "shutdown" in {

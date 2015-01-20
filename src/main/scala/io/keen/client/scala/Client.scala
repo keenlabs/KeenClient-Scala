@@ -5,7 +5,7 @@ import scala.concurrent.Future
 import com.typesafe.config.{ Config, ConfigFactory }
 import grizzled.slf4j.Logging
 
-// XXX Remaining: Extraction, Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
+// XXX Remaining: Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
 // Event deletion
 
 class Client(
@@ -179,6 +179,24 @@ trait Reader extends AccessLevel {
       timezone = timezone,
       groupBy = groupBy)
 
+  def extraction(
+    collection: String,
+    filters: Option[String] = None,
+    timeframe: Option[String] = None,
+    email: Option[String] = None,
+    latest: Option[String] = None,
+    propertyNames: Option[String] = None): Future[Response] =
+
+    doQuery(
+      analysisType = "extraction",
+      collection = collection,
+      filters = filters,
+      timeframe = timeframe,
+      email = email,
+      latest = latest,
+      propertyNames = propertyNames
+    )
+
   /**
    * Returns the maximum numeric value for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#maximum-resource Maximum Resource]].
    *
@@ -290,11 +308,14 @@ trait Reader extends AccessLevel {
   private def doQuery(
     analysisType: String,
     collection: String,
-    targetProperty: Option[String],
+    targetProperty: Option[String] = None,
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] = {
+    groupBy: Option[String] = None,
+    email: Option[String] = None,
+    latest: Option[String] = None,
+    propertyNames: Option[String] = None): Future[Response] = {
 
     val path = Seq(version, "projects", projectId, "queries", analysisType).mkString("/")
 
@@ -304,7 +325,10 @@ trait Reader extends AccessLevel {
       "filters" -> filters,
       "timeframe" -> timeframe,
       "timezone" -> timezone,
-      "group_by" -> groupBy
+      "group_by" -> groupBy,
+      "email" -> email,
+      "latest" -> latest,
+      "property_names" -> propertyNames
     )
 
     doRequest(path = path, method = "GET", key = readKey, params = params)
