@@ -1,6 +1,7 @@
-## v0.5.0-SNAPSHOT
+## v0.5.0
 
 * Configuration with Typesafe Config - #25 (ches)
+* Added extraction method - #28 (gphat)
 
 ## v0.4.0 - Jan 3rd, 2015
 
