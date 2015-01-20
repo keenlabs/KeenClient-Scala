@@ -48,14 +48,14 @@ Artifacts for keen-client-scala are [hosted on Maven Central](http://search.mave
 You can use them in your project with SBT thusly:
 
 ```scala
-libraryDependencies += "io.keen" %% "keenclient-scala" % "0.4.0"
+libraryDependencies += "io.keen" %% "keenclient-scala" % "0.5.0"
 ```
 
 Note that we publish artifacts for Scala 2.10 and 2.11, so you can either use `%%` to automatically pick the correct
 version or specify them explicitly with something like:
 
 ```scala
-libraryDependencies += "io.keen" % "keenclient-scala_2.10" % "0.4.0"
+libraryDependencies += "io.keen" % "keenclient-scala_2.10" % "0.5.0"
 ```
 
 ## Configuration
