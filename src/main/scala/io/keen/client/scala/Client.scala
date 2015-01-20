@@ -157,14 +157,17 @@ trait Reader extends AccessLevel {
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     email: Option[String] = None,
-    latest: Option[Long] = None,
+    latest: Option[String] = None,
     propertyNames: Option[String] = None): Future[Response] =
 
     doQuery(
       analysisType = "extraction",
       collection = collection,
       filters = filters,
-      timeframe = timeframe
+      timeframe = timeframe,
+      email = email,
+      latest = latest,
+      propertyNames = propertyNames
     )
 
   /**
