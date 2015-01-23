@@ -1,5 +1,7 @@
 # KeenClient-Scala
 
+[![Build Status]](https://travis-ci.org/keenlabs/KeenClient-Scala)
+
 The official asynchronous Scala client for the [Keen IO] API.
 
 **Note**: This library is in early development and does not implement all of the
@@ -157,6 +159,7 @@ described above, you may run these with:
 that you didn't expect!**
 
 
+[Build Status]: https://travis-ci.org/keenlabs/KeenClient-Scala.svg?branch=master
 [Keen IO]: http://keen.io/
 [Semantic Versioning]: http://semver.org/
 [the changelog]: https://github.com/keenlabs/KeenClient-Scala/blob/master/CHANGELOG
