@@ -14,8 +14,6 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
   // slow--see IntegrationPatience in ScalaTest, not sure if specs2 has similar...
   val timeout = 4.seconds
 
-  // args(exclude = "integration")
-
   sequential
 
   // This set of expectations currently assumes master access. Should
@@ -175,5 +173,5 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
       client.shutdown()
       1 must beEqualTo(1)
     }
-  } section("integration")
+  }
 }

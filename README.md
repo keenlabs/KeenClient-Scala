@@ -1,5 +1,7 @@
 # KeenClient-Scala
 
+[![Build Status]](https://travis-ci.org/keenlabs/KeenClient-Scala)
+
 The official asynchronous Scala client for the [Keen IO] API.
 
 **Note**: This library is in early development and does not implement all of the
@@ -145,16 +147,19 @@ adapters with optional deps.
 
 ## Hack On It
 
+Unit tests can be run with the standard SBT commands `test`, `testQuick`, etc.
+
 The test suite includes integration tests which require keys and access to Keen
-IO's API. You can skip them in the SBT console with:
+IO's API. If you have set keys through environment variables or configuration as
+described above, you may run these with:
 
-```
-> testOnly * -- exclude integration
-```
+    $ sbt it:test
 
-Unit tests can be run with the standard SBT `test`, `testQuick`, etc.
+**Only use a dedicated dummy account for this purpose, data could be destroyed
+that you didn't expect!**
 
 
+[Build Status]: https://travis-ci.org/keenlabs/KeenClient-Scala.svg?branch=master
 [Keen IO]: http://keen.io/
 [Semantic Versioning]: http://semver.org/
 [the changelog]: https://github.com/keenlabs/KeenClient-Scala/blob/master/CHANGELOG
