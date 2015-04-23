@@ -30,6 +30,7 @@ libraryDependencies ++= {
     "io.spray"                 %% "spray-util"      % sprayVersion,
     "net.databinder.dispatch"  %% "dispatch-core"   % "0.11.2",
     "org.clapper"              %% "grizzled-slf4j"  % "1.0.2",
+    "commons-codec"             % "commons-codec"   % "1.10",
     "org.specs2"               %% "specs2"          % "2.4.13"       % "it,test",
     "org.slf4j"                %  "slf4j-simple"    % "1.7.6"        % "it,test"
   )
