@@ -1,5 +1,8 @@
 package io.keen.client.scala
 
+import javax.crypto.Cipher
+import javax.crypto.spec.SecretKeySpec
+import javax.xml.bind.DatatypeConverter.{parseHexBinary,printHexBinary}
 import scala.concurrent.Future
 
 import com.typesafe.config.{ Config, ConfigFactory }
@@ -419,6 +422,29 @@ trait Master extends Reader with Writer {
   // so that a client can extend only the Master trait when needed.
   override val readKey: String = masterKey
   override val writeKey: String = masterKey
+
+  /**
+   * Creates a scoped key with the given list of allowed_operations and an optional stringified object of filters. See [[https://keen.io/docs/security/#scoped-key]]
+   *
+   * @param allowedOperations The allowed operations ("read", "write", or both)
+   * @param filters The filters that restrict any queries executed with this key
+   */
+  def createScopedKey(allowedOperations: Seq[String], filters: Option[String]=None) {
+    val allowedOperationsList = allowedOperations.map({op => s""""${op}""""}).mkString(",")
+    val filtersString = filters.map({ filter => s""", "filters": [${filter}]""" }).getOrElse("")
+    val masterKeyBytes: Array[Byte] = masterKey.getBytes("UTF-8") //parseHexBinary(masterKey)
+    val cipher: Cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+    val secretKey: SecretKeySpec = new SecretKeySpec(masterKeyBytes, "AES")
+
+    cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+    val ivString = printHexBinary(cipher.getIV)
+    val jsonDescription: String = s"""{
+      "allowed_operations": [${allowedOperationsList}]
+      ${filtersString}
+      }"""
+    val cipherText = printHexBinary(cipher.doFinal(jsonDescription.getBytes("UTF-8")))
+    ivString ++ cipherText
+  }
 
   /**
    * Deletes the entire event collection. This is irreversible and will only work for collections under 10k events. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
