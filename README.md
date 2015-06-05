@@ -47,11 +47,11 @@ resp map { println("I succeeded!") } getOrElse { println("I failed :(") }
 val masterKeen = new Client with Master
 
 val scopedKey = masterKeen.getScopedKey(List("read"))
-val narrowerScopedKey = masterKeen.getScopedKey(List("read"), Some("""[{
+val narrowerScopedKey = masterKeen.getScopedKey(List("read"), Some(Seq("""{
     "property_name": "user_id",
     "operator": "eq",
     "property_value": 123
-}]"""))
+}""")))
 ```
 
 ## Get It
