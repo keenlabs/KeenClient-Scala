@@ -15,7 +15,7 @@ Additional API features will be added over time. Contributions are welcome!
 ## Use It - A Quick Taste
 
 ```scala
-import io.keen.client.scala.{ Client, Writer }
+import io.keen.client.scala.{ Client, Master, Writer }
 
 // Assumes you've configured a write key as explained in Configuration below
 val keen = new Client with Writer
