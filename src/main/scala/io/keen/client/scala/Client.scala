@@ -432,9 +432,8 @@ trait Master extends Reader with Writer {
   def createScopedKey(allowedOperations: Seq[String], maybeFilters: Option[Seq[String]]=None): String = {
     val allowedOperationsList = allowedOperations.map({op => s""""${op}""""}).mkString(",")
     val filtersString = maybeFilters.map({ filters => s""", "filters": [${filters.mkString(",")}]""" }).getOrElse("")
-    val masterKeyBytes: Array[Byte] = masterKey.getBytes("UTF-8") //parseHexBinary(masterKey)
     val cipher: Cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-    val secretKey: SecretKeySpec = new SecretKeySpec(masterKeyBytes, "AES")
+    val secretKey: SecretKeySpec = new SecretKeySpec(masterKey.getBytes("UTF-8"), "AES")
 
     cipher.init(Cipher.ENCRYPT_MODE, secretKey)
     val ivString = printHexBinary(cipher.getIV)
