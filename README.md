@@ -42,6 +42,16 @@ resp onComplete {
 
 // Or using map
 resp map { println("I succeeded!") } getOrElse { println("I failed :(") }
+
+// You can even generate a scoped key!
+val masterKeen = new Client with Master
+
+val scopedKey = masterKeen.getScopedKey(List("read"))
+val narrowerScopedKey = masterKeen.getScopedKey(List("read"), Some("""[{
+    "property_name": "user_id",
+    "operator": "eq",
+    "property_value": 123
+}]"""))
 ```
 
 ## Get It
@@ -174,4 +184,3 @@ that you didn't expect!**
 [sbt-dotenv]: https://github.com/mefellows/sbt-dotenv
 [global plugin]: http://www.scala-sbt.org/0.13/docs/Global-Settings.html
 [runit]: http://smarden.org/runit/
-
