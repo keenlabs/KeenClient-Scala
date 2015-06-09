@@ -43,7 +43,7 @@ resp onComplete {
 // Or using map
 resp map { println("I succeeded!") } getOrElse { println("I failed :(") }
 
-// You can even generate a scoped key!
+// You can generate scoped keys using a client ...
 val masterKeen = new Client with Master
 
 val scopedKey = masterKeen.getScopedKey(List("read"))
@@ -52,6 +52,16 @@ val narrowerScopedKey = masterKeen.getScopedKey(List("read"), Some(Seq("""{
     "operator": "eq",
     "property_value": 123
 }""")))
+
+// ... or do the same thing with the scoped key interface directly
+import io.keen.client.scala.util.ScopedKeys
+
+val apiKey = "my api key exactly 32 chars long"
+val clearText = """{"allowed_operations": ["write"]}"""
+val cipherText = scopedKey.encrypt(apiKey, clearText)
+
+// and if you feel like it:
+val clearTextAgain = scopedKey.decrypt(apiKey, cipherText)
 ```
 
 ## Get It
@@ -146,8 +156,10 @@ val keen = new Client {
 
 ### Scoped Keys
 
-`io.keen.client.scala.util.ScopedKeys` has a `encrypt` and `decrypt` method for handling
-[Scoped Keys](https://keen.io/docs/security/#scoped-key). If you have trouble with Java Exceptions see
+Instances of `Client with Master` have a `createScopedKey` method for creating
+[scoped keys](https://keen.io/docs/security/#scoped-key), which is a thin
+wrapper around the encrypt method in `io.keen.client.scala.util.ScopedKeys`.
+If you have trouble with Java Exceptions see
 [this StackOverflow answer](http://stackoverflow.com/questions/6481627/java-security-illegal-key-size-or-default-parameters).
 
 ### JSON

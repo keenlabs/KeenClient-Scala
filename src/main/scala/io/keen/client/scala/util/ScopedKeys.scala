@@ -2,8 +2,7 @@ package io.keen.client.scala.util
 
 import javax.crypto.Cipher
 import javax.crypto.spec._
-
-import org.apache.commons.codec.binary.Hex
+import javax.xml.bind.DatatypeConverter.{parseHexBinary,printHexBinary}
 
 object ScopedKeys {
 
@@ -14,8 +13,8 @@ object ScopedKeys {
     val hexedIv = scopedKey.substring(0, 32)
     val hexedCipherText = scopedKey.substring(32)
 
-    val iv = Hex.decodeHex(hexedIv.toCharArray)
-    val cipherText = Hex.decodeHex(hexedCipherText.toCharArray)
+    val iv = parseHexBinary(hexedIv)
+    val cipherText = parseHexBinary(hexedCipherText)
 
     val secret = new SecretKeySpec(padApiKey(apiKey), "AES")
 
@@ -37,7 +36,7 @@ object ScopedKeys {
     val iv = cipher.getParameters.getParameterSpec(classOf[IvParameterSpec]).getIV
     val cipherText = cipher.doFinal(options.getBytes("UTF-8"))
 
-    Hex.encodeHexString(iv) + Hex.encodeHexString(cipherText)
+    printHexBinary(iv) + printHexBinary(cipherText)
   }
 
   private def padApiKey(key: String) = key.padTo(BLOCK_SIZE, " ").mkString.getBytes("UTF-8")

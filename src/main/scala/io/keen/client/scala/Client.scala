@@ -1,9 +1,8 @@
 package io.keen.client.scala
 
-import javax.crypto.Cipher
-import javax.crypto.spec.SecretKeySpec
-import javax.xml.bind.DatatypeConverter.{parseHexBinary,printHexBinary}
 import scala.concurrent.Future
+
+import io.keen.client.scala.util.ScopedKeys
 
 import com.typesafe.config.{ Config, ConfigFactory }
 import grizzled.slf4j.Logging
@@ -432,17 +431,11 @@ trait Master extends Reader with Writer {
   def createScopedKey(allowedOperations: Seq[String], maybeFilters: Option[Seq[String]]=None): String = {
     val allowedOperationsList = allowedOperations.map({op => s""""${op}""""}).mkString(",")
     val filtersString = maybeFilters.map({ filters => s""", "filters": [${filters.mkString(",")}]""" }).getOrElse("")
-    val cipher: Cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-    val secretKey: SecretKeySpec = new SecretKeySpec(masterKey.getBytes("UTF-8"), "AES")
-
-    cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-    val ivString = printHexBinary(cipher.getIV)
     val jsonDescription: String = s"""{
       "allowed_operations": [${allowedOperationsList}]
       ${filtersString}
       }"""
-    val cipherText = printHexBinary(cipher.doFinal(jsonDescription.getBytes("UTF-8")))
-    ivString ++ cipherText
+    ScopedKeys.encrypt(masterKey, jsonDescription)
   }
 
   /**
