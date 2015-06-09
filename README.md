@@ -144,6 +144,12 @@ val keen = new Client {
 }
 ```
 
+### Scoped Keys
+
+`io.keen.client.scala.util.ScopedKeys` has a `encrypt` and `decrypt` method for handling
+[Scoped Keys](https://keen.io/docs/security/#scoped-key). If you have trouble with Java Exceptions see
+[this StackOverflow answer](http://stackoverflow.com/questions/6481627/java-security-illegal-key-size-or-default-parameters).
+
 ### JSON
 
 Presently this library does **not** do any JSON parsing. It works with strings only. It is
