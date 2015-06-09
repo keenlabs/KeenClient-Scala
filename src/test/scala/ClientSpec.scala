@@ -98,7 +98,7 @@ class ClientSpec extends Specification with NoTimeConversions {
   val dummyConfig = ConfigFactory.parseMap(
     Map(
       "keen.project-id" -> "abc",
-      "keen.optional.master-key" -> "masterKey",
+      "keen.optional.master-key" -> "master key exactly 32 chars long",
       "keen.optional.read-key" -> "readKey",
       "keen.optional.write-key" -> "writeKey"
     )
@@ -129,7 +129,7 @@ class ClientSpec extends Specification with NoTimeConversions {
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects")
-      adapter.getKey.get must beEqualTo("masterKey")
+      adapter.getKey.get must beEqualTo("master key exactly 32 chars long")
     }
 
     "handle get project" in {
@@ -137,7 +137,7 @@ class ClientSpec extends Specification with NoTimeConversions {
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc")
-      adapter.getKey.get must beEqualTo("masterKey")
+      adapter.getKey.get must beEqualTo("master key exactly 32 chars long")
     }
 
     "handle get event" in {
@@ -145,7 +145,7 @@ class ClientSpec extends Specification with NoTimeConversions {
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/events")
-      adapter.getKey.get must beEqualTo("masterKey")
+      adapter.getKey.get must beEqualTo("master key exactly 32 chars long")
     }
 
     "handle get property" in {
@@ -153,7 +153,7 @@ class ClientSpec extends Specification with NoTimeConversions {
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/events/foo/properties/bar")
-      adapter.getKey.get must beEqualTo("masterKey")
+      adapter.getKey.get must beEqualTo("master key exactly 32 chars long")
     }
 
     "handle get collection" in {
@@ -161,7 +161,7 @@ class ClientSpec extends Specification with NoTimeConversions {
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/events/foo")
-      adapter.getKey.get must beEqualTo("masterKey")
+      adapter.getKey.get must beEqualTo("master key exactly 32 chars long")
     }
 
     "handle get collection (encoding)" in {
@@ -169,7 +169,7 @@ class ClientSpec extends Specification with NoTimeConversions {
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/events/foo%20foo")
-      adapter.getKey.get must beEqualTo("masterKey")
+      adapter.getKey.get must beEqualTo("master key exactly 32 chars long")
     }
 
     "handle count query" in {
@@ -177,8 +177,7 @@ class ClientSpec extends Specification with NoTimeConversions {
 
       res.statusCode must beEqualTo(200)
       adapter.getUrl.get must beEqualTo("https://api.keen.io/3.0/projects/abc/queries/count?event_collection=foo")
-
-      adapter.getKey.get must beEqualTo("masterKey")
+      adapter.getKey.get must beEqualTo("master key exactly 32 chars long")
     }
 
     // We'll test average thoroughly but since all the query method use the same underlying
@@ -206,7 +205,7 @@ class ClientSpec extends Specification with NoTimeConversions {
       url must contain("timezone=America/Chicago")
       url must contain("group_by=foo.name")
 
-      adapter.getKey.get must beEqualTo("masterKey")
+      adapter.getKey.get must beEqualTo("master key exactly 32 chars long")
     }
 
     "handle extraction query" in {
@@ -229,6 +228,18 @@ class ClientSpec extends Specification with NoTimeConversions {
       url must contain("email=test@example.com")
       url must contain("latest=1")
       url must contain("%5B%22abc%22,%22def%22%5D")
+    }
+
+    "generate a scoped key without filters" in {
+      val scopedKey = client.createScopedKey(Seq("read"))
+
+      scopedKey must not beNull
+    }
+
+    "generate a scoped key with filters" in {
+      val scopedKey = client.createScopedKey(Seq("read"), Some(Seq("""{"property_name": "baz", "operator": "eq", "property_value": "gorch"}""")))
+      
+      scopedKey must not beNull
     }
 
     "shutdown" in {
@@ -343,4 +354,3 @@ class ClientSpec extends Specification with NoTimeConversions {
     }
   }
 }
-

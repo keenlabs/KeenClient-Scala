@@ -15,7 +15,7 @@ Additional API features will be added over time. Contributions are welcome!
 ## Use It - A Quick Taste
 
 ```scala
-import io.keen.client.scala.{ Client, Writer }
+import io.keen.client.scala.{ Client, Master, Writer }
 
 // Assumes you've configured a write key as explained in Configuration below
 val keen = new Client with Writer
@@ -42,6 +42,26 @@ resp onComplete {
 
 // Or using map
 resp map { println("I succeeded!") } getOrElse { println("I failed :(") }
+
+// You can generate scoped keys using a client ...
+val masterKeen = new Client with Master
+
+val scopedKey = masterKeen.getScopedKey(List("read"))
+val narrowerScopedKey = masterKeen.getScopedKey(List("read"), Some(Seq("""{
+    "property_name": "user_id",
+    "operator": "eq",
+    "property_value": 123
+}""")))
+
+// ... or do the same thing with the scoped key interface directly
+import io.keen.client.scala.util.ScopedKeys
+
+val apiKey = "my api key exactly 32 chars long"
+val clearText = """{"allowed_operations": ["write"]}"""
+val cipherText = scopedKey.encrypt(apiKey, clearText)
+
+// and if you feel like it:
+val clearTextAgain = scopedKey.decrypt(apiKey, cipherText)
 ```
 
 ## Get It
@@ -134,6 +154,14 @@ val keen = new Client {
 }
 ```
 
+### Scoped Keys
+
+Instances of `Client with Master` have a `createScopedKey` method for creating
+[scoped keys](https://keen.io/docs/security/#scoped-key), which is a thin
+wrapper around the encrypt method in `io.keen.client.scala.util.ScopedKeys`.
+If you have trouble with Java Exceptions see
+[this StackOverflow answer](http://stackoverflow.com/questions/6481627/java-security-illegal-key-size-or-default-parameters).
+
 ### JSON
 
 Presently this library does **not** do any JSON parsing. It works with strings only. It is
@@ -174,4 +202,3 @@ that you didn't expect!**
 [sbt-dotenv]: https://github.com/mefellows/sbt-dotenv
 [global plugin]: http://www.scala-sbt.org/0.13/docs/Global-Settings.html
 [runit]: http://smarden.org/runit/
-

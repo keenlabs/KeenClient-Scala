@@ -2,6 +2,8 @@ package io.keen.client.scala
 
 import scala.concurrent.Future
 
+import io.keen.client.scala.util.ScopedKeys
+
 import com.typesafe.config.{ Config, ConfigFactory }
 import grizzled.slf4j.Logging
 
@@ -419,6 +421,22 @@ trait Master extends Reader with Writer {
   // so that a client can extend only the Master trait when needed.
   override val readKey: String = masterKey
   override val writeKey: String = masterKey
+
+  /**
+   * Creates a scoped key with the given list of allowed_operations and an optional stringified object of filters. See [[https://keen.io/docs/security/#scoped-key]]
+   *
+   * @param allowedOperations The allowed operations ("read", "write", or both)
+   * @param filters The filters that restrict any queries executed with this key
+   */
+  def createScopedKey(allowedOperations: Seq[String], maybeFilters: Option[Seq[String]]=None): String = {
+    val allowedOperationsList = allowedOperations.map({op => s""""${op}""""}).mkString(",")
+    val filtersString = maybeFilters.map({ filters => s""", "filters": [${filters.mkString(",")}]""" }).getOrElse("")
+    val jsonDescription: String = s"""{
+      "allowed_operations": [${allowedOperationsList}]
+      ${filtersString}
+      }"""
+    ScopedKeys.encrypt(masterKey, jsonDescription)
+  }
 
   /**
    * Deletes the entire event collection. This is irreversible and will only work for collections under 10k events. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
