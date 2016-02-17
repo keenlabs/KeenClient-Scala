@@ -45,6 +45,14 @@ class RamEventStore extends KeenAttemptCountingEventStore {
   }
 
   @throws(classOf[IOException])
+  override def remove(handle: Any): Unit = synchronized {
+    val id: Long = handleToId(handle)
+    events -= id
+    // be lazy about removing handles from the collectionIds map - this can happen during the
+    // getHandles call
+  }
+
+  @throws(classOf[IOException])
   def getHandles(projectId: String): HashMap[String, ArrayBuffer[Any]] = synchronized {
     var result = new HashMap[String, ArrayBuffer[Any]]()
     breakable {
@@ -80,6 +88,32 @@ class RamEventStore extends KeenAttemptCountingEventStore {
     result
   }
 
+  def getAttempts(projectId: String, eventCollection: String): String = {
+    if(attempts == null) {
+      return null
+    }
+
+    val project: HashMap[String, String] = attempts.getOrElse(projectId, null)
+    if(project == null) {
+      return null
+    }
+    project.getOrElse(eventCollection, null)
+  }
+
+  def setAttempts(projectId: String, eventCollection: String, attemptsString: String): Unit = {
+    if(attempts == null) {
+      attempts = new HashMap[String, HashMap[String, String]]()
+    }
+
+    var project: HashMap[String, String] = attempts.getOrElse(projectId, null)
+    if(project == null) {
+      project = new HashMap[String, String]()
+      attempts += (projectId -> project)
+    }
+
+    project += (eventCollection -> attemptsString)
+  }
+
   def clear() {
     nextId = 0
     collectionIds = new HashMap[String, ArrayBuffer[Long]]()
@@ -91,6 +125,7 @@ class RamEventStore extends KeenAttemptCountingEventStore {
   private var nextId: Long = 0
   private var collectionIds: HashMap[String, ArrayBuffer[Long]] = new HashMap[String, ArrayBuffer[Long]]()
   private var events: HashMap[Long, String] = new HashMap[Long, String]()
+  private var attempts: HashMap[String, HashMap[String, String]] = _
 
   private def getNextId(): Long = {
     // it should be all but impossible for the event cache to grow bigger than Long.MaxValue,

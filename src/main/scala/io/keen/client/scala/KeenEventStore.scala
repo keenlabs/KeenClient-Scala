@@ -16,9 +16,10 @@ trait KeenEventStore {
   def get(handle: Any): String
 
 
-  // @throws(classOf[IOException])
-  // def remove(handle: Any): Unit
+  @throws(classOf[IOException])
+  def remove(handle: Any): Unit
 
   @throws(classOf[IOException])
   def getHandles(projectId: String): HashMap[String, ArrayBuffer[Any]]
+
 }
