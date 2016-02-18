@@ -3,25 +3,31 @@ package io.keen.client.scala
 import java.io.IOException
 import java.util.Locale
 
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
 class RamEventStore extends KeenAttemptCountingEventStore {
+
+  private var nextId: Long = 0
+  private var collectionIds: HashMap[String, ListBuffer[Long]] = new HashMap[String, ListBuffer[Long]]()
+  private var events: HashMap[Long, String] = new HashMap[Long, String]()
+  private var attempts: HashMap[String, HashMap[String, String]] = _
+
   var maxEventsPerCollection: Integer = 10000
 
   @throws(classOf[IOException])
   override def store(projectId: String,
     eventCollection: String,
-    event: String): Any = synchronized {
+    event: String): Long = synchronized {
 
       // create a key from the project ID and event collection
       val key = "%s$%s".formatLocal(Locale.US, projectId, eventCollection)
 
       // get the list of events for the specified key. if no list exists, create it
-      var collectionEvents: ArrayBuffer[Long] = collectionIds.getOrElse(key, null)
+      var collectionEvents: ListBuffer[Long] = collectionIds.getOrElse(key, null)
       if(collectionEvents == null) {
-        collectionEvents = new ArrayBuffer[Long]()
+        collectionEvents = new ListBuffer[Long]()
         collectionIds += (key -> collectionEvents)
       }
 
@@ -39,13 +45,13 @@ class RamEventStore extends KeenAttemptCountingEventStore {
   }
 
   @throws(classOf[IOException])
-  override def get(handle: Any): String = synchronized {
+  override def get(handle: Long): String = synchronized {
     val id: Long = handleToId(handle)
     events.getOrElse(id, null)
   }
 
   @throws(classOf[IOException])
-  override def remove(handle: Any): Unit = synchronized {
+  override def remove(handle: Long): Unit = synchronized {
     val id: Long = handleToId(handle)
     events -= id
     // be lazy about removing handles from the collectionIds map - this can happen during the
@@ -53,10 +59,14 @@ class RamEventStore extends KeenAttemptCountingEventStore {
   }
 
   @throws(classOf[IOException])
-  def getHandles(projectId: String): HashMap[String, ArrayBuffer[Any]] = synchronized {
-    var result = new HashMap[String, ArrayBuffer[Any]]()
-    breakable {
-      for((key, value) <- collectionIds) {
+  def getHandles(projectId: String): HashMap[String, ListBuffer[Long]] = synchronized {
+    
+    var result = new HashMap[String, ListBuffer[Long]]()
+    
+    for((key, value) <- collectionIds) {
+
+      breakable {
+
         // skip collections for different projects
         if(!key.startsWith(projectId)) {
           break
@@ -67,13 +77,12 @@ class RamEventStore extends KeenAttemptCountingEventStore {
 
         // iterate over the list of handles, removing and "dead" events and adding the rest to
         // the result map
-        val ids: ArrayBuffer[Long] = value
-        var handles: ArrayBuffer[Any] = new ArrayBuffer[Any]()
-        val it = ids.iterator
-        while(it.hasNext) {
-          val id: Long = it.next
-          if(events(id) == null) {
-            events -= id
+        val ids: ListBuffer[Long] = value
+        var handles: ListBuffer[Long] = new ListBuffer[Long]()
+        for(id <- ids) {
+          if(!events.keySet.exists(_ == id)) {
+            // lazily remove the "dead" event
+            ids -= id
           } else {
             handles += (id)
           }
@@ -82,7 +91,9 @@ class RamEventStore extends KeenAttemptCountingEventStore {
         if(handles.size > 0) {
           result += (eventCollection -> handles)
         }
-      }  
+
+      } 
+
     }
     
     result
@@ -116,16 +127,11 @@ class RamEventStore extends KeenAttemptCountingEventStore {
 
   def clear() {
     nextId = 0
-    collectionIds = new HashMap[String, ArrayBuffer[Long]]()
+    collectionIds = new HashMap[String, ListBuffer[Long]]()
     events = new HashMap[Long, String]()
   }
 
-  ///// PRIVATE /////
-
-  private var nextId: Long = 0
-  private var collectionIds: HashMap[String, ArrayBuffer[Long]] = new HashMap[String, ArrayBuffer[Long]]()
-  private var events: HashMap[Long, String] = new HashMap[Long, String]()
-  private var attempts: HashMap[String, HashMap[String, String]] = _
+  ///// PRIVATE /////  
 
   private def getNextId(): Long = {
     // it should be all but impossible for the event cache to grow bigger than Long.MaxValue,
@@ -145,10 +151,11 @@ class RamEventStore extends KeenAttemptCountingEventStore {
     id
   }
 
-  private def handleToId(handle: Any): Long = {
+  private def handleToId(handle: Long): Long = {
     if(!handle.isInstanceOf[Long]) {
       throw new IllegalArgumentException("Expected handle to be a Long, but was: " + handle.getClass.getCanonicalName)
     }
     handle.asInstanceOf[Long]
   }
+
 }
