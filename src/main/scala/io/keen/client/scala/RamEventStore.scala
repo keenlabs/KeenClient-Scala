@@ -7,7 +7,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
-class RamEventStore extends KeenAttemptCountingEventStore {
+class RamEventStore extends AttemptCountingEventStore {
 
   private var nextId: Long = 0
   private var collectionIds: HashMap[String, ListBuffer[Long]] = new HashMap[String, ListBuffer[Long]]()

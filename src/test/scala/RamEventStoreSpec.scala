@@ -1,6 +1,6 @@
 package test
 
-import io.keen.client.scala.KeenEventStore
+import io.keen.client.scala.EventStore
 import io.keen.client.scala.RamEventStore
 
 import scala.collection.mutable.HashMap
@@ -10,7 +10,7 @@ import org.specs2.mutable.Specification
 
 class RamEventStoreSpec extends AttemptCountingEventStoreSpecBase {
 
-  override def buildStore(): KeenEventStore = {
+  override def buildStore(): EventStore = {
     new RamEventStore
   }
 

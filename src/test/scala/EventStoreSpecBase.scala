@@ -1,6 +1,6 @@
 package test
 
-import io.keen.client.scala.KeenEventStore
+import io.keen.client.scala.EventStore
 
 import java.io.IOException
 
@@ -23,9 +23,9 @@ trait BeforeAllAfterAll extends Specification {
 abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
 
   @throws(classOf[IOException])
-  def buildStore(): KeenEventStore
+  def buildStore(): EventStore
 
-  var store: KeenEventStore = _
+  var store: EventStore = _
   val testEvents: ListBuffer[String] = new ListBuffer[String]
 
   def beforeAll() {

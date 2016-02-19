@@ -1,6 +1,6 @@
 package test
 
-import io.keen.client.scala.KeenAttemptCountingEventStore
+import io.keen.client.scala.AttemptCountingEventStore
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
@@ -9,13 +9,13 @@ import org.specs2.mutable.{BeforeAfter, Specification}
 
 abstract class AttemptCountingEventStoreSpecBase extends EventStoreSpecBase {
 
-  var attemptCountingStore: KeenAttemptCountingEventStore = _
+  var attemptCountingStore: AttemptCountingEventStore = _
   
   trait AttemptCountingEventStoreSetupTeardown extends BeforeAfter {
 
     def before: Any = {
       store = buildStore()  // initialize our store
-      attemptCountingStore = store.asInstanceOf[KeenAttemptCountingEventStore]
+      attemptCountingStore = store.asInstanceOf[AttemptCountingEventStore]
     }
 
     def after: Any = {}

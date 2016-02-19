@@ -1,6 +1,10 @@
 package io.keen.client.scala
 
+import scala.concurrent.Await
 import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.ListBuffer
 
 import com.typesafe.config.{ Config, ConfigFactory }
 import grizzled.slf4j.Logging
@@ -9,15 +13,22 @@ import grizzled.slf4j.Logging
 // Event deletion
 
 class Client(
-  config: Config = ConfigFactory.load(),
-  // These will move to a config file:
-  val scheme: String = "https",
-  val authority: String = "api.keen.io",
-  val version: String = "3.0"
-  ) extends HttpAdapterComponent with Logging {
+    config: Config = ConfigFactory.load(),
+    // These will move to a config file:
+    val scheme: String = "https",
+    val authority: String = "api.keen.io",
+    val version: String = "3.0"
+  ) extends HttpAdapterComponent with Logging with Logger {
 
   val httpAdapter: HttpAdapter = new HttpAdapterSpray
+  // var loggingEnabled: Boolean = false
   val settings: Settings = new Settings(config)
+
+  // initialize and configure our local event store queue
+  val batchSize: Integer = settings.batchSize.getOrElse(500)
+  val batchTimeout: Integer = settings.batchTimeout.getOrElse(5)
+  val eventStore: RamEventStore = new RamEventStore
+  eventStore.maxEventsPerCollection = settings.maxEventsPerCollection.getOrElse(10000)
 
   /**
    * Disconnects any remaining connections. Both idle and active. If you are accessing
@@ -380,6 +391,70 @@ trait Writer extends AccessLevel {
   def addEvents(events: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events").mkString("/")
     doRequest(path = path, method = "POST", key = writeKey, body = Some(events))
+  }
+
+  /**
+   * Queue events locally for subsequent publishing.
+   *
+   * @param collection The collection to which the event will be added.
+   * @param event The event
+   */
+  def queueEvent(collection: String, event: String): Unit = {
+    val handle: Long = eventStore.store(projectId, collection, event)
+  }
+
+  /**
+   * Sends all queued events, removing events from the queue as events are successfully sent.
+   */
+  def sendQueuedEvents(): Unit = {
+
+    val handleMap: HashMap[String, ListBuffer[Long]] = eventStore.getHandles(projectId)
+    val handles: ListBuffer[Long] = ListBuffer.empty[Long]
+    val events: ListBuffer[String] = ListBuffer.empty[String]
+
+    // iterate over all of the event handles in the queue, by collection
+    for((collection, eventHandles) <- handleMap) {
+      // get each event, and its handle, then add it to a buffer so we can group the events 
+      // into smaller batches
+      for(handle <- eventHandles) {
+        handles += handle
+        events += eventStore.get(handle)
+      }
+
+      // group handles separately so we can use them to remove events from the queue once they've
+      // been succesfully added
+      val handleGroup: List[ListBuffer[Long]] = handles.grouped(batchSize).toList
+
+      // group the events by batch size, then publish them
+      for((batch, index) <- events.grouped(batchSize).zipWithIndex) {
+        // publish this batch
+        var response = Await.result(
+          addEvents(s"""{"$collection": [${batch.mkString(",")}]}"""),
+          DurationInt(batchTimeout).seconds
+        )
+
+        // handle addEvents responses properly
+        response.statusCode match {
+          case 200 | 201 => {
+            // log success
+            kinfo(s"""${response.statusCode} ${response.body} | Sent ${batch.size} queued events""")
+
+            // remove all of the handles for this batch
+            for(handle <- handleGroup(index)) {
+              eventStore.remove(handle)
+            }
+
+            // log removal
+            kinfo(s"""Removed ${handleGroup(index).size} events from the queue""")
+          }
+          case _ => {
+            // log and DO NOT remove event
+            kerror(s"""${response.statusCode} ${response.body} | Failed to send ${batch.size} queued events""") 
+          }
+        }
+      }
+    }
+
   }
 }
 

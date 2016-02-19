@@ -100,7 +100,10 @@ class ClientSpec extends Specification with NoTimeConversions {
       "keen.project-id" -> "abc",
       "keen.optional.master-key" -> "masterKey",
       "keen.optional.read-key" -> "readKey",
-      "keen.optional.write-key" -> "writeKey"
+      "keen.optional.write-key" -> "writeKey",
+      "keen.optional.queue.batch-size" -> 5,
+      "keen.optional.queue.batch-timeout" -> 5,
+      "keen.optional.queue.max-events-per-collection" -> 50
     )
   )
 
@@ -229,6 +232,36 @@ class ClientSpec extends Specification with NoTimeConversions {
       url must contain("email=test@example.com")
       url must contain("latest=1")
       url must contain("%5B%22abc%22,%22def%22%5D")
+    }
+
+    "queue a single event" in {
+
+      client.queueEvent(
+        collection = "foo",
+        event = """{"foo": "bar"}"""
+      )
+      true must beEqualTo(true)
+
+    }
+
+    "queue many events" in {
+
+      for(i <- 1 to 100) {
+        client.queueEvent(
+          collection = "foo",
+          event = s"""{"foo${i}": "bar${i}"}"""
+        )
+      }
+      
+      true must beEqualTo(true)
+
+    }
+
+    "publish queued events" in {
+
+      client.sendQueuedEvents()
+      true must beEqualTo(true) 
+
     }
 
     "shutdown" in {

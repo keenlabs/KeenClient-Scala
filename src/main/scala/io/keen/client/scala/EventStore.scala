@@ -5,7 +5,7 @@ import java.io.IOException
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 
-trait KeenEventStore {
+trait EventStore {
 
   @throws(classOf[IOException])
   def store(projectId: String,

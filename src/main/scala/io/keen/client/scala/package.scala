@@ -14,6 +14,10 @@ package object scala {
       if (self.hasPath(path)) Some(self.getString(path))
       else None
     }
+    def getOptionalInt(path: String): Option[Integer] = {
+      if (self.hasPath(path)) Some(self.getInt(path))
+      else None
+    }
   }
 
   case class MissingCredential(cause: String) extends RuntimeException(cause)

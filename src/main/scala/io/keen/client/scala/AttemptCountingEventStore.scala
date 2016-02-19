@@ -2,7 +2,7 @@ package io.keen.client.scala
 
 import java.io.IOException
 
-trait KeenAttemptCountingEventStore extends KeenEventStore {
+trait AttemptCountingEventStore extends EventStore {
   
   @throws(classOf[IOException])
   def getAttempts(projectId: String, eventCollection: String): String

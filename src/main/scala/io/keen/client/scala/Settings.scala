@@ -30,5 +30,9 @@ class Settings(config: Config) {
   val masterKey: Option[String] = config.getOptionalString("keen.optional.master-key")
   val readKey: Option[String]   = config.getOptionalString("keen.optional.read-key")
   val writeKey: Option[String]  = config.getOptionalString("keen.optional.write-key")
+
+  val batchSize: Option[Integer] = config.getOptionalInt("keen.optional.queue.batch-size")
+  val batchTimeout: Option[Integer] = config.getOptionalInt("keen.optional.queue.batch-timeout")
+  val maxEventsPerCollection: Option[Integer] = config.getOptionalInt("keen.optional.queue.max-events-per-collection")
 }
 
