@@ -33,7 +33,8 @@ class Client(
   val batchTimeout: Integer = settings.batchTimeout.getOrElse(5)
   val eventStore: RamEventStore = new RamEventStore
   eventStore.maxEventsPerCollection = settings.maxEventsPerCollection.getOrElse(10000)
-  val sendInterval: Integer = settings.sendInterval.getOrElse(0)
+  val sendIntervalEvents: Integer = settings.sendIntervalEvents.getOrElse(0)
+  val sendIntervalSeconds: Integer = settings.sendIntervalSeconds.getOrElse(0)
 
   /**
    * Disconnects any remaining connections. Both idle and active. If you are accessing
@@ -419,7 +420,7 @@ trait Writer extends AccessLevel {
    */
   private def scheduleSendQueuedEvents(): Unit = {
 
-    sendInterval match {
+    sendIntervalSeconds match {
       // no interval specified, we don't need to schedule events to be sent
       case i if i == 0 => {
         // do nothing
@@ -432,7 +433,7 @@ trait Writer extends AccessLevel {
           def run: Unit = {
             sendQueuedEvents
           }
-        }, 1, sendInterval.toLong, TimeUnit.SECONDS)
+        }, 1, sendIntervalSeconds.toLong, TimeUnit.SECONDS)
       }
       // invalid interval
       case k if k < MinSendInterval || k >= MaxSendInterval => {
