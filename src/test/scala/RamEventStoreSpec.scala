@@ -3,7 +3,7 @@ package test
 import io.keen.client.scala.EventStore
 import io.keen.client.scala.RamEventStore
 
-import scala.collection.mutable.HashMap
+import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
 import org.specs2.mutable.Specification
@@ -29,7 +29,7 @@ class RamEventStoreSpec extends AttemptCountingEventStoreSpecBase {
       }
       
       // get the handle map
-      val handleMap: HashMap[String, ListBuffer[Long]] = ramStore.getHandles("project1")
+      val handleMap: TrieMap[String, ListBuffer[Long]] = ramStore.getHandles("project1")
       (handleMap must not beNull)
 
       // get the lists of handles

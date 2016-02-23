@@ -3,16 +3,16 @@ package io.keen.client.scala
 import java.io.IOException
 import java.util.Locale
 
-import scala.collection.mutable.HashMap
+import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
 class RamEventStore extends AttemptCountingEventStore {
 
   private var nextId: Long = 0
-  private var collectionIds: HashMap[String, ListBuffer[Long]] = new HashMap[String, ListBuffer[Long]]()
-  private var events: HashMap[Long, String] = new HashMap[Long, String]()
-  private var attempts: HashMap[String, HashMap[String, String]] = _
+  private var collectionIds: TrieMap[String, ListBuffer[Long]] = new TrieMap[String, ListBuffer[Long]]()
+  private var events: TrieMap[Long, String] = new TrieMap[Long, String]()
+  private var attempts: TrieMap[String, TrieMap[String, String]] = _
 
   var maxEventsPerCollection: Integer = 10000
 
@@ -59,9 +59,9 @@ class RamEventStore extends AttemptCountingEventStore {
   }
 
   @throws(classOf[IOException])
-  def getHandles(projectId: String): HashMap[String, ListBuffer[Long]] = synchronized {
+  def getHandles(projectId: String): TrieMap[String, ListBuffer[Long]] = synchronized {
     
-    var result = new HashMap[String, ListBuffer[Long]]()
+    var result = new TrieMap[String, ListBuffer[Long]]()
     
     for((key, value) <- collectionIds) {
 
@@ -104,7 +104,7 @@ class RamEventStore extends AttemptCountingEventStore {
       return null
     }
 
-    val project: HashMap[String, String] = attempts.getOrElse(projectId, null)
+    val project: TrieMap[String, String] = attempts.getOrElse(projectId, null)
     if(project == null) {
       return null
     }
@@ -113,12 +113,12 @@ class RamEventStore extends AttemptCountingEventStore {
 
   def setAttempts(projectId: String, eventCollection: String, attemptsString: String): Unit = {
     if(attempts == null) {
-      attempts = new HashMap[String, HashMap[String, String]]()
+      attempts = new TrieMap[String, TrieMap[String, String]]()
     }
 
-    var project: HashMap[String, String] = attempts.getOrElse(projectId, null)
+    var project: TrieMap[String, String] = attempts.getOrElse(projectId, null)
     if(project == null) {
-      project = new HashMap[String, String]()
+      project = new TrieMap[String, String]()
       attempts += (projectId -> project)
     }
 
@@ -127,8 +127,8 @@ class RamEventStore extends AttemptCountingEventStore {
 
   def clear() {
     nextId = 0
-    collectionIds = new HashMap[String, ListBuffer[Long]]()
-    events = new HashMap[Long, String]()
+    collectionIds = new TrieMap[String, ListBuffer[Long]]()
+    events = new TrieMap[Long, String]()
   }
 
   ///// PRIVATE /////  

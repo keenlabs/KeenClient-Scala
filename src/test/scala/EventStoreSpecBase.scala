@@ -4,7 +4,7 @@ import io.keen.client.scala.EventStore
 
 import java.io.IOException
 
-import scala.collection.mutable.HashMap
+import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
 import org.specs2.mutable.{BeforeAfter, Specification}
@@ -89,7 +89,7 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
       store.store("project1", "collection2", testEvents(1))
 
       // get the handle map
-      val handleMap: HashMap[String, ListBuffer[Long]] = store.getHandles("project1")
+      val handleMap: TrieMap[String, ListBuffer[Long]] = store.getHandles("project1")
       (handleMap must not beNull)
       handleMap.size must beEqualTo(2)
 
@@ -109,7 +109,7 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
 
     "get handles with no events" in new EventStoreSetupTeardown {
 
-      val handleMap: HashMap[String, ListBuffer[Long]] = store.getHandles("project1")
+      val handleMap: TrieMap[String, ListBuffer[Long]] = store.getHandles("project1")
       (handleMap must not beNull)
       handleMap.size must beEqualTo(0)
 
@@ -124,7 +124,7 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
       store.store("project2", "collection3", testEvents(3))
 
       // get and validate the handle map for project 1
-      var handleMap: HashMap[String, ListBuffer[Long]] = store.getHandles("project1")
+      var handleMap: TrieMap[String, ListBuffer[Long]] = store.getHandles("project1")
       (handleMap must not beNull)
       handleMap.size must beEqualTo(2)
       handleMap.getOrElse("collection1", null).size must beEqualTo(1)

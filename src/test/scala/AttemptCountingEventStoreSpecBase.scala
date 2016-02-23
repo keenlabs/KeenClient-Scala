@@ -2,7 +2,7 @@ package test
 
 import io.keen.client.scala.AttemptCountingEventStore
 
-import scala.collection.mutable.HashMap
+import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
 import org.specs2.mutable.{BeforeAfter, Specification}
@@ -45,7 +45,7 @@ abstract class AttemptCountingEventStoreSpecBase extends EventStoreSpecBase {
       attemptCountingStore.setAttempts("project1", "collection1", "{}");
 
       // get the handle map
-      val handleMap: HashMap[String, ListBuffer[Long]] = attemptCountingStore.getHandles("project1")
+      val handleMap: TrieMap[String, ListBuffer[Long]] = attemptCountingStore.getHandles("project1")
       (handleMap must not beNull)
       handleMap.size must beEqualTo(2)
 

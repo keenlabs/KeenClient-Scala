@@ -1,9 +1,10 @@
 package io.keen.client.scala
 
-import scala.concurrent.Await
-import scala.concurrent.Future
+import java.util.concurrent.{Executor, Executors, ScheduledThreadPoolExecutor, TimeUnit}
+
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import scala.collection.mutable.HashMap
+import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
 import com.typesafe.config.{ Config, ConfigFactory }
@@ -18,10 +19,13 @@ class Client(
     val scheme: String = "https",
     val authority: String = "api.keen.io",
     val version: String = "3.0"
-  ) extends HttpAdapterComponent with Logging with Logger {
+  ) extends HttpAdapterComponent with Logging {
+
+  // constants
+  val MinSendInterval: Integer = 60
+  val MaxSendInterval: Integer = 3600
 
   val httpAdapter: HttpAdapter = new HttpAdapterSpray
-  // var loggingEnabled: Boolean = false
   val settings: Settings = new Settings(config)
 
   // initialize and configure our local event store queue
@@ -29,6 +33,7 @@ class Client(
   val batchTimeout: Integer = settings.batchTimeout.getOrElse(5)
   val eventStore: RamEventStore = new RamEventStore
   eventStore.maxEventsPerCollection = settings.maxEventsPerCollection.getOrElse(10000)
+  val sendInterval: Integer = settings.sendInterval.getOrElse(0)
 
   /**
    * Disconnects any remaining connections. Both idle and active. If you are accessing
@@ -373,6 +378,11 @@ trait Writer extends AccessLevel {
   val writeKey: String = settings.writeKey.getOrElse(throw MissingCredential("Write key required for Writer"))
 
   /**
+   * Schedule sending of queued events.
+   */
+  scheduleSendQueuedEvents()
+
+  /**
    * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
    *
    * @param collection The collection to which the event will be added.
@@ -404,11 +414,44 @@ trait Writer extends AccessLevel {
   }
 
   /**
+   * Schedules sending of queued events if keen.optional.queue.send-interval contains a valid value that
+   * is between MinSendInterval and MaxSendInterval.
+   */
+  private def scheduleSendQueuedEvents(): Unit = {
+
+    sendInterval match {
+      // no interval specified, we don't need to schedule events to be sent
+      case i if i == 0 => {
+        // do nothing
+      }
+      // interval is valid, schedule events to be sent
+      case j if j >= MinSendInterval && j <= MaxSendInterval => {
+        // schedule sending from a separate thread at the specific interval
+        val executor = new ScheduledThreadPoolExecutor(1)
+        executor.scheduleAtFixedRate(new Runnable {
+          def run: Unit = {
+            sendQueuedEvents
+          }
+        }, 1, sendInterval.toLong, TimeUnit.SECONDS)
+      }
+      // invalid interval
+      case k if k < MinSendInterval || k >= MaxSendInterval => {
+        throw new IllegalArgumentException(s"Send interval must be between $MinSendInterval and $MaxSendInterval")
+      }
+      // invalid interval value
+      case _ => {
+        throw new IllegalArgumentException(s"Invalid value specified for send interval. Value must be an integer. ")
+      }
+    }
+
+  }
+
+  /**
    * Sends all queued events, removing events from the queue as events are successfully sent.
    */
   def sendQueuedEvents(): Unit = {
 
-    val handleMap: HashMap[String, ListBuffer[Long]] = eventStore.getHandles(projectId)
+    val handleMap: TrieMap[String, ListBuffer[Long]] = eventStore.getHandles(projectId)
     val handles: ListBuffer[Long] = ListBuffer.empty[Long]
     val events: ListBuffer[String] = ListBuffer.empty[String]
 
@@ -437,7 +480,7 @@ trait Writer extends AccessLevel {
         response.statusCode match {
           case 200 | 201 => {
             // log success
-            kinfo(s"""${response.statusCode} ${response.body} | Sent ${batch.size} queued events""")
+            Logger.kinfo(s"""${response.statusCode} ${response.body} | Sent ${batch.size} queued events""")
 
             // remove all of the handles for this batch
             for(handle <- handleGroup(index)) {
@@ -445,17 +488,32 @@ trait Writer extends AccessLevel {
             }
 
             // log removal
-            kinfo(s"""Removed ${handleGroup(index).size} events from the queue""")
+            Logger.kinfo(s"""Removed ${handleGroup(index).size} events from the queue""")
           }
           case _ => {
-            // log and DO NOT remove event
-            kerror(s"""${response.statusCode} ${response.body} | Failed to send ${batch.size} queued events""") 
+            // log but DO NOT remove events from queue
+            Logger.kerror(s"""${response.statusCode} ${response.body} | Failed to send ${batch.size} queued events""") 
           }
         }
       }
     }
 
   }
+
+  /**
+   * Asynchronously sends all queued events.
+   */
+  def sendQueuedEventsAsync(): Unit = {
+
+    val executor: Executor = Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors)
+    executor.execute(new Runnable {
+      def run: Unit = {
+        sendQueuedEvents
+      }
+    })
+
+  }
+
 }
 
 /**

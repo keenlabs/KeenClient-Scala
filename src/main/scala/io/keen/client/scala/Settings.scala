@@ -34,5 +34,6 @@ class Settings(config: Config) {
   val batchSize: Option[Integer] = config.getOptionalInt("keen.optional.queue.batch-size")
   val batchTimeout: Option[Integer] = config.getOptionalInt("keen.optional.queue.batch-timeout")
   val maxEventsPerCollection: Option[Integer] = config.getOptionalInt("keen.optional.queue.max-events-per-collection")
+  val sendInterval: Option[Integer] = config.getOptionalInt("keen.optional.queue.send-interval")
 }
 

@@ -2,7 +2,7 @@ package io.keen.client.scala
 
 import java.io.IOException
 
-import scala.collection.mutable.HashMap
+import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
 trait EventStore {
@@ -19,6 +19,6 @@ trait EventStore {
   def remove(handle: Long): Unit
 
   @throws(classOf[IOException])
-  def getHandles(projectId: String): HashMap[String, ListBuffer[Long]]
+  def getHandles(projectId: String): TrieMap[String, ListBuffer[Long]]
 
 }

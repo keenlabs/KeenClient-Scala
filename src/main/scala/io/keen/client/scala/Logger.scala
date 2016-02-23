@@ -2,7 +2,7 @@ package io.keen.client.scala
 
 import grizzled.slf4j.Logging
 
-trait Logger extends Logging {
+object Logger extends Logging {
 
   var loggingEnabled: Boolean = false
 
