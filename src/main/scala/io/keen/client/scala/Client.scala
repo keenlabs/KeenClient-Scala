@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.{Config, ConfigFactory}
 import grizzled.slf4j.Logging
 
 // XXX Remaining: Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
@@ -367,13 +367,15 @@ trait Writer extends AccessLevel {
   val writeKey: String = settings.writeKey.getOrElse(throw MissingCredential("Write key required for Writer"))
 
   // constants
-  val MinSendInterval: Integer = 60
-  val MaxSendInterval: Integer = 3600
+  protected val MinSendIntervalEvents: Long = 100
+  protected val MaxSendIntervalEvents: Long = 10000
+  protected val MinSendIntervalSeconds: Long = 60
+  protected val MaxSendIntervalSeconds: Long = 3600
 
   // initialize and configure our local event store queue
   val batchSize: Integer = settings.batchSize.getOrElse(500)
   val batchTimeout: Integer = settings.batchTimeout.getOrElse(5)
-  val eventStore: RamEventStore = new RamEventStore
+  val eventStore: EventStore = new RamEventStore
   eventStore.maxEventsPerCollection = settings.maxEventsPerCollection.getOrElse(10000)
   val sendIntervalEvents: Integer = settings.sendIntervalEvents.getOrElse(0)
   val sendIntervalSeconds: Integer = settings.sendIntervalSeconds.getOrElse(0)
@@ -381,7 +383,7 @@ trait Writer extends AccessLevel {
   /**
    * Schedule sending of queued events.
    */
-  val scheduledThreadPool: ScheduledThreadPoolExecutor = scheduleSendQueuedEvents()
+  private val scheduledThreadPool: ScheduledThreadPoolExecutor = scheduleSendQueuedEvents()
 
   /**
    * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
@@ -411,16 +413,29 @@ trait Writer extends AccessLevel {
    * @param event The event
    */
   def queueEvent(collection: String, event: String): Unit = {
+
+    require(sendIntervalEvents == 0 || (sendIntervalEvents >= MinSendIntervalEvents && sendIntervalEvents <= MaxSendIntervalEvents), s"Send events interval must be between $MinSendIntervalEvents and $MaxSendIntervalEvents")
+
+    // write the event to the queue
     eventStore.store(projectId, collection, event)
+    
+    // check the queue to see if we meet or exceed keen.optional.queue.send-interval.events. if so, send
+    // all queued events
+    if(sendIntervalEvents != 0) {
+      if(eventStore.size >= sendIntervalEvents) {
+        sendQueuedEvents
+      }
+    }
+
   }
 
   /**
-   * Schedules sending of queued events if keen.optional.queue.send-interval contains a valid value that
-   * is between MinSendInterval and MaxSendInterval.
+   * Schedules sending of queued events if keen.optional.queue.send-interval.seconds contains a valid value that
+   * is between `MinSendIntervalSeconds` and `MaxSendIntervalSeconds`.
    */
   private def scheduleSendQueuedEvents(): ScheduledThreadPoolExecutor = {
 
-    require(sendIntervalSeconds == 0 || (sendIntervalSeconds >= MinSendInterval && sendIntervalSeconds <= MaxSendInterval), s"Send interval must be between $MinSendInterval and $MaxSendInterval")
+    require(sendIntervalSeconds == 0 || (sendIntervalSeconds >= MinSendIntervalSeconds && sendIntervalSeconds <= MaxSendIntervalSeconds), s"Send seconds interval must be between $MinSendIntervalSeconds and $MaxSendIntervalSeconds")
 
     var tp: ScheduledThreadPoolExecutor = null
 
@@ -458,7 +473,7 @@ trait Writer extends AccessLevel {
   /**
    * Sends all queued events, removing events from the queue as events are successfully sent.
    */
-  def sendQueuedEvents(): Unit = {
+  def sendQueuedEvents(): Unit = synchronized {
 
     val handleMap: TrieMap[String, ListBuffer[Long]] = eventStore.getHandles(projectId)
     val handles: ListBuffer[Long] = ListBuffer.empty[Long]
@@ -529,6 +544,24 @@ trait Writer extends AccessLevel {
         sendQueuedEvents
       }
     })
+
+  }
+
+  /**
+   * Safely shuts down `scheduledThreadPool` before sending all events remaining in `eventStore`.
+   */
+  override def shutdown() = {
+
+    if(scheduledThreadPool != null) {
+      scheduledThreadPool.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
+      scheduledThreadPool.shutdown  
+    }
+
+    // don't forget to empty the queue before we shutdown
+    sendQueuedEvents
+
+    // because we're overriding Client.shutdown
+    httpAdapter.shutdown
 
   }
 

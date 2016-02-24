@@ -14,9 +14,6 @@ class RamEventStore extends AttemptCountingEventStore {
   private var events: TrieMap[Long, String] = new TrieMap[Long, String]()
   private var attempts: TrieMap[String, TrieMap[String, String]] = _
 
-  var maxEventsPerCollection: Integer = 10000
-
-  @throws(classOf[IOException])
   override def store(projectId: String,
     eventCollection: String,
     event: String): Long = synchronized {
@@ -40,25 +37,24 @@ class RamEventStore extends AttemptCountingEventStore {
       // add the event to the event store, add its id to the collection's list, and return the id
       var id = getNextId()
       events += (id -> event)
+      size = events.size
       collectionEvents += id
       id
   }
 
-  @throws(classOf[IOException])
   override def get(handle: Long): String = synchronized {
     val id: Long = handleToId(handle)
     events.getOrElse(id, null)
   }
 
-  @throws(classOf[IOException])
   override def remove(handle: Long): Unit = synchronized {
     val id: Long = handleToId(handle)
     events -= id
+    size = events.size
     // be lazy about removing handles from the collectionIds map - this can happen during the
     // getHandles call
   }
 
-  @throws(classOf[IOException])
   def getHandles(projectId: String): TrieMap[String, ListBuffer[Long]] = synchronized {
     
     var result = new TrieMap[String, ListBuffer[Long]]()
