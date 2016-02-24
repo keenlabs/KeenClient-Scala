@@ -1,6 +1,6 @@
 package io.keen.client.scala
 
-import java.util.concurrent.{Executor, Executors, ScheduledThreadPoolExecutor, TimeUnit}
+import java.util.concurrent.{Executor, Executors, ScheduledThreadPoolExecutor, ThreadFactory, TimeUnit}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
@@ -21,20 +21,8 @@ class Client(
     val version: String = "3.0"
   ) extends HttpAdapterComponent with Logging {
 
-  // constants
-  val MinSendInterval: Integer = 60
-  val MaxSendInterval: Integer = 3600
-
   val httpAdapter: HttpAdapter = new HttpAdapterSpray
   val settings: Settings = new Settings(config)
-
-  // initialize and configure our local event store queue
-  val batchSize: Integer = settings.batchSize.getOrElse(500)
-  val batchTimeout: Integer = settings.batchTimeout.getOrElse(5)
-  val eventStore: RamEventStore = new RamEventStore
-  eventStore.maxEventsPerCollection = settings.maxEventsPerCollection.getOrElse(10000)
-  val sendIntervalEvents: Integer = settings.sendIntervalEvents.getOrElse(0)
-  val sendIntervalSeconds: Integer = settings.sendIntervalSeconds.getOrElse(0)
 
   /**
    * Disconnects any remaining connections. Both idle and active. If you are accessing
@@ -378,10 +366,22 @@ trait Writer extends AccessLevel {
    */
   val writeKey: String = settings.writeKey.getOrElse(throw MissingCredential("Write key required for Writer"))
 
+  // constants
+  val MinSendInterval: Integer = 60
+  val MaxSendInterval: Integer = 3600
+
+  // initialize and configure our local event store queue
+  val batchSize: Integer = settings.batchSize.getOrElse(500)
+  val batchTimeout: Integer = settings.batchTimeout.getOrElse(5)
+  val eventStore: RamEventStore = new RamEventStore
+  eventStore.maxEventsPerCollection = settings.maxEventsPerCollection.getOrElse(10000)
+  val sendIntervalEvents: Integer = settings.sendIntervalEvents.getOrElse(0)
+  val sendIntervalSeconds: Integer = settings.sendIntervalSeconds.getOrElse(0)
+
   /**
    * Schedule sending of queued events.
    */
-  scheduleSendQueuedEvents()
+  val scheduledThreadPool: ScheduledThreadPoolExecutor = scheduleSendQueuedEvents()
 
   /**
    * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
@@ -411,39 +411,47 @@ trait Writer extends AccessLevel {
    * @param event The event
    */
   def queueEvent(collection: String, event: String): Unit = {
-    val handle: Long = eventStore.store(projectId, collection, event)
+    eventStore.store(projectId, collection, event)
   }
 
   /**
    * Schedules sending of queued events if keen.optional.queue.send-interval contains a valid value that
    * is between MinSendInterval and MaxSendInterval.
    */
-  private def scheduleSendQueuedEvents(): Unit = {
+  private def scheduleSendQueuedEvents(): ScheduledThreadPoolExecutor = {
 
-    sendIntervalSeconds match {
-      // no interval specified, we don't need to schedule events to be sent
-      case i if i == 0 => {
-        // do nothing
-      }
-      // interval is valid, schedule events to be sent
-      case j if j >= MinSendInterval && j <= MaxSendInterval => {
-        // schedule sending from a separate thread at the specific interval
-        val executor = new ScheduledThreadPoolExecutor(1)
-        executor.scheduleAtFixedRate(new Runnable {
-          def run: Unit = {
+    require(sendIntervalSeconds == 0 || (sendIntervalSeconds >= MinSendInterval && sendIntervalSeconds <= MaxSendInterval), s"Send interval must be between $MinSendInterval and $MaxSendInterval")
+
+    var tp: ScheduledThreadPoolExecutor = null
+
+    // send queued events every n seconds
+    if(sendIntervalSeconds != 0) {
+      // use a thread pool for our scheduled threads so we can use daemon threads
+      tp = Executors.newScheduledThreadPool(1, new ThreadFactory {
+        def newThread(r: Runnable): Thread = {
+          val t: Thread = new Thread(r)
+          t.setDaemon(true)
+          t
+        }
+      }).asInstanceOf[ScheduledThreadPoolExecutor]
+
+      // schedule sending from our thread pool at a specific interval
+      tp.scheduleWithFixedDelay(new Runnable {
+        def run: Unit = {
+          try {
             sendQueuedEvents
+          } 
+          catch {
+            case ex: Throwable => {
+              Logger.kerror("Failed to send queued events")
+              Logger.kerror(s"""$ex""")
+            }
           }
-        }, 1, sendIntervalSeconds.toLong, TimeUnit.SECONDS)
-      }
-      // invalid interval
-      case k if k < MinSendInterval || k >= MaxSendInterval => {
-        throw new IllegalArgumentException(s"Send interval must be between $MinSendInterval and $MaxSendInterval")
-      }
-      // invalid interval value
-      case _ => {
-        throw new IllegalArgumentException(s"Invalid value specified for send interval. Value must be an integer. ")
-      }
+        }
+      }, 1, sendIntervalSeconds.toLong, TimeUnit.SECONDS)
     }
+
+    tp
 
   }
 
@@ -506,8 +514,17 @@ trait Writer extends AccessLevel {
    */
   def sendQueuedEventsAsync(): Unit = {
 
-    val executor: Executor = Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors)
-    executor.execute(new Runnable {
+    // use a thread pool for our async thread so we can use daemon threads
+    val tp = Executors.newSingleThreadExecutor(new ThreadFactory {
+      def newThread(r: Runnable): Thread = {
+        val t: Thread = new Thread(r)
+        t.setDaemon(true)
+        t
+      }
+    })
+
+    // send our queued events in a separate thread
+    tp.execute(new Runnable {
       def run: Unit = {
         sendQueuedEvents
       }

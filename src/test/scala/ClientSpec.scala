@@ -104,8 +104,8 @@ class ClientSpec extends Specification with NoTimeConversions {
       "keen.optional.queue.batch.size" -> 5,
       "keen.optional.queue.batch.timeout" -> 5,
       "keen.optional.queue.max-events-per-collection" -> 50,
-      "keen.optional.queue.send.events" -> 0,
-      "keen.optional.queue.send.interval" -> 0
+      "keen.optional.queue.send-interval.events" -> 0,
+      "keen.optional.queue.send-interval.seconds" -> 0
     )
   )
 
@@ -261,9 +261,9 @@ class ClientSpec extends Specification with NoTimeConversions {
 
     "publish queued events" in {
 
-      Logger.enableLogging()
+      // Logger.enableLogging()
       client.sendQueuedEvents()
-      Logger.disableLogging()
+      // Logger.disableLogging()
       true must beEqualTo(true) 
 
     }
