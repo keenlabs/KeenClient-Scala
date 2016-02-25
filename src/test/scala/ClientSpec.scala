@@ -396,16 +396,9 @@ class ClientSpec extends Specification with NoTimeConversions {
       handleMap.getOrElse(collection, null).size must beEqualTo(5)
 
       // send the queued events
-      client.sendQueuedEvents()
+      client.shutdown()
 
       // validate that the store is now empty
-      handleMap = store.getHandles(projectId)
-      handleMap.size must beEqualTo(0)
-
-      // try sending events again, nothing should happen because the queue is empty
-      client.sendQueuedEvents()
-
-      // the store should still be empty
       handleMap = store.getHandles(projectId)
       handleMap.size must beEqualTo(0)
 
@@ -451,8 +444,6 @@ class ClientSpec extends Specification with NoTimeConversions {
       handleMap = store.getHandles(projectId)
       handleMap.size must beEqualTo(1)
       handleMap.getOrElse(collection, null).size must beEqualTo(queueConfig.getInt("keen.optional.queue.max-events-per-collection"))
-
-
 
       // shutdown the client
       client.shutdown()
