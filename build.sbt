@@ -8,9 +8,9 @@ homepage := Some(url("https://github.com/keenlabs/KeenClient-Scala"))
 
 version := "0.6.0"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.7"
 
-crossScalaVersions := Seq("2.10.4", "2.11.2")
+crossScalaVersions := Seq("2.10.6", scalaVersion.value)
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
