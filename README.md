@@ -229,7 +229,7 @@ that you didn't expect!**
 [Build Status]: https://travis-ci.org/keenlabs/KeenClient-Scala.svg?branch=master
 [Keen IO]: http://keen.io/
 [Semantic Versioning]: http://semver.org/
-[the changelog]: https://github.com/keenlabs/KeenClient-Scala/blob/master/CHANGELOG
+[the changelog]: https://github.com/keenlabs/KeenClient-Scala/blob/master/CHANGELOG.md
 [spray]: http://spray.io
 [Akka]: http://akka.io
 [Dispatch]: http://dispatch.databinder.net/
