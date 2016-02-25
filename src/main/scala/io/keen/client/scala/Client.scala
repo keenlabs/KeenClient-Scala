@@ -24,6 +24,8 @@ class Client(
   val httpAdapter: HttpAdapter = new HttpAdapterSpray
   val settings: Settings = new Settings(config)
 
+  val environment: Option[String] = settings.environment
+
   /**
    * Disconnects any remaining connections. Both idle and active. If you are accessing
    * Keen through a proxy that keeps connections alive this is useful.
@@ -379,11 +381,12 @@ trait Writer extends AccessLevel {
   eventStore.maxEventsPerCollection = settings.maxEventsPerCollection.getOrElse(10000)
   val sendIntervalEvents: Integer = settings.sendIntervalEvents.getOrElse(0)
   val sendIntervalSeconds: Integer = settings.sendIntervalSeconds.getOrElse(0)
+  val shutdownDelay: Integer = settings.shutdownDelay.getOrElse(0)
 
   /**
    * Schedule sending of queued events.
    */
-  private val scheduledThreadPool: ScheduledThreadPoolExecutor = scheduleSendQueuedEvents()
+  protected val scheduledThreadPool: Option[ScheduledThreadPoolExecutor] = scheduleSendQueuedEvents()
 
   /**
    * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
@@ -414,8 +417,13 @@ trait Writer extends AccessLevel {
    */
   def queueEvent(collection: String, event: String): Unit = {
 
-    require(sendIntervalEvents == 0 || (sendIntervalEvents >= MinSendIntervalEvents && sendIntervalEvents <= MaxSendIntervalEvents), s"Send events interval must be between $MinSendIntervalEvents and $MaxSendIntervalEvents")
-
+    // bypass min/max intervals for testing
+    environment match {
+      case Some("test") if Some("test").get matches "(?i)test" => {}
+      case _ =>
+        require(sendIntervalEvents == 0 || (sendIntervalEvents >= MinSendIntervalEvents && sendIntervalEvents <= MaxSendIntervalEvents), s"Send events interval must be between $MinSendIntervalEvents and $MaxSendIntervalEvents")
+    }
+    
     // write the event to the queue
     eventStore.store(projectId, collection, event)
     
@@ -423,7 +431,7 @@ trait Writer extends AccessLevel {
     // all queued events
     if(sendIntervalEvents != 0) {
       if(eventStore.size >= sendIntervalEvents) {
-        sendQueuedEvents
+        sendQueuedEvents()
       }
     }
 
@@ -433,47 +441,46 @@ trait Writer extends AccessLevel {
    * Schedules sending of queued events if keen.optional.queue.send-interval.seconds contains a valid value that
    * is between `MinSendIntervalSeconds` and `MaxSendIntervalSeconds`.
    */
-  private def scheduleSendQueuedEvents(): ScheduledThreadPoolExecutor = {
+  private def scheduleSendQueuedEvents(): Option[ScheduledThreadPoolExecutor] = {
 
-    require(sendIntervalSeconds == 0 || (sendIntervalSeconds >= MinSendIntervalSeconds && sendIntervalSeconds <= MaxSendIntervalSeconds), s"Send seconds interval must be between $MinSendIntervalSeconds and $MaxSendIntervalSeconds")
-
-    var tp: ScheduledThreadPoolExecutor = null
-
-    // send queued events every n seconds
-    if(sendIntervalSeconds != 0) {
-      // use a thread pool for our scheduled threads so we can use daemon threads
-      tp = Executors.newScheduledThreadPool(1, new ThreadFactory {
-        def newThread(r: Runnable): Thread = {
-          val t: Thread = new Thread(r)
-          t.setDaemon(true)
-          t
-        }
-      }).asInstanceOf[ScheduledThreadPoolExecutor]
-
-      // schedule sending from our thread pool at a specific interval
-      tp.scheduleWithFixedDelay(new Runnable {
-        def run: Unit = {
-          try {
-            sendQueuedEvents
-          } 
-          catch {
-            case ex: Throwable => {
-              Logger.kerror("Failed to send queued events")
-              Logger.kerror(s"""$ex""")
-            }
-          }
-        }
-      }, 1, sendIntervalSeconds.toLong, TimeUnit.SECONDS)
+    // bypass min/max intervals for testing
+    environment match {
+      case Some("test") if Some("test").get matches "(?i)test" => {}
+      case _ =>
+        require(sendIntervalSeconds == 0 || (sendIntervalSeconds >= MinSendIntervalSeconds && sendIntervalSeconds <= MaxSendIntervalSeconds), s"Send seconds interval must be between $MinSendIntervalSeconds and $MaxSendIntervalSeconds")
     }
 
-    tp
+    // send queued events every n seconds
+    sendIntervalSeconds match {
+      case n if n <= 0 => None
+      case _ =>
+        // use a thread pool for our scheduled threads so we can use daemon threads
+        val tp = Executors.newScheduledThreadPool(1, new ClientThreadFactory).asInstanceOf[ScheduledThreadPoolExecutor]
+
+        // schedule sending from our thread pool at a specific interval
+        tp.scheduleWithFixedDelay(new Runnable {
+          def run: Unit = {
+            try {
+              sendQueuedEvents()
+            } 
+            catch {
+              case ex: Throwable => {
+                error("Failed to send queued events")
+                error(s"""$ex""")
+              }
+            }
+          }
+        }, 1, sendIntervalSeconds.toLong, TimeUnit.SECONDS)
+
+        Some(tp)
+    }
 
   }
 
   /**
    * Sends all queued events, removing events from the queue as events are successfully sent.
    */
-  def sendQueuedEvents(): Unit = synchronized {
+  def sendQueuedEvents(): Unit = {
 
     val handleMap: TrieMap[String, ListBuffer[Long]] = eventStore.getHandles(projectId)
     val handles: ListBuffer[Long] = ListBuffer.empty[Long]
@@ -504,7 +511,7 @@ trait Writer extends AccessLevel {
         response.statusCode match {
           case 200 | 201 => {
             // log success
-            Logger.kinfo(s"""${response.statusCode} ${response.body} | Sent ${batch.size} queued events""")
+            info(s"""${response.statusCode} ${response.body} | Sent ${batch.size} queued events""")
 
             // remove all of the handles for this batch
             for(handle <- handleGroup(index)) {
@@ -512,11 +519,11 @@ trait Writer extends AccessLevel {
             }
 
             // log removal
-            Logger.kinfo(s"""Removed ${handleGroup(index).size} events from the queue""")
+            info(s"""Removed ${handleGroup(index).size} events from the queue""")
           }
           case _ => {
             // log but DO NOT remove events from queue
-            Logger.kerror(s"""${response.statusCode} ${response.body} | Failed to send ${batch.size} queued events""") 
+            error(s"""${response.statusCode} ${response.body} | Failed to send ${batch.size} queued events""") 
           }
         }
       }
@@ -530,18 +537,12 @@ trait Writer extends AccessLevel {
   def sendQueuedEventsAsync(): Unit = {
 
     // use a thread pool for our async thread so we can use daemon threads
-    val tp = Executors.newSingleThreadExecutor(new ThreadFactory {
-      def newThread(r: Runnable): Thread = {
-        val t: Thread = new Thread(r)
-        t.setDaemon(true)
-        t
-      }
-    })
+    val tp = Executors.newSingleThreadExecutor(new ClientThreadFactory)
 
     // send our queued events in a separate thread
     tp.execute(new Runnable {
       def run: Unit = {
-        sendQueuedEvents
+        sendQueuedEvents()
       }
     })
 
@@ -552,13 +553,19 @@ trait Writer extends AccessLevel {
    */
   override def shutdown() = {
 
-    if(scheduledThreadPool != null) {
-      scheduledThreadPool.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
-      scheduledThreadPool.shutdown  
+    // safely terminate the scheduled thread pool
+    scheduledThreadPool match {
+      case Some(stp) =>
+        stp.shutdown
+        stp.awaitTermination(shutdownDelay.toLong, TimeUnit.SECONDS) match {
+          case false => error("Failed to shutdown scheduled thread pool")
+          case _ => {}
+        }
+      case _ => {}
     }
 
     // don't forget to empty the queue before we shutdown
-    sendQueuedEvents
+    sendQueuedEvents()
 
     // because we're overriding Client.shutdown
     httpAdapter.shutdown

@@ -20,7 +20,7 @@ class RamEventStoreSpec extends AttemptCountingEventStoreSpecBase {
 
     "not exceed the maximum number of events per collection" in {
 
-      val ramStore: RamEventStore = store.asInstanceOf[RamEventStore]
+      val ramStore: EventStore = store.asInstanceOf[RamEventStore]
       ramStore.maxEventsPerCollection = 3
 
       // add 5 events
