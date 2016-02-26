@@ -6,6 +6,9 @@
   * Created the `AccessLevel` traits abstraction
   * Added Typesafe Config support for settings
   * Added TravisCI & integration tests in SBT
+* [Terry Horner](https://github.com/terryhorner)
+  * Maintainer
+  * Added in-memory queueing
 
 
 [Dispatch]: http://dispatch.databinder.net/

@@ -2,6 +2,8 @@
 
 [![Build Status]](https://travis-ci.org/keenlabs/KeenClient-Scala)
 
+---
+
 The official asynchronous Scala client for the [Keen IO] API.
 
 **Note**: This library is in early development and does not implement all of the
@@ -12,76 +14,18 @@ new release version.
 
 Additional API features will be added over time. Contributions are welcome!
 
-## Use It - A Quick Taste
+---
 
-```scala
-import io.keen.client.scala.{ Client, Writer }
+* [Get It](#get-it)
+* [Configuration](#configuration)
+  * [Settings](#settings)
+* [Use It](#use-it--a-quick-taste)
+  * [Queueing](#queueing)
+* [Dependencies](#dependencies)
+  * [Using the Dispatch adapter](#using-the-dispatch-adapter)
+  * [JSON](#json)
+* [Hack On It](#hack-on-it)
 
-// Assumes you've configured a write key as explained in Configuration below
-val keen = new Client with Writer
-
-// Publish an event!
-keen.addEvent(
-  collection = "collectionNameHere",
-  event = """{"foo": "bar"}"""
-)
-
-// Publish lots of events!
-keen.addEvents(someEvents)
-
-// Responses are Futures - handle errors!
-val resp = keen.addEvent(
-  collection = "collectionNameHere",
-  event = """{"foo": "bar"}"""
-)
-
-resp onComplete {
-  case Success(r) => println(resp.statusCode)
-  case Failure(t) => println(t.getMessage) // A Throwable
-}
-
-// Or using map
-resp map { println("I succeeded!") } getOrElse { println("I failed :(") }
-```
-
-## Queueing
-
-Though you can certainly implement your own queueing and batching via `addEvents`, the client also includes automated queueing and batching for your more simplified implementation pleasures.
-
-```scala
-// Queue an event
-keen.queueEvent("collectionNameHere", """{"foo": "bar"}""")
-```
-
-Queuing is currenty handled via an in-memory queue that lives as long as the `Client` does. The behavior of the queue and automated sending of events is configurable in `conf/application.conf` as outlined below.
-
-### Sending queued events manually
-
-```scala
-keen.sendQueuedEvents()
-```
-
-### Sending queued events every time the queue reaches 100 events
-
-Set `keen.optional.queue.send-interval.events` equal to `100` in `conf/application.conf`.
-
-### Sending queued events every 5 minutes
-
-Set `keen.optional.queue.send-interval.seconds` equal to `300` in `conf/application.conf`.
-
-Note that `keen.optional.queue.send-interval.events` prevails when setting both `events` and `seconds` settings.
-
-### Using batch sizes
-
-Setting a specific batch size will help optimize your experience when sending events, so it's recommended that you set `keen.optional.queue.batch.size` to something that makes sense for your implementation (default is `500`). Note that a batch size of `5000` is the upper bound of what you should shoot for. Anything higher and your request has a good chance of being rejected due to payload size limitations.
-
-### Failed events
-
-Events that fail for whatever reason are _not_ removed from the queue. They will remain there until they are either manually removed or the client shuts down.
-
-### Shutdown
-
-The client will attempt one last time to send all queued when `shutdown()` is called just in case you forget to send the events yourself. Make sure you call `shutdown()` before you exit!
 
 ## Get It
 
@@ -89,14 +33,14 @@ Artifacts for keen-client-scala are [hosted on Maven Central](http://search.mave
 You can use them in your project with SBT thusly:
 
 ```scala
-libraryDependencies += "io.keen" %% "keenclient-scala" % "0.5.0"
+libraryDependencies += "io.keen" %% "keenclient-scala" % "0.6.0"
 ```
 
 Note that we publish artifacts for Scala 2.10 and 2.11, so you can either use `%%` to automatically pick the correct
 version or specify them explicitly with something like:
 
 ```scala
-libraryDependencies += "io.keen" % "keenclient-scala_2.10" % "0.5.0"
+libraryDependencies += "io.keen" % "keenclient-scala_2.10" % "0.6.0"
 ```
 
 ## Configuration
@@ -139,7 +83,7 @@ development setup (install it as a [global plugin], and `chmod 600` your `.env`
 files that contain credentials!). In production, a [good service manager][runit]
 can set env vars for app processes with ease. On Heroku you'll be right at home.
 
-### Available Settings
+### Settings
 
 * `keen.project-id`: Your project ID.
 * `keen.optional.read-key`: Your project read key.
@@ -151,6 +95,77 @@ can set env vars for app processes with ease. On Heroku you'll be right at home.
 * `keen.optional.queue.send-interval.events`: Automatically send all queued events every time the queue reaches this number. Minimum is `100`, maximum is `10000`, and default is `0`.
 * `keen.optional.queue.send-interval.seconds`: Automatically send all queued events at a specified interval. Minimum is `60`, maximum is `3600`, and default is `0`.
 * `keen.optional.queue.shutdown-delay`: Seconds to wait before client stops attempting to send events scheduled to be sent at a specific interval. Default is `30`.
+
+## Use It - A Quick Taste
+
+```scala
+import io.keen.client.scala.{ Client, Writer }
+
+// Assumes you've configured a write key as explained in Configuration below
+val keen = new Client with Writer
+
+// Publish an event!
+keen.addEvent(
+  collection = "collectionNameHere",
+  event = """{"foo": "bar"}"""
+)
+
+// Publish lots of events!
+keen.addEvents(someEvents)
+
+// Responses are Futures - handle errors!
+val resp = keen.addEvent(
+  collection = "collectionNameHere",
+  event = """{"foo": "bar"}"""
+)
+
+resp onComplete {
+  case Success(r) => println(resp.statusCode)
+  case Failure(t) => println(t.getMessage) // A Throwable
+}
+
+// Or using map
+resp map { println("I succeeded!") } getOrElse { println("I failed :(") }
+```
+
+### Queueing
+
+Though you can certainly implement your own queueing and batching via `addEvents`, the client also includes automated queueing and batching for your more simplified implementation pleasures.
+
+```scala
+// Queue an event
+keen.queueEvent("collectionNameHere", """{"foo": "bar"}""")
+```
+
+Queuing is currenty handled via an in-memory queue that lives as long as the `Client` does. The behavior of the queue and automated sending of events is configurable in `conf/application.conf` as outlined below.
+
+**Sending queued events manually**
+
+```scala
+keen.sendQueuedEvents()
+```
+
+*Sending queued events every time the queue reaches 100 events*
+
+Set `keen.optional.queue.send-interval.events` equal to `100` in `conf/application.conf`.
+
+**Sending queued events every 5 minutes**
+
+Set `keen.optional.queue.send-interval.seconds` equal to `300` in `conf/application.conf`.
+
+Note that `keen.optional.queue.send-interval.events` prevails when setting both `events` and `seconds` settings.
+
+**Using batch sizes**
+
+Setting a specific batch size will help optimize your experience when sending events, so it's recommended that you set `keen.optional.queue.batch.size` to something that makes sense for your implementation (default is `500`). Note that a batch size of `5000` is the upper bound of what you should shoot for. Anything higher and your request has a good chance of being rejected due to payload size limitations.
+
+**Failed events**
+
+Events that fail for whatever reason are _not_ removed from the queue. They will remain there until they are either manually removed or the client shuts down.
+
+**Shutdown**
+
+The client will attempt one last time to send all queued when `shutdown()` is called just in case you forget to send the events yourself. Make sure you call `shutdown()` before you exit!
 
 ## Dependencies
 
