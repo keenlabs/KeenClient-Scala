@@ -3,6 +3,9 @@ package io.keen.client.scala
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
+/**
+ * Abstraction for implementing custom event stores.
+ */
 trait EventStore {
 
   var maxEventsPerCollection: Integer = 10000

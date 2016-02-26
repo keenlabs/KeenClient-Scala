@@ -7,6 +7,9 @@ import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
+/**
+ * In-memory queue for [[Client]].
+ */
 class RamEventStore extends AttemptCountingEventStore {
 
   private var nextId: Long = 0
@@ -14,6 +17,13 @@ class RamEventStore extends AttemptCountingEventStore {
   private var events: TrieMap[Long, String] = new TrieMap[Long, String]()
   private var attempts: TrieMap[String, TrieMap[String, String]] = _
 
+  /**
+   * Event store.
+   *
+   * @param projectId       The ID of the project to which the collection belongs.
+   * @param eventCollection The collection to which the event will be added.
+   * @param event           The event.
+   */
   override def store(projectId: String,
     eventCollection: String,
     event: String): Long = synchronized {
@@ -42,11 +52,22 @@ class RamEventStore extends AttemptCountingEventStore {
       id
   }
 
+  /**
+   * Retrieves a specific event from the store.
+   *
+   * @param handle The handle of the event.
+   * @return       The event string.
+   */
   override def get(handle: Long): String = synchronized {
     val id: Long = handleToId(handle)
     events.getOrElse(id, null)
   }
 
+  /**
+   * Removes a specific event from the store.
+   *
+   * @param handle The handle of the event.
+   */
   override def remove(handle: Long): Unit = synchronized {
     val id: Long = handleToId(handle)
     events -= id
@@ -55,6 +76,12 @@ class RamEventStore extends AttemptCountingEventStore {
     // getHandles call
   }
 
+  /**
+   * Retrieves all handles for a specific project from the store.
+   *
+   * @param projectId The ID of the project.
+   * @return          A map of collection names and their events.
+   */
   def getHandles(projectId: String): TrieMap[String, ListBuffer[Long]] = synchronized {
     
     var result = new TrieMap[String, ListBuffer[Long]]()
