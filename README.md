@@ -19,7 +19,7 @@ Additional API features will be added over time. Contributions are welcome!
 * [Get It](#get-it)
 * [Configuration](#configuration)
   * [Settings](#settings)
-* [Use It](#use-it--a-quick-taste)
+* [Use It](#use-it---a-quick-taste)
   * [Queueing](#queueing)
 * [Dependencies](#dependencies)
   * [Using the Dispatch adapter](#using-the-dispatch-adapter)
