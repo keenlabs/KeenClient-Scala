@@ -381,7 +381,7 @@ trait Writer extends AccessLevel {
   eventStore.maxEventsPerCollection = settings.maxEventsPerCollection.getOrElse(10000)
   val sendIntervalEvents: Integer = settings.sendIntervalEvents.getOrElse(0)
   val sendIntervalSeconds: Integer = settings.sendIntervalSeconds.getOrElse(0)
-  val shutdownDelay: Integer = settings.shutdownDelay.getOrElse(0)
+  val shutdownDelay: Integer = settings.shutdownDelay.getOrElse(30)
 
   /**
    * Schedule sending of queued events.
