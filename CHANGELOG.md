@@ -1,3 +1,7 @@
+## v0.6.0
+
+* Added in-memory queueing - #38 (terryhorner)
+
 ## v0.5.0
 
 * Configuration with Typesafe Config - #25 (ches)

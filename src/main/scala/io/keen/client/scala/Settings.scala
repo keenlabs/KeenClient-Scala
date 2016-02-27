@@ -27,8 +27,18 @@ class Settings(config: Config) {
 
   val projectId: String = config.getString("keen.project-id")
 
+  val environment: Option[String] = config.getOptionalString("keen.optional.environment")
+
   val masterKey: Option[String] = config.getOptionalString("keen.optional.master-key")
   val readKey: Option[String]   = config.getOptionalString("keen.optional.read-key")
   val writeKey: Option[String]  = config.getOptionalString("keen.optional.write-key")
+
+  // Writer specific settings
+  val batchSize: Option[Integer] = config.getOptionalInt("keen.optional.queue.batch.size")
+  val batchTimeout: Option[Integer] = config.getOptionalInt("keen.optional.queue.batch.timeout")
+  val maxEventsPerCollection: Option[Integer] = config.getOptionalInt("keen.optional.queue.max-events-per-collection")
+  val sendIntervalEvents: Option[Integer] = config.getOptionalInt("keen.optional.queue.send-interval.events")
+  val sendIntervalSeconds: Option[Integer] = config.getOptionalInt("keen.optional.queue.send-interval.seconds")
+  val shutdownDelay: Option[Integer] = config.getOptionalInt("keen.optional.queue.shutdown-delay")
 }
 

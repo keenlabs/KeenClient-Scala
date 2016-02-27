@@ -1,6 +1,8 @@
 package test
 
+import scala.collection.concurrent.TrieMap
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Await, Future, TimeoutException }
@@ -104,6 +106,14 @@ class ClientSpec extends Specification with NoTimeConversions {
     )
   )
 
+  // generates n test events
+  def generateTestEvents(n: Integer): ListBuffer[String] = {
+    val events: ListBuffer[String] = new ListBuffer[String]
+    for(i <- 1 to n) {
+      events += s"""{"param$i":"value$i"}"""
+    }
+    events
+  }
 
   // Sequential because it's less work to share the client instance
   // TODO: set up separate read-only client, writer client, etc. instead of
@@ -117,6 +127,7 @@ class ClientSpec extends Specification with NoTimeConversions {
     }
 
     val adapter = client.httpAdapter
+    val projectId: String = dummyConfig.getString("keen.project-id")
 
     "handle 200" in {
       val res = Await.result(client.getProjects, timeout)
@@ -273,6 +284,178 @@ class ClientSpec extends Specification with NoTimeConversions {
     }
   }
 
+  "Client with interval based queueing enabled" should {
+
+    val queueConfig = ConfigFactory.parseMap(
+      Map(
+        "keen.project-id" -> "abc",
+        "keen.optional.environment" -> "test",
+        "keen.optional.master-key" -> "masterKey",
+        "keen.optional.read-key" -> "readKey",
+        "keen.optional.write-key" -> "writeKey",
+        "keen.optional.queue.batch.size" -> 5,
+        "keen.optional.queue.batch.timeout" -> 5,
+        "keen.optional.queue.max-events-per-collection" -> 250,
+        "keen.optional.queue.send-interval.events" -> 100,
+        "keen.optional.queue.send-interval.seconds" -> 5,
+        "keen.optional.queue.shutdown-delay" -> 0
+      )
+    )
+
+    val client = new Client(config = queueConfig) with Master {
+      override val httpAdapter = new OkHttpAdapter
+    }
+
+    val collection: String = "foo"
+    val projectId: String = dummyConfig.getString("keen.project-id")
+
+    var handleMap: TrieMap[String, ListBuffer[Long]] = new TrieMap[String, ListBuffer[Long]]()
+    val store: EventStore = client.eventStore.asInstanceOf[RamEventStore]
+    var testEvents: ListBuffer[String] = new ListBuffer[String]()
+
+    "send queued events" in {
+
+      testEvents = generateTestEvents(5)      
+      testEvents.foreach { event => client.queueEvent(collection, event) }
+
+      // verify that the expected number of events are in the store
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(1)
+      handleMap.getOrElse(collection, null).size must beEqualTo(5)
+
+      // send the queued events
+      client.sendQueuedEvents()
+
+      // validate that the store is now empty
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(0)
+
+      // try sending events again, nothing should happen because the queue is empty
+      client.sendQueuedEvents()
+
+      // the store should still be empty
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(0)
+
+    }
+
+    "automatically send queued events when queue reaches keen.optional.queue.send-interval.events" in {
+
+      testEvents = generateTestEvents(100)
+      
+      // queue the first 50 events
+      for(i <- 0 to 49) {
+        client.queueEvent(collection, testEvents(i))
+      }
+
+      // verify that the expected number of events are in the store
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(1)
+      handleMap.getOrElse(collection, null).size must beEqualTo(50)
+
+      // add the final 50 events
+      for(i <- 50 to 99) {
+        client.queueEvent(collection, testEvents(i))
+      }
+
+      // validate that the store is now empty as a result of sendQueuedEvents being automatically 
+      // triggered with the queueing of the 100th event
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(0)
+      
+    }
+
+    "automatically send queued events every keen.optional.queue.send-interval.seconds" in {
+
+      testEvents = generateTestEvents(5)
+      testEvents.foreach { event => client.queueEvent(collection, event) }
+
+      // verify that the expected number of events are in the store
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(1)
+      handleMap.getOrElse(collection, null).size must beEqualTo(5)
+
+      // sleep until the set interval is reached
+      Thread.sleep((queueConfig.getInt("keen.optional.queue.send-interval.seconds") + 1) * 1000)
+
+      // validate that the store is now empty as a result of sendQueuedEvents being automatically 
+      // triggered with the queueing of the 100th event
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(0)
+      
+    }
+
+    "send queued events on shutdown" in {
+
+      testEvents = generateTestEvents(5)
+      testEvents.foreach { event => client.queueEvent(collection, event) }
+
+      // verify that the expected number of events are in the store
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(1)
+      handleMap.getOrElse(collection, null).size must beEqualTo(5)
+
+      // send the queued events
+      client.shutdown()
+
+      // validate that the store is now empty
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(0)
+
+    }
+
+  }
+
+  "Client with simple queueing enabled" should {
+
+    val queueConfig = ConfigFactory.parseMap(
+      Map(
+        "keen.project-id" -> "abc",
+        "keen.optional.environment" -> "test",
+        "keen.optional.master-key" -> "masterKey",
+        "keen.optional.read-key" -> "readKey",
+        "keen.optional.write-key" -> "writeKey",
+        "keen.optional.queue.batch.size" -> 5,
+        "keen.optional.queue.batch.timeout" -> 5,
+        "keen.optional.queue.max-events-per-collection" -> 250,
+        "keen.optional.queue.send-interval.events" -> 0,
+        "keen.optional.queue.send-interval.seconds" -> 0,
+        "keen.optional.queue.shutdown-delay" -> 0
+      )
+    )
+
+    val client = new Client(config = queueConfig) with Master {
+      override val httpAdapter = new OkHttpAdapter
+    }
+
+    val collection: String = "foo"
+    val projectId: String = dummyConfig.getString("keen.project-id")
+
+    var handleMap: TrieMap[String, ListBuffer[Long]] = new TrieMap[String, ListBuffer[Long]]()
+    val store: EventStore = client.eventStore.asInstanceOf[RamEventStore]
+    var testEvents: ListBuffer[String] = new ListBuffer[String]()
+
+    "not exceed keen.optional.queue.max-events-per-collection" in {
+
+      testEvents = generateTestEvents(500)
+      testEvents.foreach { event => client.queueEvent(collection, event) }
+
+      // verify that the expected number of events are in the store
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(1)
+      handleMap.getOrElse(collection, null).size must beEqualTo(queueConfig.getInt("keen.optional.queue.max-events-per-collection"))
+
+      // shutdown the client
+      client.shutdown()
+
+      // validate that the store is now empty
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(0)
+
+    }
+
+  }
+
   "Client with Spray HttpAdapter" should {
     lazy val externalSystem = ActorSystem("keen-test-user-supplied")
 
@@ -318,6 +501,37 @@ class ClientSpec extends Specification with NoTimeConversions {
 
       res.statusCode must beEqualTo(500)
     }
+
+    "send queued events with server failure" in {
+
+      val projectId: String = dummyConfig.getString("keen.project-id")
+      val collection: String = "foo"
+      val testEvents: ListBuffer[String] = generateTestEvents(5)
+      
+      // queue the events
+      for(event <- testEvents) {
+        client.queueEvent(collection, event)
+      }
+
+      // verify that the expected number of events are in the store
+      val store: EventStore = client.eventStore.asInstanceOf[RamEventStore]
+      var handleMap: TrieMap[String, ListBuffer[Long]] = store.getHandles(projectId)
+      handleMap.size must beEqualTo(1)
+      handleMap.getOrElse(collection, null).size must beEqualTo(5)
+
+      // send the queued events
+      client.sendQueuedEvents()
+
+      // validate that the store still contains all of the queued events
+      handleMap = store.getHandles(projectId)
+      handleMap.size must beEqualTo(1)
+      handleMap.getOrElse(collection, null).size must beEqualTo(5)
+
+      // shutdown the client
+      client.shutdown()
+      true must beEqualTo(true)
+    }
+
   }
 
   "Client future failures" should {

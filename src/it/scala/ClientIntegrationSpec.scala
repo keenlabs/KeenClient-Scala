@@ -13,6 +13,7 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
   // feature scalable time dilation for testing on CI servers that might be
   // slow--see IntegrationPatience in ScalaTest, not sure if specs2 has similar...
   val timeout = 4.seconds
+  val timeframe = Some("this_week") // all queries require timeframes
 
   sequential
 
@@ -89,7 +90,8 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
 
     "count" in {
       val res = Await.result(client.count(
-        collection = "foo"
+        collection = "foo",
+        timeframe = timeframe
       ), timeout)
       res.statusCode must beEqualTo(200)
     }
@@ -98,7 +100,7 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
       val res = Await.result(client.count(
         collection = "foo",
         filters = Some("""[{"property_name": "baz","operator":"eq","property_value":"gorch"}]"""),
-        timeframe = Some("this_week")
+        timeframe = timeframe
       ), timeout)
       res.statusCode must beEqualTo(200)
     }
@@ -106,7 +108,8 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
     "count unique" in {
       val res = Await.result(client.countUnique(
         collection = "foo",
-        targetProperty = "gorch"
+        targetProperty = "gorch",
+        timeframe = timeframe
       ), timeout)
       res.statusCode must beEqualTo(200)
     }
@@ -114,7 +117,8 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
     "minimum" in {
       val res = Await.result(client.minimum(
         collection = "foo",
-        targetProperty = "gorch"
+        targetProperty = "gorch",
+        timeframe = timeframe
       ), timeout)
       res.statusCode must beEqualTo(200)
     }
@@ -122,7 +126,8 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
     "maximum" in {
       val res = Await.result(client.maximum(
         collection = "foo",
-        targetProperty = "gorch"
+        targetProperty = "gorch",
+        timeframe = timeframe
       ), timeout)
       res.statusCode must beEqualTo(200)
     }
@@ -130,7 +135,8 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
     "average" in {
       val res = Await.result(client.average(
         collection = "foo",
-        targetProperty = "gorch"
+        targetProperty = "gorch",
+        timeframe = timeframe
       ), timeout)
       res.statusCode must beEqualTo(200)
     }
@@ -138,7 +144,8 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
     "sum" in {
       val res = Await.result(client.sum(
         collection = "foo",
-        targetProperty = "gorch"
+        targetProperty = "gorch",
+        timeframe = timeframe
       ), timeout)
       res.statusCode must beEqualTo(200)
     }
@@ -146,7 +153,8 @@ class ClientIntegrationSpec extends Specification with NoTimeConversions {
     "select unique" in {
       val res = Await.result(client.selectUnique(
         collection = "foo",
-        targetProperty = "gorch"
+        targetProperty = "gorch",
+        timeframe = timeframe
       ), timeout)
       res.statusCode must beEqualTo(200)
     }

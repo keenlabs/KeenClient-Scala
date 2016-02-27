@@ -1,8 +1,14 @@
 language: scala
+
 scala:
   - 2.11.2
   - 2.10.4
+
 jdk:
   - oraclejdk7
   - openjdk7
 
+addons:
+  # Fix OpenJDK builds
+  # https://github.com/travis-ci/travis-ci/issues/5227
+  hostname: short-hostname
