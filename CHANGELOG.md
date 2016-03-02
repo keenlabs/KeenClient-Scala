@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+**Note:** you might notice that `1.0.x` tags were used early on in the life of this project. Ignore them. No release artifacts were published for those tags. The first published artifact was version `0.4.0`. 
+
 
 ## [Unreleased][unreleased]
 ### Changed
