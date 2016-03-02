@@ -9,7 +9,11 @@ import SonatypeKeys._
 
 sonatypeSettings
 
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+credentials ++= {
+  val ivyCredentials = Path.userHome / ".ivy2" / ".credentials"
+  if (ivyCredentials.canRead) Seq(Credentials(ivyCredentials))
+  else Nil
+}
 
 organizationName := "Keen IO"
 organizationHomepage := Some(url("https://keen.io/"))
