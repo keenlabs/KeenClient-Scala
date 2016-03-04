@@ -11,13 +11,11 @@ import org.specs2.mutable.{BeforeAfter, Specification}
 import org.specs2.specification.{Step, Fragments}
 
 trait BeforeAllAfterAll extends Specification {
-
   override def map(fragments: => Fragments) =
     Step(beforeAll) ^ fragments ^ Step(afterAll)
 
-  protected def beforeAll()
-  protected def afterAll()
-
+  protected def beforeAll(): Unit
+  protected def afterAll(): Unit
 }
 
 abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
@@ -28,7 +26,7 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
   var store: EventStore = _
   val testEvents: ListBuffer[String] = new ListBuffer[String]
 
-  def beforeAll() {
+  def beforeAll() = {
     store = buildStore()  // initialize our store
 
     // generate 5 test events and add them to the store and keep track of them so
@@ -38,7 +36,7 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
     }
   }
 
-  def afterAll() {
+  def afterAll() = {
     store = null  // cleanup
   }
 

@@ -148,7 +148,7 @@ class RamEventStore extends AttemptCountingEventStore {
     project += (eventCollection -> attemptsString)
   }
 
-  def clear() {
+  def clear(): Unit = {
     nextId = 0
     collectionIds = new TrieMap[String, ListBuffer[Long]]()
     events = new TrieMap[Long, String]()

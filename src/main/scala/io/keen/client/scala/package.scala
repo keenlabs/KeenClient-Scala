@@ -19,7 +19,8 @@ package object scala {
       else None
     }
   }
-
-  case class MissingCredential(cause: String) extends RuntimeException(cause)
 }
 
+package scala {
+  case class MissingCredential(cause: String) extends RuntimeException(cause)
+}
