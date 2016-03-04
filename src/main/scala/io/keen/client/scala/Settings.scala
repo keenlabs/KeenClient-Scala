@@ -29,6 +29,8 @@ class Settings(config: Config) {
 
   val environment: Option[String] = config.getOptionalString("keen.optional.environment")
 
+  // format: OFF
+
   val masterKey: Option[String] = config.getOptionalString("keen.optional.master-key")
   val readKey: Option[String]   = config.getOptionalString("keen.optional.read-key")
   val writeKey: Option[String]  = config.getOptionalString("keen.optional.write-key")

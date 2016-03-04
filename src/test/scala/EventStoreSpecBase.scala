@@ -7,8 +7,8 @@ import java.io.IOException
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
-import org.specs2.mutable.{BeforeAfter, Specification}
-import org.specs2.specification.{Step, Fragments}
+import org.specs2.mutable.{ BeforeAfter, Specification }
+import org.specs2.specification.{ Step, Fragments }
 
 trait BeforeAllAfterAll extends Specification {
   override def map(fragments: => Fragments) =
@@ -27,61 +27,51 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
   val testEvents: ListBuffer[String] = new ListBuffer[String]
 
   def beforeAll() = {
-    store = buildStore()  // initialize our store
+    store = buildStore() // initialize our store
 
     // generate 5 test events and add them to the store and keep track of them so
     // we can use them later in the test
-    for(i <- 0 to 4) {
+    for (i <- 0 to 4) {
       testEvents += s"""{"param$i":"value$i"}"""
     }
   }
 
   def afterAll() = {
-    store = null  // cleanup
+    store = null // cleanup
   }
 
   trait EventStoreSetupTeardown extends BeforeAfter {
-
     def before: Any = {
-      store = buildStore()  // initialize our store
+      store = buildStore() // initialize our store
     }
 
     def after: Any = {}
-
   }
 
   sequential
 
   "EventStoreSpecBase" should {
-
     "store and get event" in new EventStoreSetupTeardown {
-
       val handle: Long = store.store("project1", "collection1", testEvents(0))
       val retrieved: String = store.get(handle)
       retrieved must beEqualTo(testEvents(0))
-
     }
 
     "remove event" in new EventStoreSetupTeardown {
-
       val handle: Long = store.store("project1", "collection1", testEvents(0))
       store.remove(handle)
       val retrieved: String = store.get(handle)
       (retrieved must beNull)
-
     }
 
     "remove handle twice" in new EventStoreSetupTeardown {
-
       val handle: Long = store.store("project1", "collection1", testEvents(0))
       store.remove(handle)
       store.remove(handle)
       true must beEqualTo(true) // we're testing for an exception here, and if none is thrown, pass
-
     }
 
     "get handles" in new EventStoreSetupTeardown {
-
       // add a couple events to the store
       store.store("project1", "collection1", testEvents(0))
       store.store("project1", "collection2", testEvents(1))
@@ -102,19 +92,15 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
       // validate the actual events
       store.get(handles1(0)) must beEqualTo(testEvents(0))
       store.get(handles2(0)) must beEqualTo(testEvents(1))
-
     }
 
     "get handles with no events" in new EventStoreSetupTeardown {
-
       val handleMap: TrieMap[String, ListBuffer[Long]] = store.getHandles("project1")
       (handleMap must not beNull)
       handleMap.size must beEqualTo(0)
-
     }
 
     "get handles for multiple projects" in new EventStoreSetupTeardown {
-
       // add a couple events to the store in different projects
       store.store("project1", "collection1", testEvents(0))
       store.store("project1", "collection2", testEvents(1))
@@ -133,9 +119,6 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
       (handleMap must not beNull)
       handleMap.size must beEqualTo(1)
       handleMap.getOrElse("collection3", null).size must beEqualTo(2)
-
     }
-
   }
-
 }

@@ -44,3 +44,15 @@ initialCommands in consoleQuick := ""
 // SBT support for Maven-style integration tests (src/it)
 Defaults.itSettings
 configs(IntegrationTest)
+
+// Source Formatting
+import com.typesafe.sbt.SbtScalariform
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
+import scalariform.formatter.preferences._
+
+SbtScalariform.scalariformSettingsWithIt
+
+ScalariformKeys.preferences := ScalariformKeys.preferences.value
+  .setPreference(AlignSingleLineCaseStatements, true)
+  .setPreference(DoubleIndentClassDeclaration, true)
+  .setPreference(PreserveDanglingCloseParenthesis, true)
