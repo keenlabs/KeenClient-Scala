@@ -435,9 +435,12 @@ trait Writer extends AccessLevel {
   def queueEvent(collection: String, event: String): Unit = {
     // bypass min/max intervals for testing
     environment match {
-      case Some("test") if Some("test").get matches "(?i)test" => {}
+      case Some("test") if Some("test").get matches "(?i)test" =>
       case _ =>
-        require(sendIntervalEvents == 0 || (sendIntervalEvents >= MinSendIntervalEvents && sendIntervalEvents <= MaxSendIntervalEvents), s"Send events interval must be between $MinSendIntervalEvents and $MaxSendIntervalEvents")
+        require(
+          sendIntervalEvents == 0 || (sendIntervalEvents >= MinSendIntervalEvents && sendIntervalEvents <= MaxSendIntervalEvents),
+          s"Send events interval must be between $MinSendIntervalEvents and $MaxSendIntervalEvents"
+        )
     }
 
     // write the event to the queue
@@ -459,9 +462,12 @@ trait Writer extends AccessLevel {
   private def scheduleSendQueuedEvents(): Option[ScheduledThreadPoolExecutor] = {
     // bypass min/max intervals for testing
     environment match {
-      case Some("test") if Some("test").get matches "(?i)test" => {}
+      case Some("test") if Some("test").get matches "(?i)test" =>
       case _ =>
-        require(sendIntervalSeconds == 0 || (sendIntervalSeconds >= MinSendIntervalSeconds && sendIntervalSeconds <= MaxSendIntervalSeconds), s"Send seconds interval must be between $MinSendIntervalSeconds and $MaxSendIntervalSeconds")
+        require(
+          sendIntervalSeconds == 0 || (sendIntervalSeconds >= MinSendIntervalSeconds && sendIntervalSeconds <= MaxSendIntervalSeconds),
+          s"Send seconds interval must be between $MinSendIntervalSeconds and $MaxSendIntervalSeconds"
+        )
     }
 
     // send queued events every n seconds
@@ -473,14 +479,13 @@ trait Writer extends AccessLevel {
 
         // schedule sending from our thread pool at a specific interval
         tp.scheduleWithFixedDelay(new Runnable {
-          def run: Unit = {
+          def run(): Unit = {
             try {
               sendQueuedEvents()
             } catch {
-              case ex: Throwable => {
+              case ex: Throwable =>
                 error("Failed to send queued events")
                 error(s"""$ex""")
-              }
             }
           }
         }, 1, sendIntervalSeconds.toLong, TimeUnit.SECONDS)
@@ -520,7 +525,7 @@ trait Writer extends AccessLevel {
 
         // handle addEvents responses properly
         response.statusCode match {
-          case 200 | 201 => {
+          case 200 | 201 =>
             // log success
             info(s"""${response.statusCode} ${response.body} | Sent ${batch.size} queued events""")
 
@@ -531,11 +536,9 @@ trait Writer extends AccessLevel {
 
             // log removal
             info(s"""Removed ${handleGroup(index).size} events from the queue""")
-          }
-          case _ => {
-            // log but DO NOT remove events from queue
-            error(s"""${response.statusCode} ${response.body} | Failed to send ${batch.size} queued events""")
-          }
+
+          // log but DO NOT remove events from queue
+          case _ => error(s"""${response.statusCode} ${response.body} | Failed to send ${batch.size} queued events""")
         }
       }
     }
@@ -550,7 +553,7 @@ trait Writer extends AccessLevel {
 
     // send our queued events in a separate thread
     tp.execute(new Runnable {
-      def run: Unit = {
+      def run(): Unit = {
         sendQueuedEvents()
       }
     })
@@ -563,19 +566,19 @@ trait Writer extends AccessLevel {
     // safely terminate the scheduled thread pool
     scheduledThreadPool match {
       case Some(stp) =>
-        stp.shutdown
+        stp.shutdown()
         stp.awaitTermination(shutdownDelay.toLong, TimeUnit.SECONDS) match {
           case false => error("Failed to shutdown scheduled thread pool")
-          case _     => {}
+          case _     =>
         }
-      case _ => {}
+      case _ =>
     }
 
     // don't forget to empty the queue before we shutdown
     sendQueuedEvents()
 
     // because we're overriding Client.shutdown
-    httpAdapter.shutdown
+    httpAdapter.shutdown()
   }
 }
 

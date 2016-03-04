@@ -100,15 +100,15 @@ class RamEventStore extends AttemptCountingEventStore {
         val ids: ListBuffer[Long] = value
         var handles: ListBuffer[Long] = new ListBuffer[Long]()
         for (id <- ids) {
-          if (!events.keySet.exists(_ == id)) {
+          if (!events.keySet.contains(id)) {
             // lazily remove the "dead" event
             ids -= id
           } else {
-            handles += (id)
+            handles += id
           }
         }
 
-        if (handles.size > 0) {
+        if (handles.nonEmpty) {
           result += (eventCollection -> handles)
         }
       }

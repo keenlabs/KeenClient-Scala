@@ -12,7 +12,7 @@ import org.specs2.specification.{ Step, Fragments }
 
 trait BeforeAllAfterAll extends Specification {
   override def map(fragments: => Fragments) =
-    Step(beforeAll) ^ fragments ^ Step(afterAll)
+    Step(beforeAll()) ^ fragments ^ Step(afterAll())
 
   protected def beforeAll(): Unit
   protected def afterAll(): Unit
@@ -52,20 +52,20 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
 
   "EventStoreSpecBase" should {
     "store and get event" in new EventStoreSetupTeardown {
-      val handle: Long = store.store("project1", "collection1", testEvents(0))
+      val handle: Long = store.store("project1", "collection1", testEvents.head)
       val retrieved: String = store.get(handle)
-      retrieved must beEqualTo(testEvents(0))
+      retrieved must beEqualTo(testEvents.head)
     }
 
     "remove event" in new EventStoreSetupTeardown {
-      val handle: Long = store.store("project1", "collection1", testEvents(0))
+      val handle: Long = store.store("project1", "collection1", testEvents.head)
       store.remove(handle)
       val retrieved: String = store.get(handle)
-      (retrieved must beNull)
+      retrieved must beNull
     }
 
     "remove handle twice" in new EventStoreSetupTeardown {
-      val handle: Long = store.store("project1", "collection1", testEvents(0))
+      val handle: Long = store.store("project1", "collection1", testEvents.head)
       store.remove(handle)
       store.remove(handle)
       true must beEqualTo(true) // we're testing for an exception here, and if none is thrown, pass
@@ -73,7 +73,7 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
 
     "get handles" in new EventStoreSetupTeardown {
       // add a couple events to the store
-      store.store("project1", "collection1", testEvents(0))
+      store.store("project1", "collection1", testEvents.head)
       store.store("project1", "collection2", testEvents(1))
 
       // get the handle map
@@ -90,8 +90,8 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
       handles2.size must beEqualTo(1)
 
       // validate the actual events
-      store.get(handles1(0)) must beEqualTo(testEvents(0))
-      store.get(handles2(0)) must beEqualTo(testEvents(1))
+      store.get(handles1.head) must beEqualTo(testEvents.head)
+      store.get(handles2.head) must beEqualTo(testEvents(1))
     }
 
     "get handles with no events" in new EventStoreSetupTeardown {
@@ -102,7 +102,7 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
 
     "get handles for multiple projects" in new EventStoreSetupTeardown {
       // add a couple events to the store in different projects
-      store.store("project1", "collection1", testEvents(0))
+      store.store("project1", "collection1", testEvents.head)
       store.store("project1", "collection2", testEvents(1))
       store.store("project2", "collection3", testEvents(2))
       store.store("project2", "collection3", testEvents(3))
