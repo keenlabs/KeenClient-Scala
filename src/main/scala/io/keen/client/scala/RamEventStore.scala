@@ -1,6 +1,5 @@
 package io.keen.client.scala
 
-import java.io.IOException
 import java.util.Locale
 
 import scala.collection.concurrent.TrieMap

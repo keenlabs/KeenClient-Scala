@@ -1,6 +1,6 @@
 package io.keen.client.scala
 
-import java.util.concurrent.{Executor, Executors, ScheduledThreadPoolExecutor, ThreadFactory, TimeUnit}
+import java.util.concurrent.{Executors, ScheduledThreadPoolExecutor, TimeUnit}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._

@@ -5,7 +5,7 @@ import io.keen.client.scala.AttemptCountingEventStore
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
-import org.specs2.mutable.{BeforeAfter, Specification}
+import org.specs2.mutable.BeforeAfter
 
 abstract class AttemptCountingEventStoreSpecBase extends EventStoreSpecBase {
 

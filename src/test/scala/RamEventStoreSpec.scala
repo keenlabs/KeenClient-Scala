@@ -6,8 +6,6 @@ import io.keen.client.scala.RamEventStore
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
-import org.specs2.mutable.Specification
-
 class RamEventStoreSpec extends AttemptCountingEventStoreSpecBase {
 
   override def buildStore(): EventStore = {

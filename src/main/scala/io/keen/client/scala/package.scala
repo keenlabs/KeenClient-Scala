@@ -1,6 +1,6 @@
 package io.keen.client
 
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.Config
 
 package object scala {
   /**
