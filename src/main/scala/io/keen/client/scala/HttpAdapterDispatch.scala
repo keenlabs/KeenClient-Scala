@@ -6,8 +6,11 @@ import dispatch._
 import scala.concurrent.Future
 
 /**
- * Extension of HttpAdapter that uses Dispatch rather than Spray+akka
- * Helps avoid dependency conflicts in use cases such as Spark
+ * An [[HttpAdapter]] built on the [[http://dispatch.databinder.net/ Dispatch]]
+ * HTTP client library.
+ *
+ * @param httpTimeoutSeconds Sets a timeout for HTTP requests, in seconds.
+ * @todo Move the timeout constructor param to config; it's not used here!
  */
 class HttpAdapterDispatch(httpTimeoutSeconds: Int = 10) extends HttpAdapter {
   val http = new Http
@@ -54,5 +57,6 @@ class HttpAdapterDispatch(httpTimeoutSeconds: Int = 10) extends HttpAdapter {
 
   def shutdown() = http.shutdown()
 
+  // TODO: This is dubious...
   override protected def finalize() = shutdown()
 }

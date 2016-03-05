@@ -14,6 +14,13 @@ import spray.http.Uri._
 import spray.http.HttpHeaders.RawHeader
 import spray.httpx.RequestBuilding._
 
+/**
+ * An [[HttpAdapter]] built on HTTP client support of the [[http://spray.io/
+ * Spray HTTP toolkit]].
+ *
+ * @param httpTimeoutSeconds Sets a timeout for HTTP requests, in seconds.
+ * @todo Move the timeout constructor param to config
+ */
 class HttpAdapterSpray(httpTimeoutSeconds: Int = 10)(implicit val actorSystem: ActorSystem = ActorSystem("keen-client"))
     extends HttpAdapter with Logging {
 
@@ -73,6 +80,12 @@ class HttpAdapterSpray(httpTimeoutSeconds: Int = 10)(implicit val actorSystem: A
       })
   }
 
+  /**
+   * @inheritdoc
+   *
+   * Disconnects any remaining connections. Both idle and active. If you are accessing
+   * Keen through a proxy that keeps connections alive this is useful.
+   */
   def shutdown() = {
     (IO(Http) ? Http.CloseAll) onComplete {
       // When this completes we will shutdown the actor system if it wasn't

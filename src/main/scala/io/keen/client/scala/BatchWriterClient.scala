@@ -30,7 +30,7 @@ object BatchWriterClient {
  * Batch size, flush scheduling, queue bounds, etc. can be tuned via the settings
  * under the `keen.queue` property tree.
  *
- * TODO: explain the difference in behavior if send-interval is zero seconds.
+ * @todo Explain the difference in behavior if send-interval is zero seconds.
  *
  * @param config Client configuration, by default loaded from `application.conf`.
  */
@@ -39,19 +39,19 @@ class BatchWriterClient(config: Config = ConfigFactory.load())
 
   import BatchWriterClient._
 
-  /** The number of events sent in a single API call when flushing batches */
+  /** @see [[Settings#batchSize]] */
   val batchSize: Integer = settings.batchSize
 
-  /** Timeout for each bulk write API call when flushing batches */
+  /** @see [[Settings#batchTimeout]] */
   val batchTimeout: FiniteDuration = settings.batchTimeout
 
-  /** Threshold of queued events at which flush of batches is triggered */
+  /** @see [[Settings#sendIntervalEvents]] */
   val sendIntervalEvents: Integer = settings.sendIntervalEvents
 
-  /** Time interval at which batches of queued event writes are scheduled to be flushed */
+  /** @see [[Settings#sendIntervalDuration]] */
   val sendInterval: FiniteDuration = settings.sendIntervalDuration
 
-  /** Duration for which client will wait for scheduled batch flushes to complete when shutting down */
+  /** @see [[Settings#shutdownDelay]] */
   val shutdownDelay: FiniteDuration = settings.shutdownDelay
 
   // initialize and configure our local event store queue
