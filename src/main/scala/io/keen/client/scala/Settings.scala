@@ -1,5 +1,7 @@
 package io.keen.client.scala
 
+import scala.concurrent.duration.FiniteDuration
+
 import com.typesafe.config._
 
 /**
@@ -35,12 +37,11 @@ class Settings(config: Config) {
   val readKey: Option[String]   = config.getOptionalString("keen.optional.read-key")
   val writeKey: Option[String]  = config.getOptionalString("keen.optional.write-key")
 
-  // Writer specific settings
-  val batchSize: Option[Integer] = config.getOptionalInt("keen.optional.queue.batch.size")
-  val batchTimeout: Option[Integer] = config.getOptionalInt("keen.optional.queue.batch.timeout")
-  val maxEventsPerCollection: Option[Integer] = config.getOptionalInt("keen.optional.queue.max-events-per-collection")
-  val sendIntervalEvents: Option[Integer] = config.getOptionalInt("keen.optional.queue.send-interval.events")
-  val sendIntervalSeconds: Option[Integer] = config.getOptionalInt("keen.optional.queue.send-interval.seconds")
-  val shutdownDelay: Option[Integer] = config.getOptionalInt("keen.optional.queue.shutdown-delay")
+  // Writer-specific settings
+  val batchSize: Integer                   = config.getInt("keen.queue.batch.size")
+  val batchTimeout: FiniteDuration         = config.getFiniteDuration("keen.queue.batch.timeout")
+  val maxEventsPerCollection: Integer      = config.getInt("keen.queue.max-events-per-collection")
+  val sendIntervalEvents: Integer          = config.getInt("keen.queue.send-interval.events")
+  val sendIntervalDuration: FiniteDuration = config.getFiniteDuration("keen.queue.send-interval.duration")
+  val shutdownDelay: FiniteDuration        = config.getFiniteDuration("keen.queue.shutdown-delay")
 }
-

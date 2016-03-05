@@ -24,6 +24,7 @@ class Client(
   val httpAdapter: HttpAdapter = new HttpAdapterSpray
   val settings: Settings = new Settings(config)
 
+  // TODO: This is a smell, see http://12factor.net/config
   val environment: Option[String] = settings.environment
 
   /**
@@ -386,19 +387,20 @@ trait Writer extends AccessLevel {
   val writeKey: String = settings.writeKey.getOrElse(throw MissingCredential("Write key required for Writer"))
 
   // constants
+  // TODO: 60 seconds is an awfully long minimum…
   protected val MinSendIntervalEvents: Long = 100
   protected val MaxSendIntervalEvents: Long = 10000
-  protected val MinSendIntervalSeconds: Long = 60
-  protected val MaxSendIntervalSeconds: Long = 3600
+  protected val MinSendInterval: FiniteDuration = 60.seconds
+  protected val MaxSendInterval: FiniteDuration = 1.hour
 
   // initialize and configure our local event store queue
-  val batchSize: Integer = settings.batchSize.getOrElse(500)
-  val batchTimeout: Integer = settings.batchTimeout.getOrElse(5)
+  val batchSize: Integer = settings.batchSize
+  val batchTimeout: FiniteDuration = settings.batchTimeout
   val eventStore: EventStore = new RamEventStore
-  eventStore.maxEventsPerCollection = settings.maxEventsPerCollection.getOrElse(10000)
-  val sendIntervalEvents: Integer = settings.sendIntervalEvents.getOrElse(0)
-  val sendIntervalSeconds: Integer = settings.sendIntervalSeconds.getOrElse(0)
-  val shutdownDelay: Integer = settings.shutdownDelay.getOrElse(30)
+  eventStore.maxEventsPerCollection = settings.maxEventsPerCollection
+  val sendIntervalEvents: Integer = settings.sendIntervalEvents
+  val sendInterval: FiniteDuration = settings.sendIntervalDuration
+  val shutdownDelay: FiniteDuration = settings.shutdownDelay
 
   /**
    * Schedule sending of queued events.
@@ -434,6 +436,7 @@ trait Writer extends AccessLevel {
    */
   def queueEvent(collection: String, event: String): Unit = {
     // bypass min/max intervals for testing
+    // FIXME: There are less kludgey ways to achieve testability here
     environment match {
       case Some("test") if Some("test").get matches "(?i)test" =>
       case _ =>
@@ -456,8 +459,8 @@ trait Writer extends AccessLevel {
   }
 
   /**
-   * Schedules sending of queued events if keen.optional.queue.send-interval.seconds contains a valid value that
-   * is between `MinSendIntervalSeconds` and `MaxSendIntervalSeconds`.
+   * Schedules sending of queued events if keen.queue.send-interval.duration contains a valid value that
+   * is between `MinSendInterval` and `MaxSendInterval`.
    */
   private def scheduleSendQueuedEvents(): Option[ScheduledThreadPoolExecutor] = {
     // bypass min/max intervals for testing
@@ -465,14 +468,14 @@ trait Writer extends AccessLevel {
       case Some("test") if Some("test").get matches "(?i)test" =>
       case _ =>
         require(
-          sendIntervalSeconds == 0 || (sendIntervalSeconds >= MinSendIntervalSeconds && sendIntervalSeconds <= MaxSendIntervalSeconds),
-          s"Send seconds interval must be between $MinSendIntervalSeconds and $MaxSendIntervalSeconds"
+          sendInterval.toSeconds == 0 || (sendInterval >= MinSendInterval && sendInterval <= MaxSendInterval),
+          s"Send interval must be between $MinSendInterval and $MaxSendInterval"
         )
     }
 
     // send queued events every n seconds
-    sendIntervalSeconds match {
-      case n if n <= 0 => None
+    sendInterval.toSeconds match {
+      case n if n <= 0 => None // TODO: document what config value of zero means
       case _ =>
         // use a thread pool for our scheduled threads so we can use daemon threads
         val tp = Executors.newScheduledThreadPool(1, new ClientThreadFactory).asInstanceOf[ScheduledThreadPoolExecutor]
@@ -488,7 +491,7 @@ trait Writer extends AccessLevel {
                 error(s"""$ex""")
             }
           }
-        }, 1, sendIntervalSeconds.toLong, TimeUnit.SECONDS)
+        }, 1, sendInterval.toMillis, TimeUnit.MILLISECONDS)
 
         Some(tp)
     }
@@ -498,9 +501,9 @@ trait Writer extends AccessLevel {
    * Sends all queued events, removing events from the queue as events are successfully sent.
    */
   def sendQueuedEvents(): Unit = {
-    val handleMap: TrieMap[String, ListBuffer[Long]] = eventStore.getHandles(projectId)
-    val handles: ListBuffer[Long] = ListBuffer.empty[Long]
-    val events: ListBuffer[String] = ListBuffer.empty[String]
+    val handleMap = eventStore.getHandles(projectId)
+    val handles = ListBuffer.empty[Long]
+    val events = ListBuffer.empty[String]
 
     // iterate over all of the event handles in the queue, by collection
     for ((collection, eventHandles) <- handleMap) {
@@ -520,7 +523,7 @@ trait Writer extends AccessLevel {
         // publish this batch
         var response = Await.result(
           addEvents(s"""{"$collection": [${batch.mkString(",")}]}"""),
-          DurationInt(batchTimeout).seconds
+          batchTimeout
         )
 
         // handle addEvents responses properly
@@ -567,7 +570,7 @@ trait Writer extends AccessLevel {
     scheduledThreadPool match {
       case Some(stp) =>
         stp.shutdown()
-        stp.awaitTermination(shutdownDelay.toLong, TimeUnit.SECONDS) match {
+        stp.awaitTermination(shutdownDelay.toMillis, TimeUnit.MILLISECONDS) match {
           case false => error("Failed to shutdown scheduled thread pool")
           case _     =>
         }
