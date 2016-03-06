@@ -37,7 +37,7 @@ class Settings(config: Config) {
   val readKey: Option[String]   = config.getOptionalString("keen.optional.read-key")
   val writeKey: Option[String]  = config.getOptionalString("keen.optional.write-key")
 
-  // Writer-specific settings
+  // Batched write settings
   val batchSize: Integer                   = config.getInt("keen.queue.batch.size")
   val batchTimeout: FiniteDuration         = config.getFiniteDuration("keen.queue.batch.timeout")
   val maxEventsPerCollection: Integer      = config.getInt("keen.queue.max-events-per-collection")

@@ -1,7 +1,5 @@
+package io.keen.client.scala
 package test
-
-import io.keen.client.scala.EventStore
-import io.keen.client.scala.RamEventStore
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer

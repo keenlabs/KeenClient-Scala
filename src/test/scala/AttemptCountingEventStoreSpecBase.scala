@@ -1,6 +1,5 @@
+package io.keen.client.scala
 package test
-
-import io.keen.client.scala.AttemptCountingEventStore
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer

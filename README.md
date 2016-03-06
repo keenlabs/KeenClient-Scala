@@ -20,7 +20,7 @@ Additional API features will be added over time. Contributions are welcome!
 * [Configuration](#configuration)
   * [Settings](#settings)
 * [Use It](#use-it---a-quick-taste)
-  * [Queueing](#queueing)
+  * [Batching Write Requests](#batching-write-requests)
 * [Dependencies](#dependencies)
   * [Using the Dispatch adapter](#using-the-dispatch-adapter)
   * [JSON](#json)
@@ -128,11 +128,17 @@ resp onComplete {
 resp map { println("I succeeded!") } getOrElse { println("I failed :(") }
 ```
 
-### Queueing
+### Batching Write Requests
 
-Though you can certainly implement your own queueing and batching via `addEvents`, the client also includes automated queueing and batching for your more simplified implementation pleasures.
+The standard client is asynchronous, but it does make a discrete API call for each individual (`addEvent`) or bulk (`addEvents`) event write. Depending on your usage patterns, batching events to make fewer HTTP requests to Keen IO may be a significant optimization.
+
+Though you can certainly implement your own queueing and batching via `addEvents`, the library includes automated batching support sufficient for many use cases. This is available in the `BatchWriterClient`, shown below.
 
 ```scala
+import io.keen.client.scala.BatchWriterClient
+
+val keen = new BatchWriterClient
+
 // Queue an event
 keen.queueEvent("collectionNameHere", """{"foo": "bar"}""")
 ```
@@ -157,7 +163,7 @@ Note that `send-interval.events` takes precedence when both `send-interval.event
 
 **Using batch sizes**
 
-Setting a specific batch size will help optimize your experience when sending events. It's recommended that you set `keen.queue.batch.size` to something that makes sense for your implementation (default is `500`). Note that a batch size of `5000` is the upper bound of what you should shoot for. Anything higher and your request has a good chance of being rejected due to payload size limitations.
+Setting a specific batch size will help optimize your experience when sending events. It's recommended that you set `keen.queue.batch.size` to something that makes sense for your application (default is `500`). Note that a batch size of `5000` is the upper bound of what you should shoot for. Anything higher and your request has a good chance of being rejected due to payload size limitations.
 
 **Failed events**
 
@@ -165,7 +171,15 @@ Events that fail to be sent for whatever reason (payload rejection, network issu
 
 **Shutdown**
 
-`Client` will attempt one last time to send all queued events when `shutdown()` is called just in case you forget to send the events yourself. Make sure you call `shutdown()` before you exit otherwise all events that remain in the queue upon termination will be lost.
+`BatchWriterClient` will attempt one last time to send all queued events when `shutdown()` is called just in case you forget to send the events yourself. Make sure you call `shutdown()` before you exit otherwise all events that remain in the queue upon termination will be lost.
+
+#### Caveats and Tradeoffs
+
+Bear in mind that `BatchWriterClient` uses an in-memory event queue implementation by default and has an API that favors fire-and-forget usage; it is difficult to handle errors in a granular fashion and ensure that writes are never lost if queue bounds are exceeded, etc. If you're recording something like internal metrics, the possibility of occasional missing data points may be an acceptable tradeoff for the optimization of batching.
+
+If it is business-critical that some of your writes are never lost, you may wish to use the discrete API so that you can handle the `Future` result of each call with exacting care. Or if you require batching, you can implement a custom persistent `EventStore` queue for control over retries, and/or your own batching `Client` subclass tailored to your needs.
+
+`BatchWriterClient` is a `Client with Writer`, so you can call the discrete `addEvent`/`addEvents` methods on an instance and as usual these send immediately without queueing. Thus you can selectively use batching for some types of writes and make discrete calls for more critical ones.
 
 ## Dependencies
 
@@ -200,6 +214,8 @@ val keen = new Client {
   override val httpAdapter = new HttpAdapterDispatch
 }
 ```
+
+`BatchWriterClient` works the same way.
 
 ### JSON
 

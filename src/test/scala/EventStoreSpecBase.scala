@@ -1,6 +1,5 @@
+package io.keen.client.scala
 package test
-
-import io.keen.client.scala.EventStore
 
 import java.io.IOException
 
