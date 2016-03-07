@@ -7,7 +7,7 @@ import akka.util.Timeout
 import grizzled.slf4j.Logging
 import java.util.concurrent.TimeUnit
 import scala.concurrent.Future
-import scala.util.{Failure,Success}
+import scala.util.{ Failure, Success }
 import spray.can.Http
 import spray.http._
 import spray.http.Uri._
@@ -15,7 +15,7 @@ import spray.http.HttpHeaders.RawHeader
 import spray.httpx.RequestBuilding._
 
 class HttpAdapterSpray(httpTimeoutSeconds: Int = 10)(implicit val actorSystem: ActorSystem = ActorSystem("keen-client"))
-  extends HttpAdapter with Logging {
+    extends HttpAdapter with Logging {
 
   import actorSystem.dispatcher // execution context for futures
 
@@ -30,7 +30,8 @@ class HttpAdapterSpray(httpTimeoutSeconds: Int = 10)(implicit val actorSystem: A
     method: String,
     key: String,
     body: Option[String] = None,
-    params: Map[String,Option[String]] = Map.empty): Future[Response] = {
+    params: Map[String, Option[String]] = Map.empty
+  ): Future[Response] = {
 
     // Turn a map of string,opt[string] into a map of string,string which is
     // what Query wants
@@ -53,9 +54,9 @@ class HttpAdapterSpray(httpTimeoutSeconds: Int = 10)(implicit val actorSystem: A
     // to construct an HTTP request of the type needed.
     val httpMethod: HttpRequest = method match {
       case "DELETE" => Delete(finalUrl, body)
-      case "GET" => Get(finalUrl, body)
-      case "POST" => Post(finalUrl, HttpEntity(ContentTypes.`application/json`, body.get))
-      case _ => throw new IllegalArgumentException("Unknown HTTP method: " + method)
+      case "GET"    => Get(finalUrl, body)
+      case "POST"   => Post(finalUrl, HttpEntity(ContentTypes.`application/json`, body.get))
+      case _        => throw new IllegalArgumentException("Unknown HTTP method: " + method)
     }
 
     debug("%s: %s".format(method, finalUrl))

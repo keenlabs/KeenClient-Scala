@@ -1,13 +1,13 @@
 package io.keen.client.scala
 
-import java.util.concurrent.{Executor, Executors, ScheduledThreadPoolExecutor, ThreadFactory, TimeUnit}
+import java.util.concurrent.{ Executors, ScheduledThreadPoolExecutor, TimeUnit }
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{ Config, ConfigFactory }
 import grizzled.slf4j.Logging
 
 // XXX Remaining: Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
@@ -19,7 +19,7 @@ class Client(
     val scheme: String = "https",
     val authority: String = "api.keen.io",
     val version: String = "3.0"
-  ) extends HttpAdapterComponent with Logging {
+) extends HttpAdapterComponent with Logging {
 
   val httpAdapter: HttpAdapter = new HttpAdapterSpray
   val settings: Settings = new Settings(config)
@@ -77,7 +77,8 @@ sealed protected trait AccessLevel {
     method: String,
     key: String,
     body: Option[String] = None,
-    params: Map[String, Option[String]] = Map.empty) = {
+    params: Map[String, Option[String]] = Map.empty
+  ) = {
 
     httpAdapter.doRequest(method = method, scheme = scheme, authority = authority, path = path, key = key, body = body, params = params)
   }
@@ -125,7 +126,8 @@ trait Reader extends AccessLevel {
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] =
+    groupBy: Option[String] = None
+  ): Future[Response] =
 
     doQuery(
       analysisType = "average",
@@ -134,7 +136,8 @@ trait Reader extends AccessLevel {
       filters = filters,
       timeframe = timeframe,
       timezone = timezone,
-      groupBy = groupBy)
+      groupBy = groupBy
+    )
 
   /**
    * Returns the number of resources in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
@@ -148,7 +151,8 @@ trait Reader extends AccessLevel {
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] =
+    groupBy: Option[String] = None
+  ): Future[Response] =
 
     doQuery(
       analysisType = "count",
@@ -157,7 +161,8 @@ trait Reader extends AccessLevel {
       filters = filters,
       timeframe = timeframe,
       timezone = timezone,
-      groupBy = groupBy)
+      groupBy = groupBy
+    )
 
   /**
    * Returns the number of '''unique''' resources in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
@@ -175,7 +180,8 @@ trait Reader extends AccessLevel {
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] =
+    groupBy: Option[String] = None
+  ): Future[Response] =
 
     doQuery(
       analysisType = "count",
@@ -184,7 +190,8 @@ trait Reader extends AccessLevel {
       filters = filters,
       timeframe = timeframe,
       timezone = timezone,
-      groupBy = groupBy)
+      groupBy = groupBy
+    )
 
   def extraction(
     collection: String,
@@ -192,7 +199,8 @@ trait Reader extends AccessLevel {
     timeframe: Option[String] = None,
     email: Option[String] = None,
     latest: Option[String] = None,
-    propertyNames: Option[String] = None): Future[Response] =
+    propertyNames: Option[String] = None
+  ): Future[Response] =
 
     doQuery(
       analysisType = "extraction",
@@ -220,7 +228,8 @@ trait Reader extends AccessLevel {
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] =
+    groupBy: Option[String] = None
+  ): Future[Response] =
 
     doQuery(
       analysisType = "maximum",
@@ -229,7 +238,8 @@ trait Reader extends AccessLevel {
       filters = filters,
       timeframe = timeframe,
       timezone = timezone,
-      groupBy = groupBy)
+      groupBy = groupBy
+    )
 
   /**
    * Returns the minimum numeric value for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#minimum-resource Minimum Resource]].
@@ -247,7 +257,8 @@ trait Reader extends AccessLevel {
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] =
+    groupBy: Option[String] = None
+  ): Future[Response] =
 
     doQuery(
       analysisType = "minimum",
@@ -256,9 +267,10 @@ trait Reader extends AccessLevel {
       filters = filters,
       timeframe = timeframe,
       timezone = timezone,
-      groupBy = groupBy)
+      groupBy = groupBy
+    )
 
- /**
+  /**
    * Returns a list of '''unique''' resources in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#select-unique-resource Select Unique Resource]].
    *
    * @param collection The name of the event collection you are analyzing.
@@ -274,7 +286,8 @@ trait Reader extends AccessLevel {
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] =
+    groupBy: Option[String] = None
+  ): Future[Response] =
 
     doQuery(
       analysisType = "select_unique",
@@ -283,7 +296,8 @@ trait Reader extends AccessLevel {
       filters = filters,
       timeframe = timeframe,
       timezone = timezone,
-      groupBy = groupBy)
+      groupBy = groupBy
+    )
 
   /**
    * Returns the sum across all numeric values for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#sum-resource Sum Resource]].
@@ -301,7 +315,8 @@ trait Reader extends AccessLevel {
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     timezone: Option[String] = None,
-    groupBy: Option[String]= None): Future[Response] =
+    groupBy: Option[String] = None
+  ): Future[Response] =
 
     doQuery(
       analysisType = "sum",
@@ -310,7 +325,8 @@ trait Reader extends AccessLevel {
       filters = filters,
       timeframe = timeframe,
       timezone = timezone,
-      groupBy = groupBy)
+      groupBy = groupBy
+    )
 
   private def doQuery(
     analysisType: String,
@@ -322,7 +338,8 @@ trait Reader extends AccessLevel {
     groupBy: Option[String] = None,
     email: Option[String] = None,
     latest: Option[String] = None,
-    propertyNames: Option[String] = None): Future[Response] = {
+    propertyNames: Option[String] = None
+  ): Future[Response] = {
 
     val path = Seq(version, "projects", projectId, "queries", analysisType).mkString("/")
 
@@ -416,25 +433,26 @@ trait Writer extends AccessLevel {
    * @param event The event
    */
   def queueEvent(collection: String, event: String): Unit = {
-
     // bypass min/max intervals for testing
     environment match {
-      case Some("test") if Some("test").get matches "(?i)test" => {}
+      case Some("test") if Some("test").get matches "(?i)test" =>
       case _ =>
-        require(sendIntervalEvents == 0 || (sendIntervalEvents >= MinSendIntervalEvents && sendIntervalEvents <= MaxSendIntervalEvents), s"Send events interval must be between $MinSendIntervalEvents and $MaxSendIntervalEvents")
+        require(
+          sendIntervalEvents == 0 || (sendIntervalEvents >= MinSendIntervalEvents && sendIntervalEvents <= MaxSendIntervalEvents),
+          s"Send events interval must be between $MinSendIntervalEvents and $MaxSendIntervalEvents"
+        )
     }
-    
+
     // write the event to the queue
     eventStore.store(projectId, collection, event)
-    
+
     // check the queue to see if we meet or exceed keen.optional.queue.send-interval.events. if so, send
     // all queued events
-    if(sendIntervalEvents != 0) {
-      if(eventStore.size >= sendIntervalEvents) {
+    if (sendIntervalEvents != 0) {
+      if (eventStore.size >= sendIntervalEvents) {
         sendQueuedEvents()
       }
     }
-
   }
 
   /**
@@ -442,12 +460,14 @@ trait Writer extends AccessLevel {
    * is between `MinSendIntervalSeconds` and `MaxSendIntervalSeconds`.
    */
   private def scheduleSendQueuedEvents(): Option[ScheduledThreadPoolExecutor] = {
-
     // bypass min/max intervals for testing
     environment match {
-      case Some("test") if Some("test").get matches "(?i)test" => {}
+      case Some("test") if Some("test").get matches "(?i)test" =>
       case _ =>
-        require(sendIntervalSeconds == 0 || (sendIntervalSeconds >= MinSendIntervalSeconds && sendIntervalSeconds <= MaxSendIntervalSeconds), s"Send seconds interval must be between $MinSendIntervalSeconds and $MaxSendIntervalSeconds")
+        require(
+          sendIntervalSeconds == 0 || (sendIntervalSeconds >= MinSendIntervalSeconds && sendIntervalSeconds <= MaxSendIntervalSeconds),
+          s"Send seconds interval must be between $MinSendIntervalSeconds and $MaxSendIntervalSeconds"
+        )
     }
 
     // send queued events every n seconds
@@ -459,48 +479,44 @@ trait Writer extends AccessLevel {
 
         // schedule sending from our thread pool at a specific interval
         tp.scheduleWithFixedDelay(new Runnable {
-          def run: Unit = {
+          def run(): Unit = {
             try {
               sendQueuedEvents()
-            } 
-            catch {
-              case ex: Throwable => {
+            } catch {
+              case ex: Throwable =>
                 error("Failed to send queued events")
                 error(s"""$ex""")
-              }
             }
           }
         }, 1, sendIntervalSeconds.toLong, TimeUnit.SECONDS)
 
         Some(tp)
     }
-
   }
 
   /**
    * Sends all queued events, removing events from the queue as events are successfully sent.
    */
   def sendQueuedEvents(): Unit = {
-
     val handleMap: TrieMap[String, ListBuffer[Long]] = eventStore.getHandles(projectId)
     val handles: ListBuffer[Long] = ListBuffer.empty[Long]
     val events: ListBuffer[String] = ListBuffer.empty[String]
 
     // iterate over all of the event handles in the queue, by collection
-    for((collection, eventHandles) <- handleMap) {
-      // get each event, and its handle, then add it to a buffer so we can group the events 
+    for ((collection, eventHandles) <- handleMap) {
+      // get each event, and its handle, then add it to a buffer so we can group the events
       // into smaller batches
-      for(handle <- eventHandles) {
+      for (handle <- eventHandles) {
         handles += handle
         events += eventStore.get(handle)
       }
 
       // group handles separately so we can use them to remove events from the queue once they've
-      // been succesfully added
+      // been successfully added
       val handleGroup: List[ListBuffer[Long]] = handles.grouped(batchSize).toList
 
       // group the events by batch size, then publish them
-      for((batch, index) <- events.grouped(batchSize).zipWithIndex) {
+      for ((batch, index) <- events.grouped(batchSize).zipWithIndex) {
         // publish this batch
         var response = Await.result(
           addEvents(s"""{"$collection": [${batch.mkString(",")}]}"""),
@@ -509,69 +525,61 @@ trait Writer extends AccessLevel {
 
         // handle addEvents responses properly
         response.statusCode match {
-          case 200 | 201 => {
+          case 200 | 201 =>
             // log success
             info(s"""${response.statusCode} ${response.body} | Sent ${batch.size} queued events""")
 
             // remove all of the handles for this batch
-            for(handle <- handleGroup(index)) {
+            for (handle <- handleGroup(index)) {
               eventStore.remove(handle)
             }
 
             // log removal
             info(s"""Removed ${handleGroup(index).size} events from the queue""")
-          }
-          case _ => {
-            // log but DO NOT remove events from queue
-            error(s"""${response.statusCode} ${response.body} | Failed to send ${batch.size} queued events""") 
-          }
+
+          // log but DO NOT remove events from queue
+          case _ => error(s"""${response.statusCode} ${response.body} | Failed to send ${batch.size} queued events""")
         }
       }
     }
-
   }
 
   /**
    * Asynchronously sends all queued events.
    */
   def sendQueuedEventsAsync(): Unit = {
-
     // use a thread pool for our async thread so we can use daemon threads
     val tp = Executors.newSingleThreadExecutor(new ClientThreadFactory)
 
     // send our queued events in a separate thread
     tp.execute(new Runnable {
-      def run: Unit = {
+      def run(): Unit = {
         sendQueuedEvents()
       }
     })
-
   }
 
   /**
    * Safely shuts down `scheduledThreadPool` before sending all events remaining in `eventStore`.
    */
   override def shutdown() = {
-
     // safely terminate the scheduled thread pool
     scheduledThreadPool match {
       case Some(stp) =>
-        stp.shutdown
+        stp.shutdown()
         stp.awaitTermination(shutdownDelay.toLong, TimeUnit.SECONDS) match {
           case false => error("Failed to shutdown scheduled thread pool")
-          case _ => {}
+          case _     =>
         }
-      case _ => {}
+      case _ =>
     }
 
     // don't forget to empty the queue before we shutdown
     sendQueuedEvents()
 
     // because we're overriding Client.shutdown
-    httpAdapter.shutdown
-
+    httpAdapter.shutdown()
   }
-
 }
 
 /**

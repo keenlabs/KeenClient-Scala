@@ -35,7 +35,8 @@ class ClientSpec extends Specification with NoTimeConversions {
       method: String,
       key: String,
       body: Option[String] = None,
-      params: Map[String,Option[String]] = Map.empty): Future[Response] = {
+      params: Map[String, Option[String]] = Map.empty
+    ): Future[Response] = {
 
       // We have a map of str,opt[str] and we need to convert it to
       val filteredParams = params.filter(
@@ -74,7 +75,7 @@ class ClientSpec extends Specification with NoTimeConversions {
       method: String,
       key: String,
       body: Option[String] = None,
-      params: Map[String,Option[String]] = Map.empty
+      params: Map[String, Option[String]] = Map.empty
     ): Future[Response] = {
       Future {
         Response(500, "Internal Server Error")
@@ -91,7 +92,7 @@ class ClientSpec extends Specification with NoTimeConversions {
       method: String,
       key: String,
       body: Option[String] = None,
-      params: Map[String,Option[String]] = Map.empty
+      params: Map[String, Option[String]] = Map.empty
     ): Future[Response] = {
       Future.failed(new AskTimeoutException("I timed out!"))
     }
@@ -109,7 +110,7 @@ class ClientSpec extends Specification with NoTimeConversions {
   // generates n test events
   def generateTestEvents(n: Integer): ListBuffer[String] = {
     val events: ListBuffer[String] = new ListBuffer[String]
-    for(i <- 1 to n) {
+    for (i <- 1 to n) {
       events += s"""{"param$i":"value$i"}"""
     }
     events
@@ -315,7 +316,7 @@ class ClientSpec extends Specification with NoTimeConversions {
 
     "send queued events" in {
 
-      testEvents = generateTestEvents(5)      
+      testEvents = generateTestEvents(5)
       testEvents.foreach { event => client.queueEvent(collection, event) }
 
       // verify that the expected number of events are in the store
@@ -342,9 +343,9 @@ class ClientSpec extends Specification with NoTimeConversions {
     "automatically send queued events when queue reaches keen.optional.queue.send-interval.events" in {
 
       testEvents = generateTestEvents(100)
-      
+
       // queue the first 50 events
-      for(i <- 0 to 49) {
+      for (i <- 0 to 49) {
         client.queueEvent(collection, testEvents(i))
       }
 
@@ -354,7 +355,7 @@ class ClientSpec extends Specification with NoTimeConversions {
       handleMap.getOrElse(collection, null).size must beEqualTo(50)
 
       // add the final 50 events
-      for(i <- 50 to 99) {
+      for (i <- 50 to 99) {
         client.queueEvent(collection, testEvents(i))
       }
 
@@ -362,7 +363,7 @@ class ClientSpec extends Specification with NoTimeConversions {
       // triggered with the queueing of the 100th event
       handleMap = store.getHandles(projectId)
       handleMap.size must beEqualTo(0)
-      
+
     }
 
     "automatically send queued events every keen.optional.queue.send-interval.seconds" in {
@@ -382,7 +383,7 @@ class ClientSpec extends Specification with NoTimeConversions {
       // triggered with the queueing of the 100th event
       handleMap = store.getHandles(projectId)
       handleMap.size must beEqualTo(0)
-      
+
     }
 
     "send queued events on shutdown" in {
@@ -507,9 +508,9 @@ class ClientSpec extends Specification with NoTimeConversions {
       val projectId: String = dummyConfig.getString("keen.project-id")
       val collection: String = "foo"
       val testEvents: ListBuffer[String] = generateTestEvents(5)
-      
+
       // queue the events
-      for(event <- testEvents) {
+      for (event <- testEvents) {
         client.queueEvent(collection, event)
       }
 

@@ -3,7 +3,6 @@ package io.keen.client.scala
 import java.util.concurrent.ThreadFactory
 
 class ClientThreadFactory extends ThreadFactory {
-
   /**
    * Returns a new daemon thread.
    *
@@ -15,5 +14,4 @@ class ClientThreadFactory extends ThreadFactory {
     t.setDaemon(true)
     t
   }
-
 }

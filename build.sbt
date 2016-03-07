@@ -12,7 +12,7 @@ scalaVersion := "2.11.7"
 
 crossScalaVersions := Seq("2.10.6", scalaVersion.value)
 
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
+scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xlint")
 
 resolvers ++= Seq(
   "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases",
@@ -45,3 +45,14 @@ initialCommands in consoleQuick := ""
 Defaults.itSettings
 configs(IntegrationTest)
 
+// Source Formatting
+import com.typesafe.sbt.SbtScalariform
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
+import scalariform.formatter.preferences._
+
+SbtScalariform.scalariformSettingsWithIt
+
+ScalariformKeys.preferences := ScalariformKeys.preferences.value
+  .setPreference(AlignSingleLineCaseStatements, true)
+  .setPreference(DoubleIndentClassDeclaration, true)
+  .setPreference(PreserveDanglingCloseParenthesis, true)
