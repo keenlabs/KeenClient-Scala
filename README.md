@@ -89,12 +89,12 @@ can set env vars for app processes with ease. On Heroku you'll be right at home.
 * `keen.optional.read-key`: Your project read key.
 * `keen.optional.write-key`: Your project write key.
 * `keen.optional.master-key`: Your project master key.
-* `keen.optional.queue.batch.size`: Number of events to include in each batch sent by `sendQueuedEvents()`. Default is `500`.
-* `keen.optional.queue.batch.timeout`: Seconds each batch sent by `sendQueuedEvents()` should wait before the request times out. Default is `5`.
-* `keen.optional.queue.max-events-per-collection`: Maximum number of events to store for each collection. Old events are purged from the queue to make room for new events when the size of the queue exceeds this number. Default is `10000`.
-* `keen.optional.queue.send-interval.events`: Automatically send all queued events every time the queue reaches this number. Minimum is `100`, maximum is `10000`, and default is `0`.
-* `keen.optional.queue.send-interval.seconds`: Automatically send all queued events at a specified interval. Minimum is `60`, maximum is `3600`, and default is `0`.
-* `keen.optional.queue.shutdown-delay`: Seconds to wait before client stops attempting to send events scheduled to be sent at a specific interval. Default is `30`.
+* `keen.queue.batch.size`: Number of events to include in each batch sent by `sendQueuedEvents()`. Default is `500`.
+* `keen.queue.batch.timeout`: Duration that each batch sent by `sendQueuedEvents()` should wait before the request times out. Default is 5 seconds.
+* `keen.queue.max-events-per-collection`: Maximum number of events to store for each collection. Old events are purged from the queue to make room for new events when the size of the queue exceeds this number. Default is `10000`.
+* `keen.queue.send-interval.events`: Automatically send all queued events every time the queue reaches this number. Minimum is `100`, maximum is `10000`, and default is `0`.
+* `keen.queue.send-interval.duration`: Automatically send all queued events at a specified interval. Minimum is 60 seconds, maximum is 3600, and default is 0.
+* `keen.queue.shutdown-delay`: Duration before client stops attempting to send events scheduled to be sent at a specific interval. Default is 30 seconds.
 
 ## Use It - A Quick Taste
 
@@ -147,17 +147,17 @@ keen.sendQueuedEvents()
 
 **Sending queued events every time the queue reaches 100 events**
 
-Set `keen.optional.queue.send-interval.events` equal to `100` in `conf/application.conf`.
+Set `keen.queue.send-interval.events` equal to `100` in `conf/application.conf`.
 
 **Sending queued events every 5 minutes**
 
-Set `keen.optional.queue.send-interval.seconds` equal to `300` in `conf/application.conf`.
+Set `keen.queue.send-interval.duration` equal to `5 minutes` in `conf/application.conf`.
 
-Note that `send-interval.events` takes precedence when both `send-interval.events` and `send-interval.seconds` contain values greater than zero.
+Note that `send-interval.events` takes precedence when both `send-interval.events` and `send-interval.duration` contain values greater than zero.
 
 **Using batch sizes**
 
-Setting a specific batch size will help optimize your experience when sending events. It's recommended that you set `keen.optional.queue.batch.size` to something that makes sense for your implementation (default is `500`). Note that a batch size of `5000` is the upper bound of what you should shoot for. Anything higher and your request has a good chance of being rejected due to payload size limitations.
+Setting a specific batch size will help optimize your experience when sending events. It's recommended that you set `keen.queue.batch.size` to something that makes sense for your implementation (default is `500`). Note that a batch size of `5000` is the upper bound of what you should shoot for. Anything higher and your request has a good chance of being rejected due to payload size limitations.
 
 **Failed events**
 
@@ -241,4 +241,3 @@ that you didn't expect!**
 [sbt-dotenv]: https://github.com/mefellows/sbt-dotenv
 [global plugin]: http://www.scala-sbt.org/0.13/docs/Global-Settings.html
 [runit]: http://smarden.org/runit/
-
