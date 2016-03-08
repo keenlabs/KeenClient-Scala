@@ -5,9 +5,7 @@ import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
 class RamEventStoreSpec extends AttemptCountingEventStoreSpecBase {
-  override def buildStore(): EventStore = {
-    new RamEventStore
-  }
+  override def buildStore(): EventStore = new RamEventStore
 
   sequential
 
@@ -23,18 +21,18 @@ class RamEventStoreSpec extends AttemptCountingEventStoreSpecBase {
 
       // get the handle map
       val handleMap: TrieMap[String, ListBuffer[Long]] = ramStore.getHandles("project1")
-      (handleMap must not beNull)
+      handleMap must not be null
 
       // get the lists of handles
       val handles: ListBuffer[Long] = handleMap.getOrElse("collection1", null)
-      (handles must not beNull)
+      handles must not be null
       handles.size must beEqualTo(3)
 
       // get the events
       val retrievedEvents: ListBuffer[String] = new ListBuffer[String]()
       for (handle <- handles) {
         val retrievedEvent: String = ramStore.get(handle)
-        (retrievedEvent must not beNull)
+        retrievedEvent must not be null
         retrievedEvents += retrievedEvent
       }
 

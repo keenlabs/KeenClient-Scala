@@ -11,11 +11,10 @@ import akka.actor.ActorSystem
 import akka.pattern.AskTimeoutException
 import com.typesafe.config.{ Config, ConfigFactory }
 import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
 import spray.http.Uri
 import spray.http.Uri._
 
-class ClientSpec extends Specification with NoTimeConversions {
+class ClientSpec extends Specification {
   // Timeout used for most future awaits, etc. With unit tests/mocking this
   // shouldn't normally need to be long.
   val timeout = 1.second
