@@ -30,15 +30,9 @@ trait ClientSpecification extends Specification {
       params: Map[String, Option[String]] = Map.empty
     ): Future[Response] = {
 
-      // We have a map of str,opt[str] and we need to convert it to
-      val filteredParams = params.filter(
-        // Filter out keys that are None
-        _._2.isDefined
-      ).map(
-        // Convert the remaining tuples to str,str
-        param => (param._1 -> param._2.get)
-      )
-      // Make a Uri
+      // Query.apply won't accept the Option wrapper in our param values
+      val filteredParams = params.collect { case (key, Some(value)) => (key, value) }.toMap
+
       val finalUrl = Uri(
         scheme = scheme,
         authority = Authority(host = Host(authority)),
