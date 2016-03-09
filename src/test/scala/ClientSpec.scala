@@ -14,11 +14,8 @@ import org.specs2.mutable.Specification
 import spray.http.Uri
 import spray.http.Uri._
 
-class ClientSpec extends Specification {
-  // Timeout used for most future awaits, etc. With unit tests/mocking this
-  // shouldn't normally need to be long.
-  val timeout = 1.second
-
+/** Fakes and configuration fixtures for Client specs */
+trait ClientSpecification extends Specification {
   class OkHttpAdapter extends HttpAdapter {
     var lastUrl: Option[String] = None
     var lastKey: Option[String] = None
@@ -101,6 +98,12 @@ class ClientSpec extends Specification {
       "keen.optional.write-key" -> "writeKey"
     )
   ).withFallback(defaultConfig)
+}
+
+class ClientSpec extends ClientSpecification {
+  // Timeout used for most future awaits, etc. With unit tests/mocking this
+  // shouldn't normally need to be long.
+  val timeout = 1.second
 
   // Sequential because it's less work to share the client instance
   // TODO: set up separate read-only client, writer client, etc. instead of

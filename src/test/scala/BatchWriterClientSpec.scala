@@ -8,7 +8,9 @@ import scala.concurrent.duration._
 
 import com.typesafe.config.ConfigFactory
 
-class BatchWriterClientSpec extends ClientSpec {
+// TODO: Factor the base Client specs so that they can all be included here, with
+// an injected BatchWriterClient
+class BatchWriterClientSpec extends ClientSpecification {
   // generates n test events
   def generateTestEvents(n: Integer): ListBuffer[String] = {
     val events = ListBuffer.empty[String]
