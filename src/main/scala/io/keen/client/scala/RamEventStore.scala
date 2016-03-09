@@ -9,11 +9,10 @@ import scala.util.control.Breaks._
 /**
  * In-memory queue for [[Client]].
  */
-class RamEventStore extends AttemptCountingEventStore {
+class RamEventStore extends EventStore {
   private var nextId: Long = 0
   private var collectionIds: TrieMap[String, ListBuffer[Long]] = new TrieMap[String, ListBuffer[Long]]()
   private var events: TrieMap[Long, String] = new TrieMap[Long, String]()
-  private var attempts: TrieMap[String, TrieMap[String, String]] = _
 
   /**
    * Event store.
@@ -115,32 +114,6 @@ class RamEventStore extends AttemptCountingEventStore {
     }
 
     result
-  }
-
-  def getAttempts(projectId: String, eventCollection: String): String = {
-    if (attempts == null) {
-      return null
-    }
-
-    val project: TrieMap[String, String] = attempts.getOrElse(projectId, null)
-    if (project == null) {
-      return null
-    }
-    project.getOrElse(eventCollection, null)
-  }
-
-  def setAttempts(projectId: String, eventCollection: String, attemptsString: String): Unit = {
-    if (attempts == null) {
-      attempts = new TrieMap[String, TrieMap[String, String]]()
-    }
-
-    var project: TrieMap[String, String] = attempts.getOrElse(projectId, null)
-    if (project == null) {
-      project = new TrieMap[String, String]()
-      attempts += (projectId -> project)
-    }
-
-    project += (eventCollection -> attemptsString)
   }
 
   def clear(): Unit = {
