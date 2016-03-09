@@ -107,7 +107,7 @@ class BatchWriterClientSpec extends ClientSpecification {
       handleMap(collection).size must beEqualTo(5)
 
       // sleep until the set interval is reached
-      // FIXME: This is basically an integration test, and slow. We could test this
+      // TODO: This is basically an integration test, and slow. We could test this
       // with a mock that verifies sendQueuedEvents is called after shorter duration.
       // It's brittle too, use specs2 timeFactor if needed.
       Thread.sleep((client.settings.sendIntervalDuration + 100.millis).toMillis)
