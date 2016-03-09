@@ -1,11 +1,6 @@
 package io.keen.client.scala
 
-import java.util.concurrent.{ Executors, ScheduledThreadPoolExecutor, TimeUnit }
-
-import scala.concurrent.{ Await, Future }
-import scala.concurrent.duration._
-import scala.collection.concurrent.TrieMap
-import scala.collection.mutable.ListBuffer
+import scala.concurrent.Future
 
 import com.typesafe.config.{ Config, ConfigFactory }
 import grizzled.slf4j.Logging
@@ -31,9 +26,7 @@ class Client(
    * Disconnects any remaining connections. Both idle and active. If you are accessing
    * Keen through a proxy that keeps connections alive this is useful.
    */
-  def shutdown() = {
-    httpAdapter.shutdown()
-  }
+  def shutdown(): Unit = httpAdapter.shutdown()
 }
 
 /**
@@ -386,27 +379,6 @@ trait Writer extends AccessLevel {
    */
   val writeKey: String = settings.writeKey.getOrElse(throw MissingCredential("Write key required for Writer"))
 
-  // constants
-  // TODO: 60 seconds is an awfully long minimum…
-  protected val MinSendIntervalEvents: Long = 100
-  protected val MaxSendIntervalEvents: Long = 10000
-  protected val MinSendInterval: FiniteDuration = 60.seconds
-  protected val MaxSendInterval: FiniteDuration = 1.hour
-
-  // initialize and configure our local event store queue
-  val batchSize: Integer = settings.batchSize
-  val batchTimeout: FiniteDuration = settings.batchTimeout
-  val eventStore: EventStore = new RamEventStore
-  eventStore.maxEventsPerCollection = settings.maxEventsPerCollection
-  val sendIntervalEvents: Integer = settings.sendIntervalEvents
-  val sendInterval: FiniteDuration = settings.sendIntervalDuration
-  val shutdownDelay: FiniteDuration = settings.shutdownDelay
-
-  /**
-   * Schedule sending of queued events.
-   */
-  protected val scheduledThreadPool: Option[ScheduledThreadPoolExecutor] = scheduleSendQueuedEvents()
-
   /**
    * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
    *
@@ -426,162 +398,6 @@ trait Writer extends AccessLevel {
   def addEvents(events: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events").mkString("/")
     doRequest(path = path, method = "POST", key = writeKey, body = Some(events))
-  }
-
-  /**
-   * Queue events locally for subsequent publishing.
-   *
-   * @param collection The collection to which the event will be added.
-   * @param event The event
-   */
-  def queueEvent(collection: String, event: String): Unit = {
-    // bypass min/max intervals for testing
-    // FIXME: There are less kludgey ways to achieve testability here
-    environment match {
-      case Some("test") if Some("test").get matches "(?i)test" =>
-      case _ =>
-        require(
-          sendIntervalEvents == 0 || (sendIntervalEvents >= MinSendIntervalEvents && sendIntervalEvents <= MaxSendIntervalEvents),
-          s"Send events interval must be between $MinSendIntervalEvents and $MaxSendIntervalEvents"
-        )
-    }
-
-    // write the event to the queue
-    eventStore.store(projectId, collection, event)
-
-    // check the queue to see if we meet or exceed keen.optional.queue.send-interval.events. if so, send
-    // all queued events
-    if (sendIntervalEvents != 0) {
-      if (eventStore.size >= sendIntervalEvents) {
-        sendQueuedEvents()
-      }
-    }
-  }
-
-  /**
-   * Schedules sending of queued events if keen.queue.send-interval.duration contains a valid value that
-   * is between `MinSendInterval` and `MaxSendInterval`.
-   */
-  private def scheduleSendQueuedEvents(): Option[ScheduledThreadPoolExecutor] = {
-    // bypass min/max intervals for testing
-    environment match {
-      case Some("test") if Some("test").get matches "(?i)test" =>
-      case _ =>
-        require(
-          sendInterval.toSeconds == 0 || (sendInterval >= MinSendInterval && sendInterval <= MaxSendInterval),
-          s"Send interval must be between $MinSendInterval and $MaxSendInterval"
-        )
-    }
-
-    // send queued events every n seconds
-    sendInterval.toSeconds match {
-      case n if n <= 0 => None // TODO: document what config value of zero means
-      case _ =>
-        // use a thread pool for our scheduled threads so we can use daemon threads
-        val tp = Executors.newScheduledThreadPool(1, new ClientThreadFactory).asInstanceOf[ScheduledThreadPoolExecutor]
-
-        // schedule sending from our thread pool at a specific interval
-        tp.scheduleWithFixedDelay(new Runnable {
-          def run(): Unit = {
-            try {
-              sendQueuedEvents()
-            } catch {
-              case ex: Throwable =>
-                error("Failed to send queued events")
-                error(s"""$ex""")
-            }
-          }
-        }, 1, sendInterval.toMillis, TimeUnit.MILLISECONDS)
-
-        Some(tp)
-    }
-  }
-
-  /**
-   * Sends all queued events, removing events from the queue as events are successfully sent.
-   */
-  def sendQueuedEvents(): Unit = {
-    val handleMap = eventStore.getHandles(projectId)
-    val handles = ListBuffer.empty[Long]
-    val events = ListBuffer.empty[String]
-
-    // iterate over all of the event handles in the queue, by collection
-    for ((collection, eventHandles) <- handleMap) {
-      // get each event, and its handle, then add it to a buffer so we can group the events
-      // into smaller batches
-      for (handle <- eventHandles) {
-        handles += handle
-        events += eventStore.get(handle)
-      }
-
-      // group handles separately so we can use them to remove events from the queue once they've
-      // been successfully added
-      val handleGroup: List[ListBuffer[Long]] = handles.grouped(batchSize).toList
-
-      // group the events by batch size, then publish them
-      for ((batch, index) <- events.grouped(batchSize).zipWithIndex) {
-        // publish this batch
-        var response = Await.result(
-          addEvents(s"""{"$collection": [${batch.mkString(",")}]}"""),
-          batchTimeout
-        )
-
-        // handle addEvents responses properly
-        response.statusCode match {
-          case 200 | 201 =>
-            // log success
-            info(s"""${response.statusCode} ${response.body} | Sent ${batch.size} queued events""")
-
-            // remove all of the handles for this batch
-            for (handle <- handleGroup(index)) {
-              eventStore.remove(handle)
-            }
-
-            // log removal
-            info(s"""Removed ${handleGroup(index).size} events from the queue""")
-
-          // log but DO NOT remove events from queue
-          case _ => error(s"""${response.statusCode} ${response.body} | Failed to send ${batch.size} queued events""")
-        }
-      }
-    }
-  }
-
-  /**
-   * Asynchronously sends all queued events.
-   */
-  def sendQueuedEventsAsync(): Unit = {
-    // use a thread pool for our async thread so we can use daemon threads
-    val tp = Executors.newSingleThreadExecutor(new ClientThreadFactory)
-
-    // send our queued events in a separate thread
-    tp.execute(new Runnable {
-      def run(): Unit = {
-        sendQueuedEvents()
-      }
-    })
-  }
-
-  /**
-   * Safely shuts down `scheduledThreadPool` before sending all events remaining in `eventStore`.
-   */
-  override def shutdown() = {
-    // safely terminate the scheduled thread pool
-    scheduledThreadPool match {
-      case Some(stp) =>
-        stp.shutdown()
-        stp.awaitTermination(shutdownDelay.toMillis, TimeUnit.MILLISECONDS) match {
-          case false => error("Failed to shutdown scheduled thread pool")
-          case _     =>
-        }
-      case _ =>
-    }
-
-    // don't forget to empty the queue before we shutdown
-    sendQueuedEvents()
-
-    // because we're overriding Client.shutdown
-    httpAdapter.shutdown()
   }
 }
 

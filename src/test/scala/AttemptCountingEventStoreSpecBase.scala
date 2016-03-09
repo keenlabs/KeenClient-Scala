@@ -1,6 +1,5 @@
+package io.keen.client.scala
 package test
-
-import io.keen.client.scala.AttemptCountingEventStore
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
@@ -39,15 +38,15 @@ abstract class AttemptCountingEventStoreSpecBase extends EventStoreSpecBase {
 
       // get the handle map
       val handleMap: TrieMap[String, ListBuffer[Long]] = attemptCountingStore.getHandles("project1")
-      (handleMap must not beNull)
+      handleMap must not be null
       handleMap.size must beEqualTo(2)
 
       // get the lists of handles
       var handles1: ListBuffer[Long] = handleMap.getOrElse("collection1", null)
-      (handles1 must not beNull)
+      handles1 must not be null
       handles1.size must beEqualTo(1)
       var handles2: ListBuffer[Long] = handleMap.getOrElse("collection2", null)
-      (handles2 must not beNull)
+      handles2 must not be null
       handles2.size must beEqualTo(1)
 
       // validate the actual events

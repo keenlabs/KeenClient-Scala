@@ -1,3 +1,4 @@
+package io.keen.client.scala
 package test
 
 import scala.concurrent.Await
@@ -5,8 +6,6 @@ import scala.concurrent.duration._
 
 import org.specs2.mutable.Specification
 import org.specs2.time.NoTimeConversions
-
-import io.keen.client.scala._
 
 class ClientIntegrationSpec extends Specification with NoTimeConversions {
   // Timeout used for most future awaits, etc. ScalaTest and Akka TestKit both

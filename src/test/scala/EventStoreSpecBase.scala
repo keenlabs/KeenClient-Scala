@@ -1,30 +1,17 @@
+package io.keen.client.scala
 package test
-
-import io.keen.client.scala.EventStore
-
-import java.io.IOException
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
 import org.specs2.mutable.{ BeforeAfter, Specification }
-import org.specs2.specification.{ Step, Fragments }
+import org.specs2.specification.BeforeAfterAll
 
-trait BeforeAllAfterAll extends Specification {
-  override def map(fragments: => Fragments) =
-    Step(beforeAll()) ^ fragments ^ Step(afterAll())
-
-  protected def beforeAll(): Unit
-  protected def afterAll(): Unit
-}
-
-abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
-
-  @throws(classOf[IOException])
-  def buildStore(): EventStore
-
+abstract class EventStoreSpecBase extends Specification with BeforeAfterAll {
   var store: EventStore = _
   val testEvents: ListBuffer[String] = new ListBuffer[String]
+
+  def buildStore(): EventStore
 
   def beforeAll() = {
     store = buildStore() // initialize our store
@@ -78,15 +65,15 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
 
       // get the handle map
       val handleMap: TrieMap[String, ListBuffer[Long]] = store.getHandles("project1")
-      (handleMap must not beNull)
+      handleMap must not be null
       handleMap.size must beEqualTo(2)
 
       // get the lists of handles
       var handles1: ListBuffer[Long] = handleMap.getOrElse("collection1", null)
-      (handles1 must not beNull)
+      handles1 must not be null
       handles1.size must beEqualTo(1)
       var handles2: ListBuffer[Long] = handleMap.getOrElse("collection2", null)
-      (handles2 must not beNull)
+      handles2 must not be null
       handles2.size must beEqualTo(1)
 
       // validate the actual events
@@ -96,7 +83,7 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
 
     "get handles with no events" in new EventStoreSetupTeardown {
       val handleMap: TrieMap[String, ListBuffer[Long]] = store.getHandles("project1")
-      (handleMap must not beNull)
+      handleMap must not be null
       handleMap.size must beEqualTo(0)
     }
 
@@ -109,14 +96,14 @@ abstract class EventStoreSpecBase extends Specification with BeforeAllAfterAll {
 
       // get and validate the handle map for project 1
       var handleMap: TrieMap[String, ListBuffer[Long]] = store.getHandles("project1")
-      (handleMap must not beNull)
+      handleMap must not be null
       handleMap.size must beEqualTo(2)
       handleMap.getOrElse("collection1", null).size must beEqualTo(1)
       handleMap.getOrElse("collection2", null).size must beEqualTo(1)
 
       // get and validate the handle map for project 2
       handleMap = store.getHandles("project2")
-      (handleMap must not beNull)
+      handleMap must not be null
       handleMap.size must beEqualTo(1)
       handleMap.getOrElse("collection3", null).size must beEqualTo(2)
     }

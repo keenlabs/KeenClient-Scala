@@ -9,7 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Improved CHANGELOG.md format
 - Updated Scala & SBT versions
-- Improved type specificity of config values for batched writes, like time durations
+- Improved type specificity of config values for batched writes, like time durations - #44
+- Moved batched write (queueing) functionality to a subclass of client, called `BatchWriterClient`. The `queueEvent` method no longer intermittently blocks to synchronously flush the queue if event count threshold is reached when it is called. - #45
 
 ## [0.6.0] - 2016-02-26
 ### Added
