@@ -35,8 +35,7 @@ object BatchWriterClient {
  * @param config Client configuration, by default loaded from `application.conf`.
  */
 class BatchWriterClient(config: Config = ConfigFactory.load())
-    extends Client(config)
-    with Writer {
+    extends Client(config) with Writer {
 
   import BatchWriterClient._
 
@@ -87,7 +86,7 @@ class BatchWriterClient(config: Config = ConfigFactory.load())
 
     // If we've met a configured event count threshold, flush the queue.
     if (sendIntervalEvents != 0 && eventStore.size >= sendIntervalEvents) {
-      sendQueuedEvents()
+      sendQueuedEventsAsync()
     }
   }
 
@@ -153,6 +152,7 @@ class BatchWriterClient(config: Config = ConfigFactory.load())
       // group the events by batch size, then publish them
       for ((batch, index) <- events.grouped(batchSize).zipWithIndex) {
         // publish this batch
+        // TODO: Try to avoid this blocking, see https://github.com/keenlabs/KeenClient-Scala/pull/45
         var response = Await.result(
           addEvents(s"""{"$collection": [${batch.mkString(",")}]}"""),
           batchTimeout
@@ -182,6 +182,7 @@ class BatchWriterClient(config: Config = ConfigFactory.load())
    */
   def sendQueuedEventsAsync(): Unit = {
     // use a thread pool for our async thread so we can use daemon threads
+    // TODO: Do we really want a daemon thread?
     val tp = Executors.newSingleThreadExecutor(new ClientThreadFactory)
 
     // send our queued events in a separate thread

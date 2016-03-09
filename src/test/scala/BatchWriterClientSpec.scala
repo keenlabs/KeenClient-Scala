@@ -92,6 +92,7 @@ class BatchWriterClientSpec extends ClientSpecification {
 
       // validate that the store is now empty as a result of sendQueuedEvents being automatically
       // triggered with the queueing of the 100th event
+      Thread.sleep(300.millis.toMillis) // flush is async, wait for a beat
       handleMap = store.getHandles(projectId)
       handleMap.size must beEqualTo(0)
     }
@@ -108,7 +109,7 @@ class BatchWriterClientSpec extends ClientSpecification {
       // sleep until the set interval is reached
       // FIXME: This is basically an integration test, and slow. We could test this
       // with a mock that verifies sendQueuedEvents is called after shorter duration.
-      // It's brittle too, use test framework time dilation features.
+      // It's brittle too, use specs2 timeFactor if needed.
       Thread.sleep((client.settings.sendIntervalDuration + 100.millis).toMillis)
 
       // validate that the store is now empty as a result of sendQueuedEvents being automatically
