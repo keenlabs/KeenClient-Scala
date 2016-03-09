@@ -9,7 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Improved CHANGELOG.md format
 - Updated Scala & SBT versions
-- Improved type specificity of config values for batched writes, like time durations
+- Improved type specificity of config values for batched writes, like time durations - #44
+- Moved batched write (queueing) functionality to a subclass of client, called `BatchWriterClient` - #45
 
 ## [0.6.0] - 2016-02-26
 ### Added

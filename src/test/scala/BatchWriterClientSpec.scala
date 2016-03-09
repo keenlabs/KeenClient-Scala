@@ -20,6 +20,9 @@ class BatchWriterClientSpec extends ClientSpecification {
     events
   }
 
+  // TODO: This suite should clear the eventStore between tests, not do this
+  sequential
+
   "BatchWriterClient with interval-based queueing" should {
     val queueConfig = ConfigFactory.parseMap(
       Map(
