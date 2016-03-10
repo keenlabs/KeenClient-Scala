@@ -4,7 +4,7 @@ package test
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ListBuffer
 
-class RamEventStoreSpec extends AttemptCountingEventStoreSpecBase {
+class RamEventStoreSpec extends EventStoreSpecBase {
   override def buildStore(): EventStore = new RamEventStore
 
   sequential
