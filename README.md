@@ -1,6 +1,8 @@
 # KeenClient-Scala
 
 [![Build Status]](https://travis-ci.org/keenlabs/KeenClient-Scala)
+[![Maven Central Badge]](https://maven-badges.herokuapp.com/maven-central/io.keen/keenclient-scala_2.11)
+[![Scaladoc Badge]](https://keenlabs.github.io/KeenClient-Scala/)
 
 ---
 
@@ -101,7 +103,7 @@ can set env vars for app processes with ease. On Heroku you'll be right at home.
 ```scala
 import io.keen.client.scala.{ Client, Writer }
 
-// Assumes you've configured a write key as explained in Configuration below
+// Assumes you've configured a write key as explained in Configuration above
 val keen = new Client with Writer
 
 // Publish an event!
@@ -243,6 +245,8 @@ that you didn't expect!**
 
 
 [Build Status]: https://travis-ci.org/keenlabs/KeenClient-Scala.svg?branch=master
+[Maven Central Badge]: https://maven-badges.herokuapp.com/maven-central/io.keen/keenclient-scala_2.11/badge.svg
+[Scaladoc Badge]: https://img.shields.io/badge/scaladoc-latest-lightgrey.svg
 [Keen IO]: http://keen.io/
 [Semantic Versioning]: http://semver.org/
 [the changelog]: https://github.com/keenlabs/KeenClient-Scala/blob/master/CHANGELOG.md
