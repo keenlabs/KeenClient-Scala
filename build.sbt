@@ -23,7 +23,7 @@ libraryDependencies ++= {
   val sprayVersion = "1.3.2"
   Seq(
     "com.typesafe.akka"        %% "akka-actor"      % "2.3.6",
-    "com.typesafe"             %  "config"          % "1.2.1",
+    "com.typesafe"             %  "config"          % "1.2.1",       // 1.3+ is Java 8-only
     "io.spray"                 %% "spray-can"       % sprayVersion,
     "io.spray"                 %% "spray-http"      % sprayVersion,
     "io.spray"                 %% "spray-httpx"     % sprayVersion,
@@ -44,6 +44,30 @@ initialCommands in consoleQuick := ""
 // SBT support for Maven-style integration tests (src/it)
 Defaults.itSettings
 configs(IntegrationTest)
+
+/**
+ * Scaladoc Generation
+ *
+ * This sets up the sbt-site plugin to generate API documentation in
+ * `target/site/api/$version` and a small shim to redirect from the site root
+ * directly to the API docs, since there is no other site to display.
+ *
+ * The `makeSite` and `previewSite` tasks are salient.
+ */
+autoAPIMappings := true
+scalacOptions in (Compile, doc) ++= Seq(
+  "-doc-title", "Keen IO API Client",
+  "-doc-version", version.value,
+  // "-doc-root-content", baseDirectory.value + "/README.md",  // If only Scaladoc supported Markdown...
+  "-groups"
+)
+
+enablePlugins(SiteScaladocPlugin)
+siteSubdirName in SiteScaladoc := s"api/${version.value}"
+
+// Builds static files in src/site-preprocess with variable substitution.
+enablePlugins(PreprocessPlugin)
+preprocessVars := Map("VERSION" -> version.value)
 
 // Source Formatting
 import com.typesafe.sbt.SbtScalariform
