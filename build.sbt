@@ -73,12 +73,25 @@ configs(IntegrationTest)
  * the gh-pages branch including old versions of the API docs.
  */
 autoAPIMappings := true
-scalacOptions in (Compile, doc) ++= Seq(
-  "-doc-title", "Keen IO API Client",
-  "-doc-version", version.value,
-  // "-doc-root-content", baseDirectory.value + "/README.md",  // If only Scaladoc supported Markdown...
-  "-groups"
-)
+scalacOptions in (Compile, doc) <++= (version, scmInfo, baseDirectory in ThisBuild) map {
+  case (version, Some(scm), basedir) =>
+    val sourceTemplate =
+      if (version.endsWith("SNAPSHOT"))
+        s"${scm.browseUrl}/tree/master€{FILE_PATH}.scala"
+      else
+        s"${scm.browseUrl}/tree/v${version}€{FILE_PATH}.scala"
+
+    Seq(
+      "-doc-title", "Keen IO API Client",
+      "-doc-version", version,
+      // "-doc-root-content", baseDirectory.value + "/README.md",  // If only Scaladoc supported Markdown...
+      "-sourcepath", basedir.getAbsolutePath,
+      "-doc-source-url", sourceTemplate,
+      "-groups"
+    )
+
+  case _ => Seq.empty
+}
 
 enablePlugins(SiteScaladocPlugin)
 siteSubdirName in SiteScaladoc := s"api/${version.value}"
