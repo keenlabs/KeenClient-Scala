@@ -4,3 +4,5 @@ addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.6.0")
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.10")
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.0.0-RC3")
 
+resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
+addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.5.4")

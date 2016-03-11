@@ -41,6 +41,9 @@ initialCommands in console := "import io.keen.client.scala._"
 // ...but skip it in case we've broken the build and want the REPL to find out why!
 initialCommands in consoleQuick := ""
 
+// We already pull in sbt-git for sbt-ghpages, so hey why not.
+enablePlugins(GitBranchPrompt)
+
 // SBT support for Maven-style integration tests (src/it)
 Defaults.itSettings
 configs(IntegrationTest)
@@ -52,7 +55,22 @@ configs(IntegrationTest)
  * `target/site/api/$version` and a small shim to redirect from the site root
  * directly to the API docs, since there is no other site to display.
  *
- * The `makeSite` and `previewSite` tasks are salient.
+ * Salient tasks that this adds:
+ *
+ *   - `makeSite`        - Build the site locally.
+ *   - `previewSite`     - Serve site and open in browser.
+ *   - `ghpagesPushSite` - Do gh-pages branch dance, commit new docs, and push.
+ *                         This is done in a sandbox checkout of the repo, so it
+ *                         won't clobber anything dirty in your working dir.
+ *
+ * The latter '''should''' retain old versions of the API docs so that links to
+ * them don't break, but this is currently broken in sbt-ghpages--subscribe here
+ * to track fixes: https://github.com/sbt/sbt-ghpages/issues/10
+ *
+ * Once that's fixed, keep the below doc: :-)
+ *
+ * Please do not use the `ghpagesCleanSite` task, it wipes out the contents of
+ * the gh-pages branch including old versions of the API docs.
  */
 autoAPIMappings := true
 scalacOptions in (Compile, doc) ++= Seq(
@@ -68,6 +86,10 @@ siteSubdirName in SiteScaladoc := s"api/${version.value}"
 // Builds static files in src/site-preprocess with variable substitution.
 enablePlugins(PreprocessPlugin)
 preprocessVars := Map("VERSION" -> version.value)
+
+// Enables easy publishing to project's gh-pages.
+ghpages.settings
+git.remoteRepo := "git@github.com:keenlabs/KeenClient-Scala.git"
 
 // Source Formatting
 import com.typesafe.sbt.SbtScalariform
