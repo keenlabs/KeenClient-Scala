@@ -38,6 +38,9 @@ scmInfo := Some(
   )
 )
 
+// Allow other projects' Scaladoc to link to ours if they use `autoAPIMappings := true`
+apiURL := Some(url(s"http://keenlabs.github.io/KeenClient-Scala/api/${version.value}/"))
+
 // Central doesn't allow any external repository sources.
 pomIncludeRepository := { _ => false }
 pomExtra :=
