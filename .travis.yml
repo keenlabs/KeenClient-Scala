@@ -8,6 +8,12 @@ jdk:
   - oraclejdk7
   - openjdk7
 
+script:
+  - sbt clean coverage test
+
+after_success:
+  - sbt coverageReport coveralls
+
 addons:
   # Fix OpenJDK builds
   # https://github.com/travis-ci/travis-ci/issues/5227

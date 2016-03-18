@@ -5,9 +5,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 import org.specs2.mutable.Specification
-import org.specs2.time.NoTimeConversions
 
-class ClientIntegrationSpec extends Specification with NoTimeConversions {
+class ClientIntegrationSpec extends Specification {
   // Timeout used for most future awaits, etc. ScalaTest and Akka TestKit both
   // feature scalable time dilation for testing on CI servers that might be
   // slow--see IntegrationPatience in ScalaTest, not sure if specs2 has similar...
