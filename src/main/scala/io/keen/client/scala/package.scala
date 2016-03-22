@@ -4,6 +4,12 @@ import concurrent.duration.{ FiniteDuration, MILLISECONDS }
 
 import com.typesafe.config.Config
 
+/**
+ * Package implementing an asynchronous, idiomatic Scala client for the
+ * [[https://keen.io/docs/ Keen IO]] API.
+ *
+ * @see [[https://github.com/keenlabs/KeenClient-Scala The project home on GitHub]]
+ */
 package object scala {
   /**
    * Enrichment for Typesafe Config to wrap some optional settings in Option, or

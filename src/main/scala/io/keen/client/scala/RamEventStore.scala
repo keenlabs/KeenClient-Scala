@@ -7,20 +7,23 @@ import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
 /**
- * In-memory queue for [[Client]].
+ * `RamEventStore` implements the [[EventStore]] interface with an in-memory
+ * backing cache that is concurrency-safe.
+ *
+ * It is the default `EventStore` implementation supporting batched write
+ * flushing functionality of [[BatchWriterClient]].
+ *
+ * @todo We're really getting nothing out of `TrieMap`'s lock-free nature, every
+ *   operation is wrapped in (coarse) `synchronized` blocks for sake of
+ *   `ListBuffer` safety. The Java implementation doesn't use concurrent data
+ *   structures at all, presumably for that reason. Use a simpler Map type, or
+ *   even better, find ways to safely slim down the `synchronized` blocks.
  */
 class RamEventStore extends EventStore {
   private var nextId: Long = 0
   private var collectionIds: TrieMap[String, ListBuffer[Long]] = new TrieMap[String, ListBuffer[Long]]()
   private var events: TrieMap[Long, String] = new TrieMap[Long, String]()
 
-  /**
-   * Event store.
-   *
-   * @param projectId       The ID of the project to which the collection belongs.
-   * @param eventCollection The collection to which the event will be added.
-   * @param event           The event.
-   */
   override def store(
     projectId: String,
     eventCollection: String,
@@ -51,22 +54,11 @@ class RamEventStore extends EventStore {
     id
   }
 
-  /**
-   * Retrieves a specific event from the store.
-   *
-   * @param handle The handle of the event.
-   * @return       The event string.
-   */
   override def get(handle: Long): String = synchronized {
     val id: Long = handleToId(handle)
     events.getOrElse(id, null)
   }
 
-  /**
-   * Removes a specific event from the store.
-   *
-   * @param handle The handle of the event.
-   */
   override def remove(handle: Long): Unit = synchronized {
     val id: Long = handleToId(handle)
     events -= id
@@ -75,13 +67,7 @@ class RamEventStore extends EventStore {
     // getHandles call
   }
 
-  /**
-   * Retrieves all handles for a specific project from the store.
-   *
-   * @param projectId The ID of the project.
-   * @return          A map of collection names and their events.
-   */
-  def getHandles(projectId: String): TrieMap[String, ListBuffer[Long]] = synchronized {
+  override def getHandles(projectId: String): TrieMap[String, ListBuffer[Long]] = synchronized {
     var result = new TrieMap[String, ListBuffer[Long]]()
 
     for ((key, value) <- collectionIds) {
@@ -116,10 +102,18 @@ class RamEventStore extends EventStore {
     result
   }
 
+  /**
+   * Resets the store to an empty state, discarding all data.
+   *
+   * @todo This is currently unused. Any use case beyond possibly tests? Axe it?
+   * @todo Technically ought to reset `attempts` too, but I hope that is gone
+   *   for now anyway… [[https://github.com/keenlabs/KeenClient-Scala/pull/46]]
+   */
   def clear(): Unit = {
     nextId = 0
     collectionIds = new TrieMap[String, ListBuffer[Long]]()
     events = new TrieMap[Long, String]()
+    size = 0
   }
 
   ///// PRIVATE /////

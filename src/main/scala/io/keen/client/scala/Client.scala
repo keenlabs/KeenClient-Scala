@@ -8,6 +8,26 @@ import grizzled.slf4j.Logging
 // XXX Remaining: Funnel, Saved Queries List, Saved Queries Row, Saved Queries Row Result
 // Event deletion
 
+/**
+ * A keen.io API client. A plain `Client` instance doesn't do a whole lot—you'll
+ * want to mix in [[AccessLevel]]s like [[Writer]], [[Reader]], or [[Master]]
+ * depending on the API operations that you need to perform.
+ *
+ * The client defaults to using [[HttpAdapterSpray a built-in adapter for the
+ * Spray HTTP toolkit]] for HTTP requests. Another HTTP client library can be
+ * plugged in by implementing the [[HttpAdapter]] interface.
+ *
+ * @param config Client configuration, by default loaded from `application.conf`.
+ *
+ * @example Overriding the default [[HttpAdapter]]
+ * {{{
+ * val keen = new Client {
+ *   override val httpAdapter = new HttpAdapterDispatch
+ * }
+ * }}}
+ *
+ * @see [[https://keen.io/docs/api/ The Keen IO API Reference]]
+ */
 class Client(
     config: Config = ConfigFactory.load(),
     // These will move to a config file:
@@ -16,15 +36,18 @@ class Client(
     val version: String = "3.0"
 ) extends HttpAdapterComponent with Logging {
 
+  /** The concrete [[HttpAdapter]] used to make API requests. */
   val httpAdapter: HttpAdapter = new HttpAdapterSpray
+
+  /** The client's configuration settings. */
   val settings: Settings = new Settings(config)
 
   // TODO: This is a smell, see http://12factor.net/config
   val environment: Option[String] = settings.environment
 
   /**
-   * Disconnects any remaining connections. Both idle and active. If you are accessing
-   * Keen through a proxy that keeps connections alive this is useful.
+   * Shuts down the client's [[HttpAdapter]], to perform cleanup such as closing
+   * connections.
    */
   def shutdown(): Unit = httpAdapter.shutdown()
 }
@@ -55,6 +78,10 @@ sealed protected trait AccessLevel {
   // Access levels need the basic facilities of a Client; require that.
   self: Client =>
 
+  /**
+   * Project identifier for the Keen project that an `AccessLevel`'s API key is
+   * associated with.
+   */
   val projectId: String = settings.projectId
 
   // TODO: These don't belong here abstraction-wise. They will move to a config
@@ -73,7 +100,6 @@ sealed protected trait AccessLevel {
     body: Option[String] = None,
     params: Map[String, Option[String]] = Map.empty
   ) = {
-
     httpAdapter.doRequest(method = method, scheme = scheme, authority = authority, path = path, key = key, body = body, params = params)
   }
 }
@@ -105,7 +131,7 @@ trait Reader extends AccessLevel {
   val readKey: String = settings.readKey.getOrElse(throw MissingCredential("Read key required for Reader"))
 
   /**
-   * Returns the average across all numeric values for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#average-resource Average Resource]].
+   * Returns the average across all numeric values for the target property in the event collection matching the given criteria.
    *
    * @param collection The name of the event collection you are analyzing.
    * @param targetProperty The name of the property you are analyzing.
@@ -113,6 +139,8 @@ trait Reader extends AccessLevel {
    * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
    * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
    * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   *
+   * @see [[https://keen.io/docs/api/#average Average API Reference]]
    */
   def average(
     collection: String,
@@ -134,11 +162,13 @@ trait Reader extends AccessLevel {
     )
 
   /**
-   * Returns the number of resources in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
+   * Returns the number of resources in the event collection matching the given criteria.
    *
    * @param collection The name of the event collection you are analyzing.
    * @param filters Filters are used to narrow down the events used in an analysis request based on event property values. See [[https://keen.io/docs/data-analysis/filters/ Filters]].
    * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
+   *
+   * @see [[https://keen.io/docs/api/#count Count API Reference]]
    */
   def count(
     collection: String,
@@ -159,7 +189,7 @@ trait Reader extends AccessLevel {
     )
 
   /**
-   * Returns the number of '''unique''' resources in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
+   * Returns the number of '''unique''' resources in the event collection matching the given criteria.
    *
    * @param collection The name of the event collection you are analyzing.
    * @param targetProperty The name of the property you are analyzing.
@@ -167,6 +197,8 @@ trait Reader extends AccessLevel {
    * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
    * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
    * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   *
+   * @see [[https://keen.io/docs/api/#count-unique Count Unique API Reference]]
    */
   def countUnique(
     collection: String,
@@ -187,13 +219,34 @@ trait Reader extends AccessLevel {
       groupBy = groupBy
     )
 
+  /**
+   * Creates an extraction request for full-form event data with all property values.
+   *
+   * If the `email` parameter is given, the extraction will be processed asynchronously
+   * and an email will be sent to the specified address when complete. Otherwise events
+   * are returned in a synchronous JSON response with a limit of 100,000 events.
+   *
+   * @param collection The name of the event collection you are analyzing.
+   * @param filters Filters are used to narrow down the events used in an analysis request
+   *   based on event property values. See [[https://keen.io/docs/data-analysis/filters/ Filters]].
+   * @param timeframe A Timeframe specifies the events to use for analysis based on a window
+   *   of time. If no timeframe is specified, all events will be counted. See
+   *   [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
+   * @param email Email address to notify when asynchronous extraction is ready for download.
+   * @param latest An integer containing the number of most recent events to extract.
+   * @param propertyNames An array of strings containing properties you wish to extract.
+   *   If this parameter is omitted, all properties will be returned.
+   *
+   * @see [[https://keen.io/docs/api/#extractions Extractions API Reference]]
+   * @todo Should accept timezone parameter: [[https://github.com/keenlabs/KeenClient-Scala/issues/37]]
+   */
   def extraction(
     collection: String,
     filters: Option[String] = None,
     timeframe: Option[String] = None,
     email: Option[String] = None,
-    latest: Option[String] = None,
-    propertyNames: Option[String] = None
+    latest: Option[String] = None, // TODO: Integer
+    propertyNames: Option[String] = None // TODO: List of Strings
   ): Future[Response] =
 
     doQuery(
@@ -207,7 +260,7 @@ trait Reader extends AccessLevel {
     )
 
   /**
-   * Returns the maximum numeric value for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#maximum-resource Maximum Resource]].
+   * Returns the maximum numeric value for the target property in the event collection matching the given criteria.
    *
    * @param collection The name of the event collection you are analyzing.
    * @param targetProperty The name of the property you are analyzing.
@@ -215,6 +268,8 @@ trait Reader extends AccessLevel {
    * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
    * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
    * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   *
+   * @see [[https://keen.io/docs/api/#maximum Maximum API Reference]]
    */
   def maximum(
     collection: String,
@@ -236,7 +291,8 @@ trait Reader extends AccessLevel {
     )
 
   /**
-   * Returns the minimum numeric value for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#minimum-resource Minimum Resource]].
+   * Returns the minimum numeric value for the target property in the event
+   * collection matching the given criteria.
    *
    * @param collection The name of the event collection you are analyzing.
    * @param targetProperty The name of the property you are analyzing.
@@ -244,6 +300,8 @@ trait Reader extends AccessLevel {
    * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
    * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
    * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   *
+   * @see [[https://keen.io/docs/api/#minimum Minimum API Reference]]
    */
   def minimum(
     collection: String,
@@ -265,7 +323,7 @@ trait Reader extends AccessLevel {
     )
 
   /**
-   * Returns a list of '''unique''' resources in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#select-unique-resource Select Unique Resource]].
+   * Returns a list of '''unique''' resources in the event collection matching the given criteria.
    *
    * @param collection The name of the event collection you are analyzing.
    * @param targetProperty The name of the property you are analyzing.
@@ -273,6 +331,8 @@ trait Reader extends AccessLevel {
    * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
    * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
    * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   *
+   * @see [[https://keen.io/docs/api/#select-unique Select Unique API Reference]]
    */
   def selectUnique(
     collection: String,
@@ -294,7 +354,8 @@ trait Reader extends AccessLevel {
     )
 
   /**
-   * Returns the sum across all numeric values for the target property in the event collection matching the given criteria. See [[https://keen.io/docs/api/reference/#sum-resource Sum Resource]].
+   * Returns the sum across all numeric values for the target property in the
+   * event collection matching the given criteria.
    *
    * @param collection The name of the event collection you are analyzing.
    * @param targetProperty The name of the property you are analyzing.
@@ -302,6 +363,8 @@ trait Reader extends AccessLevel {
    * @param timeframe A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See [[https://keen.io/docs/data-analysis/timeframe/ Timeframes]].
    * @param timezone Modifies the timeframe filters for Relative Timeframes to match a specific timezone.
    * @param groupBy The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See [[https://keen.io/docs/data-analysis/group-by/ Group By]].
+   *
+   * @see [[https://keen.io/docs/api/#sum Sum API Reference]]
    */
   def sum(
     collection: String,
@@ -349,6 +412,7 @@ trait Reader extends AccessLevel {
       "property_names" -> propertyNames
     )
 
+    // TODO: Prefer POST when available, avoids URL encoding concerns, etc.
     doRequest(path = path, method = "GET", key = readKey, params = params)
   }
 }
@@ -380,10 +444,12 @@ trait Writer extends AccessLevel {
   val writeKey: String = settings.writeKey.getOrElse(throw MissingCredential("Write key required for Writer"))
 
   /**
-   * Publish a single event. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
+   * Publish a single event.
    *
    * @param collection The collection to which the event will be added.
    * @param event The event
+   *
+   * @see [[https://keen.io/docs/api/#record-a-single-event Record a single event API Reference]]
    */
   def addEvent(collection: String, event: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
@@ -391,9 +457,10 @@ trait Writer extends AccessLevel {
   }
 
   /**
-   * Publish multiple events. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
+   * Publish multiple events.
    *
    * @param events The events to add to the project.
+   * @see [[https://keen.io/docs/api/#record-multiple-events Record multiple events API Reference]]
    */
   def addEvents(events: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events").mkString("/")
@@ -439,9 +506,11 @@ trait Master extends Reader with Writer {
   override val writeKey: String = masterKey
 
   /**
-   * Deletes the entire event collection. This is irreversible and will only work for collections under 10k events. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
+   * Deletes the entire event collection. This is irreversible and will only work
+   * for collections under 10k events.
    *
    * @param collection The name of the collection.
+   * @see [[https://keen.io/docs/api/#delete-a-collection Delete a Collection API Reference]]
    */
   def deleteCollection(collection: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
@@ -449,7 +518,8 @@ trait Master extends Reader with Writer {
   }
 
   /**
-   * Removes a property and deletes all values stored with that property name. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
+   * Removes a property and deletes all values stored with that property name.
+   * @see [[https://keen.io/docs/api/#delete-a-property Delete a Property API Reference]]
    */
   def deleteProperty(collection: String, name: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
@@ -457,7 +527,9 @@ trait Master extends Reader with Writer {
   }
 
   /**
-   * Returns schema information for all the event collections in this project. See [[https://keen.io/docs/api/reference/#event-resource Event Resource]].
+   * Returns schema information for all the event collections in this project.
+   * @see [[https://keen.io/docs/api/#inspect-all-collections Inspect all collections API Reference]]
+   * @todo This only requires a read key, move to Reader
    */
   def getEvents: Future[Response] = {
     val path = Seq(version, "projects", projectId, "events").mkString("/")
@@ -465,9 +537,12 @@ trait Master extends Reader with Writer {
   }
 
   /**
-   * Returns available schema information for this event collection, including properties and their type. It also returns links to sub-resources. See [[https://keen.io/docs/api/reference/#event-collection-resource Event Collection Resource]].
+   * Returns available schema information for this event collection, including
+   * properties and their type. It also returns links to sub-resources.
    *
    * @param collection The name of the collection.
+   * @see [[https://keen.io/docs/api/#inspect-a-single-collection Inspect a single collection API Reference]]
+   * @todo This only requires a read key, move to Reader
    */
   def getCollection(collection: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection).mkString("/")
@@ -476,7 +551,8 @@ trait Master extends Reader with Writer {
 
   /**
    * Returns the projects accessible to the API user, as well as links to project sub-resources for
-   * discovery. See [[https://keen.io/docs/api/reference/#projects-resource Projects Resource]].
+   * discovery.
+   * @see [[https://keen.io/docs/api/#inspect-all-projects Inspect all projects API Reference]]
    */
   def getProjects: Future[Response] = {
     val path = Seq(version, "projects").mkString("/")
@@ -485,7 +561,7 @@ trait Master extends Reader with Writer {
 
   /**
    * Returns detailed information about the specific project, as well as links to related resources.
-   * See [[https://keen.io/docs/api/reference/#project-row-resource Project Row Resource]].
+   * @see [[https://keen.io/docs/api/#inspect-a-single-project Inspect a single project API Reference]]
    */
   def getProject: Future[Response] = {
     val path = Seq(version, "projects", projectId).mkString("/")
@@ -493,7 +569,9 @@ trait Master extends Reader with Writer {
   }
 
   /**
-   * Returns the property name, type, and a link to sub-resources. See [[https://keen.io/docs/api/reference/#property-resource Property Resource]].
+   * Returns the property name, type, and a link to sub-resources.
+   * @see [[https://keen.io/docs/api/#inspect-a-single-property Inspect a single property API Reference]]
+   * @todo This only requires a read key, move to Reader
    */
   def getProperty(collection: String, name: String): Future[Response] = {
     val path = Seq(version, "projects", projectId, "events", collection, "properties", name).mkString("/")
@@ -501,8 +579,8 @@ trait Master extends Reader with Writer {
   }
 
   /**
-   * Returns the list of available queries and links to them. See [[https://keen.io/docs/api/reference/#queries-resource Queries Resource]].
-   *
+   * Returns the list of available query resources as paths to their endpoints.
+   * @see [[https://keen.io/docs/api/#query-availability Query Availability API Reference]]
    */
   def getQueries: Future[Response] = {
     val path = Seq(version, "projects", projectId, "queries").mkString("/")

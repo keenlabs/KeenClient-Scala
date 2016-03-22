@@ -14,6 +14,35 @@ import spray.http.Uri._
 import spray.http.HttpHeaders.RawHeader
 import spray.httpx.RequestBuilding._
 
+/**
+ * An [[HttpAdapter]] built on HTTP client support of the [[http://spray.io/
+ * Spray HTTP toolkit]].
+ *
+ * == Akka and Actor Systems ==
+ *
+ * Spray is built upon $AkkaIO and uses an Akka $ActorSystem to handle HTTP I/O.
+ * By default, `HttpAdapterSpray` creates an `ActorSystem` for its own use so
+ * that it works out of the box. If you are using it within an Akka application,
+ * however, it is possible to specify the `ActorSystem` within which it will run
+ * using an implicit parameter.
+ *
+ * @example Using a custom $ActorSystem
+ * {{{
+ * val adapter = new HttpAdapterSpray()(ActorSystem("myapp-system"))
+ * }}}
+ *
+ * @example Using a custom $ActorSystem, implicitly for a scope
+ * {{{
+ * implicit val system = ActorSystem("myapp-system")
+ * val adapter = new HttpAdapterSpray
+ * }}}
+ *
+ * @param httpTimeoutSeconds Sets a timeout for HTTP requests, in seconds.
+ * @todo Move the timeout constructor param to config
+ *
+ * @define AkkaIO [[http://doc.akka.io/docs/akka/2.3.14/scala/io.html Akka I/O]]
+ * @define ActorSystem [[akka.actor.ActorSystem ActorSystem]]
+ */
 class HttpAdapterSpray(httpTimeoutSeconds: Int = 10)(implicit val actorSystem: ActorSystem = ActorSystem("keen-client"))
     extends HttpAdapter with Logging {
 
@@ -73,6 +102,15 @@ class HttpAdapterSpray(httpTimeoutSeconds: Int = 10)(implicit val actorSystem: A
       })
   }
 
+  /**
+   * @inheritdoc
+   *
+   * Disconnects any remaining connections. Both idle and active. If you are accessing
+   * Keen through a proxy that keeps connections alive this is useful.
+   *
+   * If [[HttpAdapterSpray]]'s default $ActorSystem is in use, it will be shut
+   * down; if a custom `ActorSystem` has been supplied, it will not.
+   */
   def shutdown() = {
     (IO(Http) ? Http.CloseAll) onComplete {
       // When this completes we will shutdown the actor system if it wasn't
