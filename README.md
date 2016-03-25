@@ -1,6 +1,7 @@
 # KeenClient-Scala
 
 [![Build Status]](https://travis-ci.org/keenlabs/KeenClient-Scala)
+[![Coverage Status]](https://coveralls.io/github/keenlabs/KeenClient-Scala?branch=master)
 [![Maven Central Badge]](https://maven-badges.herokuapp.com/maven-central/io.keen/keenclient-scala_2.11)
 [![Scaladoc Badge]](https://keenlabs.github.io/KeenClient-Scala/)
 
@@ -245,6 +246,7 @@ that you didn't expect!**
 
 
 [Build Status]: https://travis-ci.org/keenlabs/KeenClient-Scala.svg?branch=master
+[Coverage Status]: https://coveralls.io/repos/github/keenlabs/KeenClient-Scala/badge.svg?branch=master
 [Maven Central Badge]: https://maven-badges.herokuapp.com/maven-central/io.keen/keenclient-scala_2.11/badge.svg
 [Scaladoc Badge]: https://img.shields.io/badge/scaladoc-latest-lightgrey.svg
 [Keen IO]: http://keen.io/

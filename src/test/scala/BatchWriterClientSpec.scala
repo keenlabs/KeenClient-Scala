@@ -110,7 +110,7 @@ class BatchWriterClientSpec extends ClientSpecification {
       // TODO: This is basically an integration test, and slow. We could test this
       // with a mock that verifies sendQueuedEvents is called after shorter duration.
       // It's brittle too, use specs2 timeFactor if needed.
-      Thread.sleep((client.settings.sendIntervalDuration + 100.millis).toMillis)
+      Thread.sleep((client.settings.sendIntervalDuration + 2.seconds).toMillis)
 
       // validate that the store is now empty as a result of sendQueuedEvents being automatically
       // triggered with the queueing of the 100th event
