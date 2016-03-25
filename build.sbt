@@ -48,13 +48,6 @@ enablePlugins(GitBranchPrompt)
 Defaults.itSettings
 configs(IntegrationTest)
 
-// Fail builds if pull requests don't maintain test coverage. Bump this up as
-// coverage improves. Coverage is better if we include integration tests, but we
-// need to separate true end-to-end tests that require account credentials since
-// these are troublesome to run on CI.
-coverageMinimum := 60
-coverageFailOnMinimum := true
-
 /**
  * Scaladoc Generation
  *
