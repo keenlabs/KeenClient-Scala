@@ -52,7 +52,7 @@
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p><code>RamEventStore</code> implements the <a href="EventStore.html" class="extype" name="io.keen.client.scala.EventStore">EventStore</a> interface with an in-memory
 backing cache that is concurrency-safe.</p><p>It is the default <code>EventStore</code> implementation supporting batched write
 flushing functionality of <a href="BatchWriterClient.html" class="extype" name="io.keen.client.scala.BatchWriterClient">BatchWriterClient</a>.
-</p></div><dl class="attributes block"> <dt>Source</dt><dd><a href="https://github.com/keenlabs/KeenClient-Scala/tree/master/Users/terryhorner/Dropbox (Personal)/Code/keen-io/KeenClient-Scala/src/main/scala/io/keen/client/scala/RamEventStore.scala" target="_blank">RamEventStore.scala</a></dd><dt>To do</dt><dd><span class="cmt"><p>We're really getting nothing out of <code>TrieMap</code>'s lock-free nature, every
+</p></div><dl class="attributes block"> <dt>Source</dt><dd><a href="https://github.com/keenlabs/KeenClient-Scala/tree/master/src/main/scala/io/keen/client/scala/RamEventStore.scala" target="_blank">RamEventStore.scala</a></dd><dt>To do</dt><dd><span class="cmt"><p>We're really getting nothing out of <code>TrieMap</code>'s lock-free nature, every
   operation is wrapped in (coarse) <code>synchronized</code> blocks for sake of
   <code>ListBuffer</code> safety. The Java implementation doesn't use concurrent data
   structures at all, presumably for that reason. Use a simpler Map type, or

@@ -54,7 +54,7 @@ By default, <code>HttpAdapterSpray</code> creates an <code>ActorSystem</code> fo
 that it works out of the box. If you are using it within an Akka application,
 however, it is possible to specify the <code>ActorSystem</code> within which it will run
 using an implicit parameter.
-</p></div><dl class="attributes block"> <dt>Source</dt><dd><a href="https://github.com/keenlabs/KeenClient-Scala/tree/master/Users/terryhorner/Dropbox (Personal)/Code/keen-io/KeenClient-Scala/src/main/scala/io/keen/client/scala/HttpAdapterSpray.scala" target="_blank">HttpAdapterSpray.scala</a></dd><div class="block">Examples:
+</p></div><dl class="attributes block"> <dt>Source</dt><dd><a href="https://github.com/keenlabs/KeenClient-Scala/tree/master/src/main/scala/io/keen/client/scala/HttpAdapterSpray.scala" target="_blank">HttpAdapterSpray.scala</a></dd><div class="block">Examples:
                <ol><li class="cmt"><p>Using a custom <span class="extype" name="akka.actor.ActorSystem">ActorSystem</span>, implicitly for a scope</p><pre><span class="kw">implicit</span> <span class="kw">val</span> system = ActorSystem(<span class="lit">"myapp-system"</span>)
 <span class="kw">val</span> adapter = <span class="kw">new</span> HttpAdapterSpray</pre></li>, <li class="cmt"><p>Using a custom <span class="extype" name="akka.actor.ActorSystem">ActorSystem</span></p><pre><span class="kw">val</span> adapter = <span class="kw">new</span> HttpAdapterSpray()(ActorSystem(<span class="lit">"myapp-system"</span>))</pre></li></ol>
             </div><dt>To do</dt><dd><span class="cmt"><p>Move the timeout constructor param to config</p></span></dd></dl><div class="toggleContainer block">

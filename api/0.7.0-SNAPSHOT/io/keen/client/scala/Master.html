@@ -56,7 +56,7 @@ and does not require additional keys configured for these. However, this
 should <b>not</b> be considered a shortcut! Please keep your master key as
 secure as possible by not deploying it where it isn't strictly needed.</p><p>A master key must be configured in the <code>Client</code>'s <a href="Settings.html" class="extype" name="io.keen.client.scala.Settings">Settings</a> or the
 <code>masterKey</code> field must otherwise be set e.g. with an anonymous class override.
-</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="io.keen.client.scala.Master">Master</a> with <a href="Client.html" class="extype" name="io.keen.client.scala.Client">Client</a></dd><dt>Source</dt><dd><a href="https://github.com/keenlabs/KeenClient-Scala/tree/master/Users/terryhorner/Dropbox (Personal)/Code/keen-io/KeenClient-Scala/src/main/scala/io/keen/client/scala/Client.scala" target="_blank">Client.scala</a></dd><div class="block">Example:
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="io.keen.client.scala.Master">Master</a> with <a href="Client.html" class="extype" name="io.keen.client.scala.Client">Client</a></dd><dt>Source</dt><dd><a href="https://github.com/keenlabs/KeenClient-Scala/tree/master/src/main/scala/io/keen/client/scala/Client.scala" target="_blank">Client.scala</a></dd><div class="block">Example:
                <ol><li class="cmt"><p>Initializing a Client with master access</p><pre><span class="kw">val</span> keen = <span class="kw">new</span> Client <span class="kw">with</span> Master {
   <span class="kw">override</span> <span class="kw">val</span> masterKey = <span class="lit">"myMasterKey"</span>
 }</pre></li></ol>
