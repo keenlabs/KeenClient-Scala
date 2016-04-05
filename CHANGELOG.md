@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [Unreleased][unreleased]
+
+## [0.7.0] - 2016-04-05
 ### Changed
 - Improved CHANGELOG.md format
 - Updated Scala & SBT versions
@@ -32,7 +34,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Switched to trait-based key setup when creating client - #20 (ches)
 * Removed unnecessary StandardCharset import (gphat)
 
-[unreleased]: https://github.com/keenlabs/KeenClient-Scala/compare/v0.6.0...HEAD
+[unreleased]: https://github.com/keenlabs/KeenClient-Scala/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/keenlabs/KeenClient-Scala/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/keenlabs/KeenClient-Scala/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/keenlabs/KeenClient-Scala/compare/v1.0.3...v0.5.0
 [0.4.0]: https://github.com/keenlabs/KeenClient-Scala/compare/v1.0.0...v0.5.0
