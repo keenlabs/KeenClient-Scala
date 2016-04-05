@@ -1,0 +1,976 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>Master - Keen IO API Client 0.7.0 - io.keen.client.scala.Master</title>
+          <meta name="description" content="Master - Keen IO API Client 0.7.0 - io.keen.client.scala.Master" />
+          <meta name="keywords" content="Master Keen IO API Client 0.7.0 io.keen.client.scala.Master" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'io.keen.client.scala.Master';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img alt="Trait" src="../../../../lib/trait_big.png" />
+        <p id="owner"><a href="../../../package.html" class="extype" name="io">io</a>.<a href="../../package.html" class="extype" name="io.keen">keen</a>.<a href="../package.html" class="extype" name="io.keen.client">client</a>.<a href="package.html" class="extype" name="io.keen.client.scala">scala</a></p>
+        <h1>Master</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="io.keen.client.scala">package scala</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Master</span><span class="result"> extends <a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a> with <a href="Writer.html" class="extype" name="io.keen.client.scala.Writer">Writer</a></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="Client.html" class="extype" name="io.keen.client.scala.Client">Client</a> mixing in <code>Master</code> can make Keen IO API calls requiring a master
+key, such as deleting data, creating saved queries, and performing
+administrative functions.</p><p>A <code>Master</code> client can also perform all <a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a> and <a href="Writer.html" class="extype" name="io.keen.client.scala.Writer">Writer</a> API calls
+and does not require additional keys configured for these. However, this
+should <b>not</b> be considered a shortcut! Please keep your master key as
+secure as possible by not deploying it where it isn't strictly needed.</p><p>A master key must be configured in the <code>Client</code>'s <a href="Settings.html" class="extype" name="io.keen.client.scala.Settings">Settings</a> or the
+<code>masterKey</code> field must otherwise be set e.g. with an anonymous class override.
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="io.keen.client.scala.Master">Master</a> with <a href="Client.html" class="extype" name="io.keen.client.scala.Client">Client</a></dd><dt>Source</dt><dd><a href="https://github.com/keenlabs/KeenClient-Scala/tree/v0.7.0/src/main/scala/io/keen/client/scala/Client.scala" target="_blank">Client.scala</a></dd><div class="block">Example:
+               <ol><li class="cmt"><p>Initializing a Client with master access</p><pre><span class="kw">val</span> keen = <span class="kw">new</span> Client <span class="kw">with</span> Master {
+  <span class="kw">override</span> <span class="kw">val</span> masterKey = <span class="lit">"myMasterKey"</span>
+}</pre></li></ol>
+            </div><dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="MissingCredential.html" class="extype" name="io.keen.client.scala.MissingCredential"><code>MissingCredential</code></a> if a master key is not configured.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/security/" target="_blank">https://keen.io/docs/security/</a></p></span></dd></dl><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><a href="Writer.html" class="extype" name="io.keen.client.scala.Writer">Writer</a>, <a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a>, <a href="AccessLevel.html" class="extype" name="io.keen.client.scala.AccessLevel">AccessLevel</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="io.keen.client.scala.Master"><span>Master</span></li><li class="in" name="io.keen.client.scala.Writer"><span>Writer</span></li><li class="in" name="io.keen.client.scala.Reader"><span>Reader</span></li><li class="in" name="io.keen.client.scala.AccessLevel"><span>AccessLevel</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="io.keen.client.scala.AccessLevel#authority" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="authority:String"></a>
+      <a id="authority:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">authority</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@authority:String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AccessLevel.html" class="extype" name="io.keen.client.scala.AccessLevel">AccessLevel</a></dd></dl></div>
+    </li><li name="io.keen.client.scala.AccessLevel#scheme" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="scheme:String"></a>
+      <a id="scheme:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scheme</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@scheme:String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AccessLevel.html" class="extype" name="io.keen.client.scala.AccessLevel">AccessLevel</a></dd></dl></div>
+    </li><li name="io.keen.client.scala.AccessLevel#version" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="version:String"></a>
+      <a id="version:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">version</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@version:String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AccessLevel.html" class="extype" name="io.keen.client.scala.AccessLevel">AccessLevel</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Concrete Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@##():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="io.keen.client.scala.Writer#addEvent" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addEvent(collection:String,event:String):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="addEvent(String,String):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addEvent</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="event">event: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@addEvent(collection:String,event:String):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Publish a single event.</p><div class="fullcomment"><div class="comment cmt"><p>Publish a single event.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The collection to which the event will be added.</p></dd><dt class="param">event</dt><dd class="cmt"><p>The event</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Writer.html" class="extype" name="io.keen.client.scala.Writer">Writer</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#record-a-single-event" target="_blank">Record a single event API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Writer#addEvents" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addEvents(events:String):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="addEvents(String):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addEvents</span><span class="params">(<span name="events">events: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@addEvents(events:String):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Publish multiple events.</p><div class="fullcomment"><div class="comment cmt"><p>Publish multiple events.
+</p></div><dl class="paramcmts block"><dt class="param">events</dt><dd class="cmt"><p>The events to add to the project.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Writer.html" class="extype" name="io.keen.client.scala.Writer">Writer</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#record-multiple-events" target="_blank">Record multiple events API Reference</a></p></span></dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="io.keen.client.scala.Reader#average" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="average(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="average(String,String,Option[String],Option[String],Option[String],Option[String]):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">average</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetProperty">targetProperty: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="filters">filters: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timeframe">timeframe: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timezone">timezone: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="groupBy">groupBy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@average(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns the average across all numeric values for the target property in the event collection matching the given criteria.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the average across all numeric values for the target property in the event collection matching the given criteria.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The name of the event collection you are analyzing.</p></dd><dt class="param">targetProperty</dt><dd class="cmt"><p>The name of the property you are analyzing.</p></dd><dt class="param">filters</dt><dd class="cmt"><p>Filters are used to narrow down the events used in an analysis request based on event property values. See <a href="https://keen.io/docs/data-analysis/filters/" target="_blank">Filters</a>.</p></dd><dt class="param">timeframe</dt><dd class="cmt"><p>A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See <a href="https://keen.io/docs/data-analysis/timeframe/" target="_blank">Timeframes</a>.</p></dd><dt class="param">timezone</dt><dd class="cmt"><p>Modifies the timeframe filters for Relative Timeframes to match a specific timezone.</p></dd><dt class="param">groupBy</dt><dd class="cmt"><p>The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See <a href="https://keen.io/docs/data-analysis/group-by/" target="_blank">Group By</a>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#average" target="_blank">Average API Reference</a></p></span></dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.keen.client.scala.Reader#count" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="count(collection:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="count(String,Option[String],Option[String],Option[String],Option[String]):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">count</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="filters">filters: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timeframe">timeframe: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timezone">timezone: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="groupBy">groupBy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@count(collection:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns the number of resources in the event collection matching the given criteria.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the number of resources in the event collection matching the given criteria.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The name of the event collection you are analyzing.</p></dd><dt class="param">filters</dt><dd class="cmt"><p>Filters are used to narrow down the events used in an analysis request based on event property values. See <a href="https://keen.io/docs/data-analysis/filters/" target="_blank">Filters</a>.</p></dd><dt class="param">timeframe</dt><dd class="cmt"><p>A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See <a href="https://keen.io/docs/data-analysis/timeframe/" target="_blank">Timeframes</a>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#count" target="_blank">Count API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Reader#countUnique" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="countUnique(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="countUnique(String,String,Option[String],Option[String],Option[String],Option[String]):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">countUnique</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetProperty">targetProperty: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="filters">filters: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timeframe">timeframe: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timezone">timezone: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="groupBy">groupBy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@countUnique(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns the number of <b>unique</b> resources in the event collection matching the given criteria.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the number of <b>unique</b> resources in the event collection matching the given criteria.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The name of the event collection you are analyzing.</p></dd><dt class="param">targetProperty</dt><dd class="cmt"><p>The name of the property you are analyzing.</p></dd><dt class="param">filters</dt><dd class="cmt"><p>Filters are used to narrow down the events used in an analysis request based on event property values. See <a href="https://keen.io/docs/data-analysis/filters/" target="_blank">Filters</a>.</p></dd><dt class="param">timeframe</dt><dd class="cmt"><p>A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See <a href="https://keen.io/docs/data-analysis/timeframe/" target="_blank">Timeframes</a>.</p></dd><dt class="param">timezone</dt><dd class="cmt"><p>Modifies the timeframe filters for Relative Timeframes to match a specific timezone.</p></dd><dt class="param">groupBy</dt><dd class="cmt"><p>The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See <a href="https://keen.io/docs/data-analysis/group-by/" target="_blank">Group By</a>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#count-unique" target="_blank">Count Unique API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#deleteCollection" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="deleteCollection(collection:String):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="deleteCollection(String):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">deleteCollection</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@deleteCollection(collection:String):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Deletes the entire event collection.</p><div class="fullcomment"><div class="comment cmt"><p>Deletes the entire event collection. This is irreversible and will only work
+for collections under 10k events.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The name of the collection.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#delete-a-collection" target="_blank">Delete a Collection API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#deleteProperty" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="deleteProperty(collection:String,name:String):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="deleteProperty(String,String):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">deleteProperty</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@deleteProperty(collection:String,name:String):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Removes a property and deletes all values stored with that property name.</p><div class="fullcomment"><div class="comment cmt"><p>Removes a property and deletes all values stored with that property name.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#delete-a-property" target="_blank">Delete a Property API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.AccessLevel#doRequest" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="doRequest(path:String,method:String,key:String,body:Option[String],params:Map[String,Option[String]]):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="doRequest(String,String,String,Option[String],Map[String,Option[String]]):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">doRequest</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="body">body: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="params">params: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]] = <span class="symbol">Map.empty</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@doRequest(path:String,method:String,key:String,body:Option[String],params:Map[String,Option[String]]):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="AccessLevel.html" class="extype" name="io.keen.client.scala.AccessLevel">AccessLevel</a></dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="io.keen.client.scala.Reader#extraction" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="extraction(collection:String,filters:Option[String],timeframe:Option[String],email:Option[String],latest:Option[String],propertyNames:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="extraction(String,Option[String],Option[String],Option[String],Option[String],Option[String]):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">extraction</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="filters">filters: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timeframe">timeframe: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="email">email: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="latest">latest: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="propertyNames">propertyNames: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@extraction(collection:String,filters:Option[String],timeframe:Option[String],email:Option[String],latest:Option[String],propertyNames:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Creates an extraction request for full-form event data with all property values.</p><div class="fullcomment"><div class="comment cmt"><p>Creates an extraction request for full-form event data with all property values.</p><p>If the <code>email</code> parameter is given, the extraction will be processed asynchronously
+and an email will be sent to the specified address when complete. Otherwise events
+are returned in a synchronous JSON response with a limit of 100,000 events.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The name of the event collection you are analyzing.</p></dd><dt class="param">filters</dt><dd class="cmt"><p>Filters are used to narrow down the events used in an analysis request
+  based on event property values. See <a href="https://keen.io/docs/data-analysis/filters/" target="_blank">Filters</a>.</p></dd><dt class="param">timeframe</dt><dd class="cmt"><p>A Timeframe specifies the events to use for analysis based on a window
+  of time. If no timeframe is specified, all events will be counted. See
+  <a href="https://keen.io/docs/data-analysis/timeframe/" target="_blank">Timeframes</a>.</p></dd><dt class="param">email</dt><dd class="cmt"><p>Email address to notify when asynchronous extraction is ready for download.</p></dd><dt class="param">latest</dt><dd class="cmt"><p>An integer containing the number of most recent events to extract.</p></dd><dt class="param">propertyNames</dt><dd class="cmt"><p>An array of strings containing properties you wish to extract.
+  If this parameter is omitted, all properties will be returned.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a></dd><dt>To do</dt><dd><span class="cmt"><p>Should accept timezone parameter: <a href="https://github.com/keenlabs/KeenClient-Scala/issues/37" target="_blank">https://github.com/keenlabs/KeenClient-Scala/issues/37</a></p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#extractions" target="_blank">Extractions API Reference</a></p></span></dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#getCollection" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getCollection(collection:String):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="getCollection(String):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getCollection</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@getCollection(collection:String):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns available schema information for this event collection, including
+properties and their type.</p><div class="fullcomment"><div class="comment cmt"><p>Returns available schema information for this event collection, including
+properties and their type. It also returns links to sub-resources.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The name of the collection.</p></dd></dl><dl class="attributes block"> <dt>To do</dt><dd><span class="cmt"><p>This only requires a read key, move to Reader</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#inspect-a-single-collection" target="_blank">Inspect a single collection API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#getEvents" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getEvents:scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="getEvents:Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getEvents</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@getEvents:scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns schema information for all the event collections in this project.</p><div class="fullcomment"><div class="comment cmt"><p>Returns schema information for all the event collections in this project.</p></div><dl class="attributes block"> <dt>To do</dt><dd><span class="cmt"><p>This only requires a read key, move to Reader</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#inspect-all-collections" target="_blank">Inspect all collections API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#getProject" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getProject:scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="getProject:Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getProject</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@getProject:scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns detailed information about the specific project, as well as links to related resources.</p><div class="fullcomment"><div class="comment cmt"><p>Returns detailed information about the specific project, as well as links to related resources.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#inspect-a-single-project" target="_blank">Inspect a single project API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#getProjects" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getProjects:scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="getProjects:Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getProjects</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@getProjects:scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns the projects accessible to the API user, as well as links to project sub-resources for
+discovery.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the projects accessible to the API user, as well as links to project sub-resources for
+discovery.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#inspect-all-projects" target="_blank">Inspect all projects API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#getProperty" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getProperty(collection:String,name:String):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="getProperty(String,String):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getProperty</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@getProperty(collection:String,name:String):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns the property name, type, and a link to sub-resources.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the property name, type, and a link to sub-resources.</p></div><dl class="attributes block"> <dt>To do</dt><dd><span class="cmt"><p>This only requires a read key, move to Reader</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#inspect-a-single-property" target="_blank">Inspect a single property API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#getQueries" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getQueries:scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="getQueries:Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getQueries</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@getQueries:scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns the list of available query resources as paths to their endpoints.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the list of available query resources as paths to their endpoints.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#query-availability" target="_blank">Query Availability API Reference</a></p></span></dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#masterKey" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="masterKey:String"></a>
+      <a id="masterKey:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">masterKey</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@masterKey:String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A master key required to make API calls of administrative nature.</p>
+    </li><li name="io.keen.client.scala.Reader#maximum" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="maximum(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="maximum(String,String,Option[String],Option[String],Option[String],Option[String]):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maximum</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetProperty">targetProperty: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="filters">filters: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timeframe">timeframe: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timezone">timezone: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="groupBy">groupBy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@maximum(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns the maximum numeric value for the target property in the event collection matching the given criteria.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the maximum numeric value for the target property in the event collection matching the given criteria.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The name of the event collection you are analyzing.</p></dd><dt class="param">targetProperty</dt><dd class="cmt"><p>The name of the property you are analyzing.</p></dd><dt class="param">filters</dt><dd class="cmt"><p>Filters are used to narrow down the events used in an analysis request based on event property values. See <a href="https://keen.io/docs/data-analysis/filters/" target="_blank">Filters</a>.</p></dd><dt class="param">timeframe</dt><dd class="cmt"><p>A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See <a href="https://keen.io/docs/data-analysis/timeframe/" target="_blank">Timeframes</a>.</p></dd><dt class="param">timezone</dt><dd class="cmt"><p>Modifies the timeframe filters for Relative Timeframes to match a specific timezone.</p></dd><dt class="param">groupBy</dt><dd class="cmt"><p>The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See <a href="https://keen.io/docs/data-analysis/group-by/" target="_blank">Group By</a>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#maximum" target="_blank">Maximum API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Reader#minimum" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="minimum(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="minimum(String,String,Option[String],Option[String],Option[String],Option[String]):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">minimum</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetProperty">targetProperty: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="filters">filters: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timeframe">timeframe: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timezone">timezone: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="groupBy">groupBy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@minimum(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns the minimum numeric value for the target property in the event
+collection matching the given criteria.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the minimum numeric value for the target property in the event
+collection matching the given criteria.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The name of the event collection you are analyzing.</p></dd><dt class="param">targetProperty</dt><dd class="cmt"><p>The name of the property you are analyzing.</p></dd><dt class="param">filters</dt><dd class="cmt"><p>Filters are used to narrow down the events used in an analysis request based on event property values. See <a href="https://keen.io/docs/data-analysis/filters/" target="_blank">Filters</a>.</p></dd><dt class="param">timeframe</dt><dd class="cmt"><p>A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See <a href="https://keen.io/docs/data-analysis/timeframe/" target="_blank">Timeframes</a>.</p></dd><dt class="param">timezone</dt><dd class="cmt"><p>Modifies the timeframe filters for Relative Timeframes to match a specific timezone.</p></dd><dt class="param">groupBy</dt><dd class="cmt"><p>The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See <a href="https://keen.io/docs/data-analysis/group-by/" target="_blank">Group By</a>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#minimum" target="_blank">Minimum API Reference</a></p></span></dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="io.keen.client.scala.AccessLevel#projectId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="projectId:String"></a>
+      <a id="projectId:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">projectId</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@projectId:String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Project identifier for the Keen project that an <code>AccessLevel</code>'s API key is
+associated with.</p><div class="fullcomment"><div class="comment cmt"><p>Project identifier for the Keen project that an <code>AccessLevel</code>'s API key is
+associated with.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AccessLevel.html" class="extype" name="io.keen.client.scala.AccessLevel">AccessLevel</a></dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#readKey" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="readKey:String"></a>
+      <a id="readKey:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readKey</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@readKey:String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A read key required to make API calls for querying and extracting data.</p><div class="fullcomment"><div class="comment cmt"><p>A read key required to make API calls for querying and extracting data.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="io.keen.client.scala.Master">Master</a> → <a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a></dd></dl></div>
+    </li><li name="io.keen.client.scala.Reader#selectUnique" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="selectUnique(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="selectUnique(String,String,Option[String],Option[String],Option[String],Option[String]):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">selectUnique</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetProperty">targetProperty: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="filters">filters: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timeframe">timeframe: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timezone">timezone: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="groupBy">groupBy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@selectUnique(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns a list of <b>unique</b> resources in the event collection matching the given criteria.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a list of <b>unique</b> resources in the event collection matching the given criteria.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The name of the event collection you are analyzing.</p></dd><dt class="param">targetProperty</dt><dd class="cmt"><p>The name of the property you are analyzing.</p></dd><dt class="param">filters</dt><dd class="cmt"><p>Filters are used to narrow down the events used in an analysis request based on event property values. See <a href="https://keen.io/docs/data-analysis/filters/" target="_blank">Filters</a>.</p></dd><dt class="param">timeframe</dt><dd class="cmt"><p>A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See <a href="https://keen.io/docs/data-analysis/timeframe/" target="_blank">Timeframes</a>.</p></dd><dt class="param">timezone</dt><dd class="cmt"><p>Modifies the timeframe filters for Relative Timeframes to match a specific timezone.</p></dd><dt class="param">groupBy</dt><dd class="cmt"><p>The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See <a href="https://keen.io/docs/data-analysis/group-by/" target="_blank">Group By</a>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#select-unique" target="_blank">Select Unique API Reference</a></p></span></dd></dl></div>
+    </li><li name="io.keen.client.scala.Reader#sum" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sum(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]"></a>
+      <a id="sum(String,String,Option[String],Option[String],Option[String],Option[String]):Future[Response]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sum</span><span class="params">(<span name="collection">collection: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetProperty">targetProperty: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="filters">filters: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timeframe">timeframe: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="timezone">timezone: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="groupBy">groupBy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.concurrent.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="io.keen.client.scala.Response">Response</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@sum(collection:String,targetProperty:String,filters:Option[String],timeframe:Option[String],timezone:Option[String],groupBy:Option[String]):scala.concurrent.Future[io.keen.client.scala.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns the sum across all numeric values for the target property in the
+event collection matching the given criteria.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the sum across all numeric values for the target property in the
+event collection matching the given criteria.
+</p></div><dl class="paramcmts block"><dt class="param">collection</dt><dd class="cmt"><p>The name of the event collection you are analyzing.</p></dd><dt class="param">targetProperty</dt><dd class="cmt"><p>The name of the property you are analyzing.</p></dd><dt class="param">filters</dt><dd class="cmt"><p>Filters are used to narrow down the events used in an analysis request based on event property values. See <a href="https://keen.io/docs/data-analysis/filters/" target="_blank">Filters</a>.</p></dd><dt class="param">timeframe</dt><dd class="cmt"><p>A Timeframe specifies the events to use for analysis based on a window of time. If no timeframe is specified, all events will be counted. See <a href="https://keen.io/docs/data-analysis/timeframe/" target="_blank">Timeframes</a>.</p></dd><dt class="param">timezone</dt><dd class="cmt"><p>Modifies the timeframe filters for Relative Timeframes to match a specific timezone.</p></dd><dt class="param">groupBy</dt><dd class="cmt"><p>The group_by parameter specifies the name of a property by which you would like to group the results. Using this parameter changes the response format. See <a href="https://keen.io/docs/data-analysis/group-by/" target="_blank">Group By</a>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://keen.io/docs/api/#sum" target="_blank">Sum API Reference</a></p></span></dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@toString():String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.keen.client.scala.Master#writeKey" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeKey:String"></a>
+      <a id="writeKey:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writeKey</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#io.keen.client.scala.Master@writeKey:String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A write key required to make API calls that write data.</p><div class="fullcomment"><div class="comment cmt"><p>A write key required to make API calls that write data.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="io.keen.client.scala.Master">Master</a> → <a href="Writer.html" class="extype" name="io.keen.client.scala.Writer">Writer</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="io.keen.client.scala.Writer">
+              <h3>Inherited from <a href="Writer.html" class="extype" name="io.keen.client.scala.Writer">Writer</a></h3>
+            </div><div class="parent" name="io.keen.client.scala.Reader">
+              <h3>Inherited from <a href="Reader.html" class="extype" name="io.keen.client.scala.Reader">Reader</a></h3>
+            </div><div class="parent" name="io.keen.client.scala.AccessLevel">
+              <h3>Inherited from <a href="AccessLevel.html" class="extype" name="io.keen.client.scala.AccessLevel">AccessLevel</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>
