@@ -3,7 +3,7 @@ organization := "io.keen"
 description  := "Keen IO SDK/client library for Scala"
 homepage     := Some(url("https://github.com/keenlabs/KeenClient-Scala"))
 
-scalaVersion       := "2.11.7"
+scalaVersion       := "2.11.8"
 crossScalaVersions := Seq("2.10.6", scalaVersion.value)
 scalacOptions     ++= Seq("-unchecked", "-deprecation", "-feature", "-Xlint")
 
