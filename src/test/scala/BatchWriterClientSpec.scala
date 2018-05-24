@@ -2,6 +2,7 @@ package io.keen.client.scala
 package test
 
 import com.typesafe.config.{Config, ConfigFactory}
+import org.specs2.execute.Skipped
 import org.specs2.matcher.{EventuallyMatchers, MatchResult}
 
 import scala.collection.JavaConversions._
@@ -63,6 +64,8 @@ class BatchWriterClientSpec extends ClientSpecification with EventuallyMatchers 
 
 
     "send queued events" in {
+      skipped("Requires refactoring because of random failures: https://github.com/keenlabs/KeenClient-Scala/issues/51")
+
       testEvents = generateTestEvents(5)
       testEvents foreach queueForTestCollection
 
@@ -84,6 +87,8 @@ class BatchWriterClientSpec extends ClientSpecification with EventuallyMatchers 
     }
 
     "send queued events asynchronously when queue exceeds its send-interval.events limit" in {
+      skipped("Requires refactoring because of random failures: https://github.com/keenlabs/KeenClient-Scala/issues/51")
+
       testEvents = generateTestEvents(queueConfig.getInt("keen.queue.send-interval.events"))
       testEvents foreach queueForTestCollection
 
@@ -92,6 +97,8 @@ class BatchWriterClientSpec extends ClientSpecification with EventuallyMatchers 
     }
 
     "send queued events on shutdown" in {
+      skipped("Requires refactoring because of random failures: https://github.com/keenlabs/KeenClient-Scala/issues/51")
+
       testEvents = generateTestEvents(5)
       testEvents foreach queueForTestCollection
 
