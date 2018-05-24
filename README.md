@@ -201,7 +201,7 @@ example of choosing the Dispatch adapter is shown below.
 
 The client also depends on [grizzled-slf4j] for logging.
 
-It is cross-compiled for 2.10 and 2.11 Scala versions. If you are interested in
+It is cross-compiled for 2.11 and 2.12 Scala versions. If you are interested in
 support for other versions or discover any binary compatibility problems, please
 share your feedback.
 
