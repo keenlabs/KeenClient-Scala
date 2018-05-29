@@ -39,7 +39,7 @@ You can use them in your project with SBT thusly:
 libraryDependencies += "io.keen" %% "keenclient-scala" % "0.7.0"
 ```
 
-Note that we publish artifacts for Scala 2.10, 2.12 and 2.12, so you can either use `%%` to automatically pick the correct
+Note that we publish artifacts for Scala 2.10, 2.11 and 2.12, so you can either use `%%` to automatically pick the correct
 version or specify them explicitly with something like:
 
 ```scala
