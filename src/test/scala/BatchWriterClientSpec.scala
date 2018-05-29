@@ -40,13 +40,13 @@ class BatchWriterClientSpec extends ClientSpecification with EventuallyMatchers 
   }
 
   def assertEventualStoreHandlesSize(size: Int): MatchResult[Int] = {
-    store.getHandles(projectId).size must beEqualTo(size).eventually(10, 1000.millis)
+    store.getHandles(projectId).size must beEqualTo(size).eventually
   }
 
   def assertEventualStoreHandlesCollectionSize(size: Int): MatchResult[Int] = {
     size must beGreaterThan(0)
-    store.getHandles(projectId).contains(collection) must beTrue.eventually(10, 1000.millis)
-    store.getHandles(projectId)(collection).size must beEqualTo(size).eventually(10, 1000.millis)
+    store.getHandles(projectId).contains(collection) must beTrue.eventually
+    store.getHandles(projectId)(collection).size must beEqualTo(size).eventually
   }
 
   "BatchWriterClient with interval-based queueing" should {

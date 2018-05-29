@@ -39,7 +39,7 @@ You can use them in your project with SBT thusly:
 libraryDependencies += "io.keen" %% "keenclient-scala" % "0.7.0"
 ```
 
-Note that we publish artifacts for Scala 2.10 and 2.11, so you can either use `%%` to automatically pick the correct
+Note that we publish artifacts for Scala 2.10, 2.12 and 2.12, so you can either use `%%` to automatically pick the correct
 version or specify them explicitly with something like:
 
 ```scala
@@ -201,7 +201,7 @@ example of choosing the Dispatch adapter is shown below.
 
 The client also depends on [grizzled-slf4j] for logging.
 
-It is cross-compiled for 2.11 and 2.12 Scala versions. If you are interested in
+It is cross-compiled for 2.10, 2.11 and 2.12 Scala versions. If you are interested in
 support for other versions or discover any binary compatibility problems, please
 share your feedback.
 
