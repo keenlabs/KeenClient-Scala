@@ -1,15 +1,16 @@
 language: scala
 
 scala:
-  - 2.11.7
-  - 2.10.6
+  - 2.12.6
+  - 2.11.12
+  - 2.10.7
 
 jdk:
-  - oraclejdk7
+  - openjdk8
   - openjdk7
 
 script:
-  - sbt clean coverage test
+  - travis_retry sbt clean coverage test
 
 after_success:
   - sbt coverageReport coveralls
