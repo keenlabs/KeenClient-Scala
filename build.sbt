@@ -1,18 +1,11 @@
-name := "keenclient-scala"
-
+name         := "keenclient-scala"
 organization := "io.keen"
+description  := "Keen IO SDK/client library for Scala"
+homepage     := Some(url("https://github.com/keenlabs/KeenClient-Scala"))
 
-description := "Keen IO SDK/client library for Scala"
-
-homepage := Some(url("https://github.com/keenlabs/KeenClient-Scala"))
-
-version := "0.7.0"
-
-scalaVersion := "2.11.7"
-
+scalaVersion       := "2.11.8"
 crossScalaVersions := Seq("2.10.6", scalaVersion.value)
-
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xlint")
+scalacOptions     ++= Seq("-unchecked", "-deprecation", "-feature", "-Xlint")
 
 resolvers ++= Seq(
   "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases",
@@ -47,6 +40,26 @@ enablePlugins(GitBranchPrompt)
 // SBT support for Maven-style integration tests (src/it)
 Defaults.itSettings
 configs(IntegrationTest)
+
+/**
+ * Release Automation
+ *
+ * Adds the `release` task to do version bumping, artifact publishing, etc.
+ * See PUBLISHING.md for a rundown of how to make releases.
+ */
+releaseCrossBuild    := true
+releaseTagComment    := s"Release ${(version in ThisBuild).value}"
+releaseCommitMessage := s"Set version to ${(version in ThisBuild).value}"
+
+// For pre-1.0. The default of Next is probably better after that.
+releaseVersionBump := sbtrelease.Version.Bump.Minor
+
+// Releases publish signed artifacts. See publishing.sbt for the setup.
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+
+// Tack on ScalaDoc publishing task (configured below) to end of release process
+import com.typesafe.sbt.SbtGhPages.GhPagesKeys
+releaseProcess += releaseStepTask(GhPagesKeys.pushSite in thisProjectRef.value)
 
 /**
  * Scaladoc Generation
@@ -104,7 +117,9 @@ preprocessVars := Map("VERSION" -> version.value)
 ghpages.settings
 git.remoteRepo := "git@github.com:keenlabs/KeenClient-Scala.git"
 
-// Source Formatting
+/**
+ * Automated source formatting upon compile, for focused code review.
+ */
 import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import scalariform.formatter.preferences._
